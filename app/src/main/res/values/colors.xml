@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#33484B</color>
+    <color name="colorPrimaryDark">#304057</color>
+    <color name="colorAccent">#fdb903</color>
+
+    <!-- Other colors -->
+    <color name="colorBlack">#000000</color>
+    <color name="colorWhile">#ffffff</color>
+    <color name="colorWhiteDirty">#efeeee</color>
+    <color name="colorError">#E31221</color>
+    <color name="cyan">#24527a</color>
+    <color name="blueWhite">#5DACBD</color>
+
+    <!-- Color palette 1-->
+    <color name="activityBackground">#304057</color>
+    <color name="color2">#da5e5a</color>
+    <color name="color3">#e2814d</color>
+    <color name="color4">#fdb903</color>
+
+    <!-- Color palette 2-->
+    <color name="cream">#EFE0BF</color>
+    <color name="water">#A7BBDC</color>
+    <color name="brown">#743411</color>
+    <color name="bittersweetSewage">#33484B</color>
+    <color name="busAccident">#282407</color>
+</resources>

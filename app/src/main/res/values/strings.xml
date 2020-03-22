@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Corden</string>
+
+    <string-array name="roles">
+        <item>Admin</item>
+        <item>Privileged I</item>
+        <item>Privileged II</item>
+        <item>User</item>
+    </string-array>
+</resources>
