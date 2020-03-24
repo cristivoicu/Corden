@@ -6,6 +6,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import java.util.List;
@@ -38,7 +39,7 @@ public class UsersActivity extends AppCompatActivity implements GetUsersListener
 
         String getType = getIntent().getStringExtra(ExtraConstant.GET_USERS_TYPE);
         if(getType.equals(ExtraConstant.GET_USERS_ALL)){
-            Repository.getInstance().requestAllUsers();
+            viewModel.setAllUsers();
         }
 
 
@@ -49,6 +50,15 @@ public class UsersActivity extends AppCompatActivity implements GetUsersListener
             @Override
             public void onChanged(List<User> users) {
                 userAdapter.setUsers(users);
+            }
+        });
+
+        userAdapter.setOnItemClickListener(new UserAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(User user) {
+                Intent intent = new Intent(UsersActivity.this, UserDetailActivity.class);
+                intent.putExtra("user", user);
+                startActivity(intent);
             }
         });
     }

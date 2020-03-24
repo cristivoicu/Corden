@@ -81,4 +81,22 @@ public interface MediaListener {
         void onIceCandidate(JsonObject data);
     }
 
+    interface LivePlayListener{
+        /**
+         * Called by web socket client
+         * Used to notify user that his call was accepted by the media server
+         * @param answer is the sdpAnswer from media server
+         */
+        void onLiveResponse(String answer);
+        /**
+         * Called by web socket client
+         * Used in media stream activity for sending the forward message:
+         * <ul>
+         *     <li>id : iceCandidate</li>
+         *     <li>candidate : <candidate></li>
+         * </ul>
+         */
+        void onIceCandidate(JsonObject data);
+    }
+
 }

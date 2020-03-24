@@ -1,9 +1,15 @@
 package ro.atm.corden.util.websocket;
 
 import android.annotation.SuppressLint;
+import android.media.MediaPlayer;
+import android.os.ConditionVariable;
 import android.os.Looper;
 import android.os.NetworkOnMainThreadException;
+import android.provider.MediaStore;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.lifecycle.MediatorLiveData;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -47,7 +53,9 @@ import javax.security.auth.x500.X500Principal;
 
 import ro.atm.corden.model.Roles;
 import ro.atm.corden.model.transport_model.User;
+import ro.atm.corden.model.transport_model.Video;
 import ro.atm.corden.util.exception.login.LoginListenerNotInitialisedException;
+import ro.atm.corden.util.exception.websocket.TransportException;
 import ro.atm.corden.util.exception.websocket.UserNotLoggedInException;
 import ro.atm.corden.util.websocket.callback.EnrollListener;
 import ro.atm.corden.util.websocket.callback.LoginListener;
@@ -69,12 +77,16 @@ public class SignallingClient implements com.neovisionaries.ws.client.WebSocketL
     private static final Gson gson = new GsonBuilder().setDateFormat("MMM dd, yyyy, h:mm:ss a").setPrettyPrinting().create();
 
     // listeners
-    private MediaListener.RecordingListener mediaListenerRecord;
-    private MediaListener.OneToOneCallListener mediaListener;
+    private MediaListener.RecordingListener mediaListenerRecord = null;
+    private MediaListener.OneToOneCallListener mediaListener = null;
+    private MediaListener.LivePlayListener livePlayListener = null;
     private LoginListener loginListener = null;
     private EnrollListener enrollListener;
 
+    private ConditionVariable mConditionVariable = new ConditionVariable(true);
+
     private List<User> users = null;
+    private final List<Video> videos = new ArrayList<>();
 
     private WebSocket webSocket = null;
 
@@ -221,6 +233,45 @@ public class SignallingClient implements com.neovisionaries.ws.client.WebSocketL
     }
 
     /**
+     * Used to send a request for recorded video path list
+     *
+     * @param forUsername is the username of the user that recorded the videos
+     * @return null if an exception is thrown or the videos list
+     * @throws NetworkOnMainThreadException if is working on the main thread
+     * @throws TransportException           if the server does not return the requested videos
+     */
+    synchronized List<Video> getVideosForUser(String forUsername)
+            throws NetworkOnMainThreadException, TransportException {
+        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+            Log.e(TAG, "Main thread is used! in SignallingClient.getAllUsersRequest");
+            throw new NetworkOnMainThreadException();
+        }
+
+        JSONObject message = new JSONObject();
+
+        try {
+            message.put(ID, "recordedVideos");
+            message.put("forUser", forUsername);
+
+            webSocket.sendText(message.toString());
+            synchronized (videos) {
+                Log.d("ThreadReq", "Before wait.");
+                //wait(5000); // waiting 10 seconds
+                mConditionVariable.block();
+                Log.d("ThreadReq", "After wait.");
+
+                if (videos != null) {
+                    return videos;
+                }
+            }
+            throw new TransportException("Could not get the requested videos!");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
      * Methods is package private, can be used from Repository
      * Used to fetch online users from the server database
      * <b>It should not be called from the main thread</b>
@@ -276,7 +327,7 @@ public class SignallingClient implements com.neovisionaries.ws.client.WebSocketL
      * @param user is the user that is enrolled in the database
      * @throws NetworkOnMainThreadException if main thread is used
      */
-    public void enrollUser(User user) throws NetworkOnMainThreadException {
+    public void enrollUser(@NonNull User user) throws NetworkOnMainThreadException {
         if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
             Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
             throw new NetworkOnMainThreadException();
@@ -295,6 +346,33 @@ public class SignallingClient implements com.neovisionaries.ws.client.WebSocketL
     }
 
     /**
+     * Used by admin to intercept user recording session
+     *
+     * @param from     is the username that is sending live video to the media server for recording
+     * @param sdpOffer is the session description offer
+     */
+    public void sendVideoLiveRequest(@NonNull String from, @NonNull SessionDescription sdpOffer) {
+        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+            Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
+            throw new NetworkOnMainThreadException();
+        }
+
+        Log.i(TAG, "Sending live request to server");
+
+        JSONObject jsonObject = new JSONObject();
+
+        try {
+            jsonObject.put(ID, ID_GET_LIVE);
+            jsonObject.put(FROM, from);
+            jsonObject.put(SDP_OFFER, sdpOffer.description);
+
+            webSocket.sendText(jsonObject.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * This methods send a request for recording video
      * <b>It should not be called from the main thread</b>
      *
@@ -302,7 +380,7 @@ public class SignallingClient implements com.neovisionaries.ws.client.WebSocketL
      * @param sdpOffer is de session description offer
      * @throws NetworkOnMainThreadException if it runs on the main thread
      */
-    public void sendVideoForRecord(String from, SessionDescription sdpOffer) throws NetworkOnMainThreadException {
+    public void sendVideoForRecord(@NonNull String from, @NonNull SessionDescription sdpOffer) throws NetworkOnMainThreadException {
         if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
             Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
             throw new NetworkOnMainThreadException();
@@ -328,7 +406,7 @@ public class SignallingClient implements com.neovisionaries.ws.client.WebSocketL
      * @param from is the username
      * @throws NetworkOnMainThreadException
      */
-    public void stopVideoRecording(String from) {
+    public void stopVideoRecording(@NonNull String from) {
         if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
             Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
             throw new NetworkOnMainThreadException();
@@ -397,7 +475,7 @@ public class SignallingClient implements com.neovisionaries.ws.client.WebSocketL
      * @param iceCandidate is the candidate
      * @throws NetworkOnMainThreadException if it runs on the main thread
      */
-    public void emitIceCandidate(IceCandidate iceCandidate) throws NetworkOnMainThreadException {
+    public void emitIceCandidate(@NonNull IceCandidate iceCandidate, @NonNull String iceFor) throws NetworkOnMainThreadException {
         if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
             Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
             throw new NetworkOnMainThreadException();
@@ -407,6 +485,7 @@ public class SignallingClient implements com.neovisionaries.ws.client.WebSocketL
             JSONObject candidate = new JSONObject();
 
             object.put(ID, ID_ICE_CANDIDATE);
+            object.put("for", iceFor);
             candidate.put("sdpMLineIndex", iceCandidate.sdpMLineIndex);
             candidate.put("sdpMid", iceCandidate.sdpMid);
             candidate.put("candidate", iceCandidate.sdp);
@@ -446,26 +525,37 @@ public class SignallingClient implements com.neovisionaries.ws.client.WebSocketL
         }
     }
 
-    public void subscribeLoginListener(LoginListener loginListener) {
+    public void subscribeLoginListener(@NonNull LoginListener loginListener) {
         this.loginListener = loginListener;
     }
 
-    public void subscribeMediaListenerRecord(MediaListener.RecordingListener mediaListenerRecord) throws UserNotLoggedInException {
+    public void subscribeMediaListenerRecord(@NonNull MediaListener.RecordingListener mediaListenerRecord) throws UserNotLoggedInException {
         if (!isLoggedIn)
             throw new UserNotLoggedInException();
         this.mediaListenerRecord = mediaListenerRecord;
     }
 
-    public void subscribeMediaListener(MediaListener.OneToOneCallListener mediaListener) throws UserNotLoggedInException {
+    public void subscribeMediaListener(@NonNull MediaListener.OneToOneCallListener mediaListener) throws UserNotLoggedInException {
         if (!isLoggedIn)
             throw new UserNotLoggedInException();
         this.mediaListener = mediaListener;
     }
 
-    public void subscribeEnrollListener(EnrollListener enrollListener) throws UserNotLoggedInException {
+    public void subscribeEnrollListener(@NonNull EnrollListener enrollListener) throws UserNotLoggedInException {
         if (!isLoggedIn)
             throw new UserNotLoggedInException();
         this.enrollListener = enrollListener;
+    }
+
+    public void subscribeLiveVideoListener(@NonNull MediaListener.LivePlayListener livePlayListener) throws UserNotLoggedInException {
+        if (!isLoggedIn)
+            throw new UserNotLoggedInException();
+
+        this.livePlayListener = livePlayListener;
+    }
+
+    public void unsubscribeLiveVideoListener() {
+        this.livePlayListener = null;
     }
 
     //region Socket listener
@@ -537,7 +627,7 @@ public class SignallingClient implements com.neovisionaries.ws.client.WebSocketL
 
     @Override
     public void onTextMessage(WebSocket websocket, String text) throws Exception {
-        Log.i(TAG, "Received Text message");
+        Log.i(TAG, "Received Text message: " + text);
         try {
 
             Log.i(TAG, "Rec brut: " + text);
@@ -557,7 +647,20 @@ public class SignallingClient implements com.neovisionaries.ws.client.WebSocketL
                     Log.i(TAG, "Got stop communication");
                 case EVENT_ICE_CANDIDATE: // rec ice candidate
                     Log.i(TAG, "Got ice candidate");
-                    mediaListener.onIceCandidate(jsonObject.getAsJsonObject("candidate"));
+                    String usedFor = jsonObject.get("for").getAsString();
+                    switch (usedFor) {
+                        case USE_ICE_FOR_LIVE:
+                            if (livePlayListener != null)
+                                livePlayListener.onIceCandidate(jsonObject.getAsJsonObject("candidate"));
+                            break;
+                        case USE_ICE_FOR_PLAY:
+                            break;
+                        case USE_ICE_FOR_RECORDING:
+                            if (mediaListenerRecord != null) {
+                                mediaListenerRecord.onIceCandidate(jsonObject.getAsJsonObject("candidate"));
+                            }
+                            break;
+                    }
                     break;
                 case EVENT_PLAY_RESPONSE:
                     String response = jsonObject.get("response").getAsString();
@@ -575,15 +678,19 @@ public class SignallingClient implements com.neovisionaries.ws.client.WebSocketL
                     }
                     break;
                 case EVENT_LIST_USERS_RESPONSE: {
-                    JsonElement jsonElement = jsonObject.get("users");
                     response = jsonObject.get("users").getAsString();
-                    Type listType = new TypeToken<List<User>>() {
-                    }.getType();
 
                     Type userListType = new TypeToken<ArrayList<User>>() {
                     }.getType();
 
                     users = gson.fromJson(response, userListType);
+                }
+                case EVENT_LIVE_RESPONSE: {
+                    if (RESPONSE_ACCEPTED.equals(jsonObject.get("response"))) {
+                        Log.d(TAG, "Received sdp answer, live response!");
+                        sdpAnswer = jsonObject.get(SDP_OFFER).getAsString();
+                        livePlayListener.onLiveResponse(sdpAnswer);
+                    }
                 }
                 case EVENT_RECORDING:
                     String status = jsonObject.get("status").getAsString();
@@ -596,13 +703,28 @@ public class SignallingClient implements com.neovisionaries.ws.client.WebSocketL
                             break;
                     }
                     break;
+                case REQ_LIST_VIDEO_RESPONSE:
+                    response = jsonObject.get("videos").getAsString();
+
+                    Type userListType = new TypeToken<ArrayList<Video>>() {
+                    }.getType();
+
+                    synchronized (videos) {
+                        videos.addAll(gson.fromJson(response, userListType));
+
+                        Log.d("ThreadResp", "Before notify");
+                        mConditionVariable.open();
+                        Log.d("ThreadResp", "After notify");
+                    }
+
+                    break;
                 default:
-                    Log.e(TAG, "Client received an unknown message from server!");
+                    Log.e(TAGC, "Client received an unknown message from server!");
                     break;
 
             }
         } catch (JsonSyntaxException e) {
-            Log.e(TAG, "json invalid");
+            Log.e(TAGC, "json invalid");
         }
     }
 

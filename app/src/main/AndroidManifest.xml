@@ -28,14 +28,19 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".view.activity.MediaActivity"></activity>
+        <activity android:name=".view.activity.VideoListActivity"></activity>
+        <activity
+            android:name=".view.activity.UserDetailActivity"
+            android:parentActivityName=".view.activity.MainActivity" />
+        <activity android:name=".view.activity.MediaActivity" />
 
         <service
             android:name=".util.services.StreamingIntentService"
             android:exported="false" />
 
-        <activity android:name=".view.activity.MainActivityUser"
-            android:launchMode="singleTop"/>
+        <activity
+            android:name=".view.activity.MainActivityUser"
+            android:launchMode="singleTop" />
         <activity
             android:name=".view.activity.UsersActivity"
             android:parentActivityName=".view.activity.MainActivity" />
@@ -54,7 +59,6 @@
             android:launchMode="singleTop" />
 
         <receiver android:name=".util.receiver.NotificationReceiver" />
-
     </application>
 
 </manifest>

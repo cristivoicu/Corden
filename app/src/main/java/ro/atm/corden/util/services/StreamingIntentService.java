@@ -43,6 +43,7 @@ import java.util.List;
 import ro.atm.corden.R;
 import ro.atm.corden.model.LoginUser;
 import ro.atm.corden.util.App;
+import ro.atm.corden.util.constant.JsonConstants;
 import ro.atm.corden.util.exception.websocket.UserNotLoggedInException;
 import ro.atm.corden.util.receiver.NotificationReceiver;
 import ro.atm.corden.util.webrtc.SimplePeerConnectionObserver;
@@ -55,8 +56,9 @@ import ro.atm.corden.view.activity.MainActivityUser;
  * An {@link IntentService} subclass for handling asynchronous task requests in
  * a service on a separate handler thread.
  * <p>
- * TODO: Customize class - update intent actions, extra parameters and static
- * helper methods.
+ *
+ * Service should not be running if main activity of user is destroyed!
+ * @see MainActivityUser
  */
 public class StreamingIntentService extends IntentService implements MediaListener.RecordingListener {
     private static final String TAG = "StreamIntentService";
@@ -146,23 +148,16 @@ public class StreamingIntentService extends IntentService implements MediaListen
         wakeLock.release();
         Log.d(TAG, "wakelock released");
 
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... voids) {
-                SignallingClient.getInstance().stopVideoRecording(LoginUser.username);
-                return null;
-            }
-        }.execute();
-
         try {
             videoCapturer.stopCapture();
             videoCapturer.dispose();
-            peerConnectionFactory.dispose();
-            localPeer.dispose();
+            videoSource.dispose();
+            audioSource.dispose();
             localVideoTrack.dispose();
             localAudioTrack.dispose();
-            videoSource.dispose();;
-            audioSource.dispose();
+            localPeer.dispose();
+
+            peerConnectionFactory.dispose();
 
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -290,7 +285,7 @@ public class StreamingIntentService extends IntentService implements MediaListen
      */
     public void onIceCandidateReceived(IceCandidate iceCandidate) {
         //we have received ice candidate. We can set it to the other peer.
-        SignallingClient.getInstance().emitIceCandidate(iceCandidate);
+        SignallingClient.getInstance().emitIceCandidate(iceCandidate, JsonConstants.ICE_FOR_REC);
     }
 
     /**

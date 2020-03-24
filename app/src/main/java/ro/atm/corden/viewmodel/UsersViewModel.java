@@ -18,6 +18,10 @@ public class UsersViewModel extends AndroidViewModel {
     public UsersViewModel(@NonNull Application application) {
         super(application);
         allUsers = new MutableLiveData<>();
+
+    }
+
+    public void setAllUsers(){
         allUsers.setValue(Repository.getInstance().requestAllUsers());
     }
 

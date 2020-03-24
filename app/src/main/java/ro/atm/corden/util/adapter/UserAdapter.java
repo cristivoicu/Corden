@@ -3,6 +3,7 @@ package ro.atm.corden.util.adapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -14,8 +15,9 @@ import java.util.List;
 import ro.atm.corden.R;
 import ro.atm.corden.model.transport_model.User;
 
-public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserHolder>{
+public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserHolder> {
     private List<User> users = new ArrayList<>();
+    private OnItemClickListener listener;
 
     public void setUsers(List<User> users) {
         this.users = users;
@@ -42,7 +44,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserHolder>{
         return users.size();
     }
 
-    class UserHolder extends RecyclerView.ViewHolder{
+    class UserHolder extends RecyclerView.ViewHolder {
         private TextView name;
         private TextView username;
         private TextView program;
@@ -52,6 +54,24 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserHolder>{
             name = itemView.findViewById(R.id.name);
             username = itemView.findViewById(R.id.username);
             program = itemView.findViewById(R.id.program);
+
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int position = getAdapterPosition();
+                    if (listener != null && position != RecyclerView.NO_POSITION) {
+                        listener.onItemClick(users.get(position));
+                    }
+                }
+            });
         }
+    }
+
+    public interface OnItemClickListener {
+        void onItemClick(User user);
+    }
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.listener = listener;
     }
 }

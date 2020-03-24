@@ -3,13 +3,18 @@ package ro.atm.corden.view.activity;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Toast;
+
+import com.google.gson.JsonObject;
 
 import org.webrtc.AudioSource;
 import org.webrtc.AudioTrack;
+import org.webrtc.Camera1Enumerator;
 import org.webrtc.DefaultVideoDecoderFactory;
 import org.webrtc.DefaultVideoEncoderFactory;
 import org.webrtc.EglBase;
@@ -18,8 +23,10 @@ import org.webrtc.MediaConstraints;
 import org.webrtc.MediaStream;
 import org.webrtc.PeerConnection;
 import org.webrtc.PeerConnectionFactory;
+import org.webrtc.SessionDescription;
 import org.webrtc.SurfaceTextureHelper;
 import org.webrtc.SurfaceViewRenderer;
+import org.webrtc.VideoCapturer;
 import org.webrtc.VideoSource;
 import org.webrtc.VideoTrack;
 
@@ -28,10 +35,15 @@ import java.util.List;
 
 import ro.atm.corden.R;
 import ro.atm.corden.databinding.ActivityMediaBinding;
+import ro.atm.corden.util.constant.JsonConstants;
+import ro.atm.corden.util.exception.websocket.UserNotLoggedInException;
+import ro.atm.corden.util.webrtc.CameraControl;
 import ro.atm.corden.util.webrtc.SimplePeerConnectionObserver;
+import ro.atm.corden.util.webrtc.SimpleSdpObserver;
 import ro.atm.corden.util.websocket.SignallingClient;
+import ro.atm.corden.util.websocket.callback.MediaListener;
 
-public class MediaActivity extends AppCompatActivity {
+public class MediaActivity extends AppCompatActivity implements MediaListener.LivePlayListener {
     private static final String TAG = "MediaActivity";
     private ActivityMediaBinding binding;
 
@@ -55,14 +67,33 @@ public class MediaActivity extends AppCompatActivity {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_media);
 
         remoteVideoView = binding.remoteView;
-
+        SignallingClient.getInstance().isInitiator = true;
         start();
     }
 
     private void start() {
-        initVideos();
-        createPeerConnectionFactory();
-        createPeerConnection();
+        // keep screen on
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        try {
+            SignallingClient.getInstance().subscribeLiveVideoListener(this);
+            initVideos();
+            createPeerConnectionFactory();
+            createPeerConnection();
+
+            if (SignallingClient.getInstance().isChannelReady) {
+                onTryToStart();
+            }
+        } catch (UserNotLoggedInException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void onTryToStart() {
+        if (!SignallingClient.getInstance().isStarted  && SignallingClient.getInstance().isChannelReady) {
+            SignallingClient.getInstance().isStarted = true;
+            doCall();
+        }
     }
 
 
@@ -122,6 +153,8 @@ public class MediaActivity extends AppCompatActivity {
                 gotRemoteStream(mediaStream);
             }
         });
+
+        SignallingClient.getInstance().isChannelReady = true;
     }
 
     /**
@@ -143,12 +176,70 @@ public class MediaActivity extends AppCompatActivity {
     /**
      * Received local ice candidate. Send it to remote peer through signalling for negotiation
      */
-    public void onIceCandidateReceived(IceCandidate iceCandidate) {
+    private void onIceCandidateReceived(IceCandidate iceCandidate) {
         //we have received ice candidate. We can set it to the other peer.
-        SignallingClient.getInstance().emitIceCandidate(iceCandidate);
+        SignallingClient.getInstance().emitIceCandidate(iceCandidate, JsonConstants.ICE_FOR_LIVE);
+    }
+
+    /**
+     * This method is called when the app is the initiator - We generate the offer and send it over through socket
+     * to remote peer
+     */
+    private void doCall() {
+        sdpConstraints = new MediaConstraints();
+        sdpConstraints.mandatory.add(
+                new MediaConstraints.KeyValuePair("OfferToReceiveAudio", "true"));
+        sdpConstraints.mandatory.add(
+                new MediaConstraints.KeyValuePair("OfferToReceiveVideo", "true"));
+        localPeer.createOffer(new SimpleSdpObserver() {
+            @Override
+            public void onCreateSuccess(SessionDescription sessionDescription) {
+                super.onCreateSuccess(sessionDescription);
+                localPeer.setLocalDescription(new SimpleSdpObserver(), sessionDescription);
+                Log.d("onCreateSuccess", "SignallingClient emit ");
+
+                CallAsyncTask callAsyncTask = new CallAsyncTask();
+                callAsyncTask.from = "voicu.petre";
+                callAsyncTask.sdpOffer = sessionDescription;
+
+                callAsyncTask.execute();
+            }
+        }, sdpConstraints);
     }
 
     public void showToast(final String msg) {
         runOnUiThread(() -> Toast.makeText(MediaActivity.this, msg, Toast.LENGTH_SHORT).show());
+    }
+
+    @Override
+    public void onLiveResponse(String answer) {
+        showToast("Received sdpAnswer on play");
+        Log.d(TAG, "Received sdp answer");
+        localPeer.setRemoteDescription(new SimpleSdpObserver(),
+                new SessionDescription(SessionDescription.Type.ANSWER, answer));
+    }
+
+    @Override
+    public void onIceCandidate(JsonObject data) {
+        showToast("Receiving ice candidates");
+        Log.d(TAG, "OnIceCandidate Rec");
+        localPeer.addIceCandidate(new IceCandidate(data.get("sdpMid").getAsString(), data.get("sdpMLineIndex").getAsInt(), data.get("candidate").getAsString()));
+    }
+
+    private static final class CallAsyncTask extends AsyncTask<Void, Void, Void> {
+        private String from;
+        private SessionDescription sdpOffer;
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            SignallingClient.getInstance().sendVideoLiveRequest(from, sdpOffer);
+            return null;
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        SignallingClient.getInstance().unsubscribeLiveVideoListener();
     }
 }

@@ -4,11 +4,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 
 import ro.atm.corden.R;
+import ro.atm.corden.model.LoginUser;
 import ro.atm.corden.util.services.StreamingIntentService;
+import ro.atm.corden.util.websocket.SignallingClient;
 
 public class MainActivityUser extends AppCompatActivity {
     private boolean isServiceStarted = false;
@@ -29,6 +32,9 @@ public class MainActivityUser extends AppCompatActivity {
             isServiceStarted = true;
         } else {
             stopService(serviceIntent);
+            StopServiceAsyncTask stopServiceAsyncTask = new StopServiceAsyncTask();
+            stopServiceAsyncTask.execute();
+            stopServiceAsyncTask = null;
             isServiceStarted = false;
         }
     }
@@ -37,6 +43,19 @@ public class MainActivityUser extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         Intent serviceIntent = new Intent(this, StreamingIntentService.class);
-        stopService(serviceIntent);
+        if (isServiceStarted) {
+            stopService(serviceIntent);
+            StopServiceAsyncTask stopServiceAsyncTask = new StopServiceAsyncTask();
+            stopServiceAsyncTask.execute();
+            stopServiceAsyncTask = null;
+        }
+    }
+
+    private static class StopServiceAsyncTask extends AsyncTask<Void, Void, Void>{
+        @Override
+        protected Void doInBackground(Void... voids) {
+            SignallingClient.getInstance().stopVideoRecording(LoginUser.username);
+            return null;
+        }
     }
 }
