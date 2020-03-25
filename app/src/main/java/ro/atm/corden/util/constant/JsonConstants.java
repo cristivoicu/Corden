@@ -28,6 +28,14 @@ public class JsonConstants {
     public static final String ID_ENROLL_USER = "enroll";
     public static final String ID_GET_LIVE = "liveVideo";
 
+    // media player ids
+    public static final String ID_PLAY_VIDEO = "playVideo";
+    public static final String ID_STOP_VIDEO = "stopVideo";
+    public static final String ID_PAUSE_VIDEO = "pauseVideo";
+    public static final String ID_DO_SEEK_VIDEO = "seekVideo";
+    public static final String ID_RESUME_VIDEO = "resumeVideo";
+    public static final String ID_GET_POSITION_VIDEO = "getPositionVideo";
+
     public static final String USERS_TYPE_REQ_ALL = "all";
     public static final String USERS_TYPE_REQ_ONLINE = "online";
 
