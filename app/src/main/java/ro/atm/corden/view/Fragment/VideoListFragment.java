@@ -1,9 +1,12 @@
 package ro.atm.corden.view.Fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -60,10 +63,28 @@ public class VideoListFragment extends Fragment {
         final VideoAdapter videoAdapter = new VideoAdapter();
         binding.videosList.setAdapter(videoAdapter);
 
-        viewModel.getVideos().observe(this, new Observer<List<Video>>() {
+        viewModel.getVideos().observe(getViewLifecycleOwner(), new Observer<List<Video>>() {
             @Override
             public void onChanged(List<Video> videos) {
                 videoAdapter.setVideos(videos);
+            }
+        });
+
+        videoAdapter.setOnItemClickListener(new VideoAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(Video video) {
+
+                FragmentManager fragmentManager = getParentFragmentManager();
+                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                PlayerFragment playerFragment = new PlayerFragment();
+                Bundle videoBundle = new Bundle();;
+                videoBundle.putSerializable(ExtraConstant.GET_VIDEO, video);
+                playerFragment.setArguments(videoBundle);
+                fragmentTransaction.addToBackStack("videoList");
+                fragmentTransaction.hide(VideoListFragment.this);
+                fragmentTransaction.add(R.id.frameLayout, playerFragment);
+                fragmentTransaction.commit();
+
             }
         });
 

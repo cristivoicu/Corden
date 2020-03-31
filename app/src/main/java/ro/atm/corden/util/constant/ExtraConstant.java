@@ -7,4 +7,6 @@ public class ExtraConstant {
     public static final String GET_USERS_ONLINE = "GET_USERS_ONLINE";
 
     public static final String GET_USERNAME = "GET_USERNAME";
+    public static final String GET_VIDEO = "GET_VIDEO";
+    public static final String GET_VIDEO_PATH = "GET_VIDEO_PATH";
 }

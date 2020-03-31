@@ -35,7 +35,8 @@ public class LoginActivity extends AppCompatActivity implements LoginListener {
         context = this;
         binding = DataBindingUtil.setContentView(this, R.layout.activity_login);
 
-        viewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(this.getApplication()).create(LoginViewModel.class);
+        viewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(this.getApplication())
+                .create(LoginViewModel.class);
 
         SignallingClient.getInstance().subscribeLoginListener(this);
 

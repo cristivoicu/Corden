@@ -53,6 +53,8 @@ public class User implements Serializable {
     private String programEnd;
     private Date creationDate;
 
+    private boolean isOnline;
+
     @SerializedName("role")
     private Roles roles;
 
@@ -200,6 +202,11 @@ public class User implements Serializable {
     public void setRoles(Roles roles) {
         this.roles = roles;
     }
+
+    public boolean isOnline() {
+        return isOnline;
+    }
+
     //endregion
 
     public String toJson() {

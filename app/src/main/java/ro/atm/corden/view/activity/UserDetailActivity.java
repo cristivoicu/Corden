@@ -2,6 +2,7 @@ package ro.atm.corden.view.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -15,15 +16,22 @@ import ro.atm.corden.databinding.ActivityUserDetailBinding;
 import ro.atm.corden.model.Roles;
 import ro.atm.corden.model.transport_model.User;
 import ro.atm.corden.util.constant.ExtraConstant;
+import ro.atm.corden.viewmodel.LoginViewModel;
+import ro.atm.corden.viewmodel.UserDetailViewModel;
 
 public class UserDetailActivity extends AppCompatActivity {
     private ActivityUserDetailBinding binding;
+    private UserDetailViewModel viewModel;
     private User user = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_user_detail);
+
+        viewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(this.getApplication())
+                .create(UserDetailViewModel.class);
+        binding.setViewModel(viewModel);
 
         setSupportActionBar(binding.toolbar);
 
@@ -38,9 +46,15 @@ public class UserDetailActivity extends AppCompatActivity {
 
         if(user != null){
             if(user.getRoles() == Roles.ADMIN){
-                binding.image.setImageResource(R.drawable.toolbar_ic_admin);
+                binding.image.setImageResource(R.drawable.ic_boss);
                 binding.textUserType.setText("ADMIN");
             }
+            viewModel.setRole(user.getRoles().name());
+            viewModel.setUserAddress(user.getAddress());
+            viewModel.setUsername(user.getUsername());
+            viewModel.setUserPhoneNumber(user.getPhoneNumber());
+            viewModel.setUserProgram(String.format("Program from %s to %s", user.getProgramStart(), user.getProgramEnd()));
+            viewModel.setUserRealName(user.getName());
         }
     }
 

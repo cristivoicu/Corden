@@ -4,9 +4,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
@@ -37,6 +39,11 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserHolder> {
         holder.name.setText(currentUser.getName());
         holder.username.setText(currentUser.getUsername());
         holder.program.setText(String.format("Program: %s to %s.", currentUser.getProgramStart(), currentUser.getProgramEnd()));
+        if(currentUser.isOnline()){
+            holder.status.setCardBackgroundColor(0x006400); // color online
+        }else{
+            holder.status.setCardBackgroundColor(0x8B0000);// color offline
+        }
     }
 
     @Override
@@ -48,12 +55,14 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserHolder> {
         private TextView name;
         private TextView username;
         private TextView program;
+        private CardView status;
 
-        public UserHolder(@NonNull View itemView) {
+        private UserHolder(@NonNull View itemView) {
             super(itemView);
             name = itemView.findViewById(R.id.name);
             username = itemView.findViewById(R.id.username);
             program = itemView.findViewById(R.id.program);
+            status = itemView.findViewById(R.id.onlineStatus);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override

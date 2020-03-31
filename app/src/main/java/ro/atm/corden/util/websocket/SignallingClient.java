@@ -54,6 +54,7 @@ import javax.security.auth.x500.X500Principal;
 import ro.atm.corden.model.Roles;
 import ro.atm.corden.model.transport_model.User;
 import ro.atm.corden.model.transport_model.Video;
+import ro.atm.corden.model.transport_model.VideoInfo;
 import ro.atm.corden.util.exception.login.LoginListenerNotInitialisedException;
 import ro.atm.corden.util.exception.websocket.TransportException;
 import ro.atm.corden.util.exception.websocket.UserNotLoggedInException;
@@ -78,8 +79,8 @@ public class SignallingClient implements com.neovisionaries.ws.client.WebSocketL
 
     // listeners
     private MediaListener.RecordingListener mediaListenerRecord = null;
-    private MediaListener.OneToOneCallListener mediaListener = null;
     private MediaListener.LivePlayListener livePlayListener = null;
+    private MediaListener.PlaybackListener playbackListener = null;
     private LoginListener loginListener = null;
     private EnrollListener enrollListener;
 
@@ -279,7 +280,7 @@ public class SignallingClient implements com.neovisionaries.ws.client.WebSocketL
      * @throws NetworkOnMainThreadException if main thread is used
      * @see Repository
      */
-    void getOnlineUsersRequest() throws NetworkOnMainThreadException {
+    void sendOnlineUsersRequest() throws NetworkOnMainThreadException {
         if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
             Log.e(TAG, "Main thread is used! in SignallingClient.getOnlineUsersRequest");
             throw new NetworkOnMainThreadException();
@@ -373,6 +374,95 @@ public class SignallingClient implements com.neovisionaries.ws.client.WebSocketL
     }
 
     /**
+     * Used by admin to send a video playback request to the application server
+     * This method should not be used on the main thread
+     *
+     * @param sdpOffer  is the Session Description Offer {@link SessionDescription} of the admin {@link Roles}user
+     * @param videoPath is the video path in media server, user should already have it from the app server
+     * @throws NetworkOnMainThreadException if main thread is used
+     */
+    public void sendPlayVideoRequest(@NonNull SessionDescription sdpOffer, @NonNull String videoPath) {
+        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+            Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
+            throw new NetworkOnMainThreadException();
+        }
+        JsonObject message = new JsonObject();
+        message.addProperty(ID, ID_PLAY_VIDEO);
+        message.addProperty(SDP_OFFER, sdpOffer.description);
+        message.addProperty("videoPath", videoPath);
+
+        webSocket.sendText(message.toString());
+    }
+
+    /**
+     * Used to send video pause request
+     * It should not be used form the main thread
+     */
+    public void sendPauseVideoRequest() {
+        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+            Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
+            throw new NetworkOnMainThreadException();
+        }
+        JsonObject message = new JsonObject();
+        message.addProperty(ID, ID_PAUSE_VIDEO);
+
+        webSocket.sendText(message.toString());
+    }
+
+    /***/
+    public void sendResumeVideoRequest() {
+        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+            Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
+            throw new NetworkOnMainThreadException();
+        }
+
+        JsonObject message = new JsonObject();
+        message.addProperty(ID, ID_RESUME_VIDEO);
+
+        webSocket.sendText(message.toString());
+    }
+
+    /***/
+    public void sendGetVideoPositionRequest(){
+        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+            Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
+            throw new NetworkOnMainThreadException();
+        }
+
+        JsonObject message = new JsonObject();
+        message.addProperty(ID, ID_GET_POSITION_VIDEO);
+
+        webSocket.sendText(message.toString());
+    }
+
+    /***/
+    public void sendSeekVideoRequest(long position) {
+        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+            Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
+            throw new NetworkOnMainThreadException();
+        }
+
+        JsonObject message = new JsonObject();
+        message.addProperty(ID, ID_DO_SEEK_VIDEO);
+        message.addProperty("position", position);
+
+        webSocket.sendText(message.toString());
+    }
+
+    /***/
+    public void sendStopVideoRequest() {
+        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+            Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
+            throw new NetworkOnMainThreadException();
+        }
+
+        JsonObject message = new JsonObject();
+        message.addProperty(ID, ID_STOP_VIDEO);
+
+        webSocket.sendText(message.toString());
+    }
+
+    /**
      * This methods send a request for recording video
      * <b>It should not be called from the main thread</b>
      *
@@ -425,50 +515,6 @@ public class SignallingClient implements com.neovisionaries.ws.client.WebSocketL
     }
 
     /**
-     * Sends offer to the server
-     * Called when peer is initiator
-     *
-     * @param sdpOffer should be OFFER type
-     * @see SessionDescription.Type
-     */
-    public void call(String from, String to, SessionDescription sdpOffer) {
-        Log.i(TAGC, String.format("Calling from %s to %s", from, to));
-        JSONObject object = new JSONObject();
-        try {
-            object.put("id", "call");
-            object.put("from", from);
-            object.put("to", to);
-            object.put("sdpOffer", sdpOffer.description);
-
-            webSocket.sendText(object.toString());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Sends sdp offer to the server
-     * Called when peer is called
-     *
-     * @param message should be OFFER type
-     * @see SessionDescription.Type
-     */
-    public void emitIncomingCallResponse(SessionDescription message, String from) {
-        JSONObject object = new JSONObject();
-        try {
-            object.put("id", "incomingCallResponse");
-            object.put("from", from);
-            object.put("callResponse", "accept");
-            object.put("sdpOffer", message.description);
-
-            webSocket.sendText(object.toString());
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
      * Used to send ice candidate from client to the server.
      * Candidates are processed on server
      *
@@ -501,12 +547,14 @@ public class SignallingClient implements com.neovisionaries.ws.client.WebSocketL
     }
 
     /**
-     * Used to send a play request to the server from client
+     * Used by media player to send a play request to the server from client
      *
      * @param from        is the username
      * @param description is the sdp offer
      * @throws NetworkOnMainThreadException if it runs on the main thread
+     * @deprecated
      */
+    @Deprecated
     public void play(String from, SessionDescription description) throws NetworkOnMainThreadException {
         if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
             Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
@@ -535,12 +583,6 @@ public class SignallingClient implements com.neovisionaries.ws.client.WebSocketL
         this.mediaListenerRecord = mediaListenerRecord;
     }
 
-    public void subscribeMediaListener(@NonNull MediaListener.OneToOneCallListener mediaListener) throws UserNotLoggedInException {
-        if (!isLoggedIn)
-            throw new UserNotLoggedInException();
-        this.mediaListener = mediaListener;
-    }
-
     public void subscribeEnrollListener(@NonNull EnrollListener enrollListener) throws UserNotLoggedInException {
         if (!isLoggedIn)
             throw new UserNotLoggedInException();
@@ -554,8 +596,18 @@ public class SignallingClient implements com.neovisionaries.ws.client.WebSocketL
         this.livePlayListener = livePlayListener;
     }
 
+    public void subscribePlaybackVideoListener(@NonNull MediaListener.PlaybackListener playbackListener) throws UserNotLoggedInException {
+        if (!isLoggedIn)
+            throw new UserNotLoggedInException();
+        this.playbackListener = playbackListener;
+    }
+
     public void unsubscribeLiveVideoListener() {
         this.livePlayListener = null;
+    }
+
+    public void unsubscribePlaybackVideoListener() {
+        this.playbackListener = null;
     }
 
     //region Socket listener
@@ -634,11 +686,6 @@ public class SignallingClient implements com.neovisionaries.ws.client.WebSocketL
 
             JsonObject jsonObject = gson.fromJson(text, JsonObject.class);
             switch (jsonObject.get("id").getAsString()) {
-                case EVENT_START_COMMUNICATION: // sdp answer
-                    Log.i(TAG, "Got start communication");
-                    String sdpAnwer = jsonObject.get("sdpAnswer").getAsString();
-                    mediaListener.onStartCommunication(sdpAnwer);
-                    break;
                 case EVENT_RECORD_RESPONSE:
                     Log.d(TAG, "Got record response");
                     String sdpAnswer = jsonObject.get("sdpAnswer").getAsString();
@@ -654,11 +701,12 @@ public class SignallingClient implements com.neovisionaries.ws.client.WebSocketL
                                 livePlayListener.onIceCandidate(jsonObject.getAsJsonObject("candidate"));
                             break;
                         case USE_ICE_FOR_PLAY:
+                            if (playbackListener != null)
+                                playbackListener.onIceCandidate(jsonObject.getAsJsonObject("candidate"));
                             break;
                         case USE_ICE_FOR_RECORDING:
-                            if (mediaListenerRecord != null) {
+                            if (mediaListenerRecord != null)
                                 mediaListenerRecord.onIceCandidate(jsonObject.getAsJsonObject("candidate"));
-                            }
                             break;
                     }
                     break;
@@ -668,8 +716,21 @@ public class SignallingClient implements com.neovisionaries.ws.client.WebSocketL
                         Log.e(TAG, "Play request rejected!");
                         break;
                     }
-                    sdpAnwer = jsonObject.get("sdpAnswer").getAsString();
-                    mediaListener.onPlayResponse(sdpAnwer);
+                    String sdpAnwer = jsonObject.get("sdpAnswer").getAsString();
+                    playbackListener.onPlayResponse(sdpAnwer);
+                    break;
+                case EVENT_GET_POSITION_RESPONSE:
+                    long position = jsonObject.get("position").getAsLong();
+                    playbackListener.onGotPosition(position);
+                    break;
+                case EVENT_VIDEO_INFO:
+                    boolean isSeekable = jsonObject.get(VIDEO_INFO_IS_SEEKABLE).getAsBoolean();
+                    long seekableInit = jsonObject.get(VIDEO_INFO_INIT_SEEKABLE).getAsLong();
+                    long seekableEnd = jsonObject.get(VIDEO_INFO_END_SEEKABLE).getAsLong();
+                    long duration = jsonObject.get(VIDEO_INFO_DURATION).getAsLong();
+
+                    VideoInfo videoInfo = new VideoInfo(isSeekable, seekableInit, seekableEnd, duration);
+                    playbackListener.onVideoInfo(videoInfo);
                     break;
                 case EVENT_ENROLL_RESPONSE:
                     response = jsonObject.get("response").getAsString();
@@ -711,10 +772,7 @@ public class SignallingClient implements com.neovisionaries.ws.client.WebSocketL
 
                     synchronized (videos) {
                         videos.addAll(gson.fromJson(response, userListType));
-
-                        Log.d("ThreadResp", "Before notify");
                         mConditionVariable.open();
-                        Log.d("ThreadResp", "After notify");
                     }
 
                     break;

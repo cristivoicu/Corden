@@ -2,40 +2,18 @@ package ro.atm.corden.util.websocket.callback;
 
 import com.google.gson.JsonObject;
 
+import ro.atm.corden.model.transport_model.VideoInfo;
+
 /**
  * Contain interfaces for different calls with media server
  */
 public interface MediaListener {
     /**
-     * Defines method that a media activity must implement for one to one video call
+     * Defines method that a media player activity must implement for gaining tha capacity to
+     * playback video data from the server
      */
-    interface OneToOneCallListener {
-        /**
-         * Called by web socket client
-         * Used in media stream activity for sending the forward message:
-         * <ul>
-         *     <li>id : incomingCallResponse</li>
-         *     <li>from : username</li>
-         *     <li>response : accepted</li>
-         *     <li>sdpOffer : <sdp></li>
-         * </ul>
-         */
-        void onIncomingCallResponse(String from);
 
-
-        /**
-         * Called by web socket client
-         * Used to process sdp answer received from server
-         * Used when user is callee
-         */
-        void onStartCommunication(String answer);
-
-        /**
-         * Called by web socket client
-         * Used to process sdp answer received from server
-         * Used when user is caller
-         */
-        void onCallResponse(String answer);
+    interface PlaybackListener {
         /**
          * Called by web socket client
          * Used in media stream activity for sending the forward message:
@@ -53,10 +31,10 @@ public interface MediaListener {
          */
         void onPlayResponse(String answer);
 
+        /***/
+        void onVideoInfo(VideoInfo videoInfo);
 
-        void onTryToStart();
-
-        void callRefused();
+        void onGotPosition(long position);
     }
 
     /**
@@ -66,6 +44,7 @@ public interface MediaListener {
         /**
          * Called by web socket client
          * Used to notify user that his call was accepted by the media server
+         *
          * @param answer is the sdpAnswer from media server
          */
         void onStartResponse(String answer);
@@ -81,13 +60,15 @@ public interface MediaListener {
         void onIceCandidate(JsonObject data);
     }
 
-    interface LivePlayListener{
+    interface LivePlayListener {
         /**
          * Called by web socket client
          * Used to notify user that his call was accepted by the media server
+         *
          * @param answer is the sdpAnswer from media server
          */
         void onLiveResponse(String answer);
+
         /**
          * Called by web socket client
          * Used in media stream activity for sending the forward message:

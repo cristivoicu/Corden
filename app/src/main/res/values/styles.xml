@@ -7,7 +7,7 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:windowBackground"> @color/activityBackground </item>
-
+        <item name="fontFamily">@font/lato</item>
         <item name="android:windowActivityTransitions">true</item>
         <item name="android:windowEnterTransition">@android:transition/slide_right</item>
         <item name="android:windowExitTransition">@android:transition/slide_left</item>
@@ -16,7 +16,15 @@
     <style name="cardView_dashBoard">
         <item name="android:layout_height">0dp</item>
         <item name="android:layout_width">0dp</item>
-        <item name="android:clickable">true</item>
+        <item name="android:layout_margin">8dp</item>
     </style>
-
+    <style name="textView_adminBoard">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginBottom">8dp</item>
+        <item name="fontFamily">@font/lato_light</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textColor">@color/colorWhile</item>
+        <item name="android:textSize">22sp</item>
+    </style>
 </resources>

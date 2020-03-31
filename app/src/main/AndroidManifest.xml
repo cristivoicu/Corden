@@ -28,7 +28,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".view.activity.VideoListActivity"></activity>
+        <activity android:name=".view.activity.VideoListActivity" />
         <activity
             android:name=".view.activity.UserDetailActivity"
             android:parentActivityName=".view.activity.MainActivity" />
@@ -59,6 +59,10 @@
             android:launchMode="singleTop" />
 
         <receiver android:name=".util.receiver.NotificationReceiver" />
+
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
     </application>
 
 </manifest>

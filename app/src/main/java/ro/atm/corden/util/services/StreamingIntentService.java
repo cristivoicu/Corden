@@ -6,7 +6,6 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
@@ -97,7 +96,7 @@ public class StreamingIntentService extends IntentService implements MediaListen
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SteamIntent:Wakelock");
         wakeLock.acquire(600000); //wake for maximum 10 minutes when user turns off the screen, bc it drain battery
 
-        Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_video_marketing);
+        Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_video_playback);
 
         Intent activityIntent = new Intent(getApplicationContext(), MainActivityUser.class);
         PendingIntent contentInteint = PendingIntent.getActivity(getApplicationContext(), 0, activityIntent, 0);

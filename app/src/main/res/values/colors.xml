@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#33484B</color>
+    <color name="colorPrimary">#5DACBD</color>
     <color name="colorPrimaryDark">#304057</color>
     <color name="colorAccent">#fdb903</color>
 
@@ -24,4 +24,8 @@
     <color name="brown">#743411</color>
     <color name="bittersweetSewage">#33484B</color>
     <color name="busAccident">#282407</color>
+
+    <color name="colorOnline"> #006400</color>
+    <color name="colorOffline"> #8B0000</color>
+    <color name="colorDisabled"> #696969</color>
 </resources>

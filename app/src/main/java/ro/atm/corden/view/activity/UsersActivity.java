@@ -34,6 +34,8 @@ public class UsersActivity extends AppCompatActivity implements GetUsersListener
         viewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(this.getApplication()).create(UsersViewModel.class);
         binding.setViewModel(viewModel);
 
+        setSupportActionBar(binding.toolbar);
+
         binding.usersList.setLayoutManager(new LinearLayoutManager(this));
         binding.usersList.setHasFixedSize(true);
 
