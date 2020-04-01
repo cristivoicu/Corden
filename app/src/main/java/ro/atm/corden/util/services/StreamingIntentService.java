@@ -10,6 +10,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -45,8 +46,10 @@ import ro.atm.corden.util.App;
 import ro.atm.corden.util.constant.JsonConstants;
 import ro.atm.corden.util.exception.websocket.UserNotLoggedInException;
 import ro.atm.corden.util.receiver.NotificationReceiver;
-import ro.atm.corden.util.webrtc.SimplePeerConnectionObserver;
-import ro.atm.corden.util.webrtc.SimpleSdpObserver;
+import ro.atm.corden.util.webrtc.client.Session;
+import ro.atm.corden.util.webrtc.interfaces.MediaActivity;
+import ro.atm.corden.util.webrtc.observer.SimplePeerConnectionObserver;
+import ro.atm.corden.util.webrtc.observer.SimpleSdpObserver;
 import ro.atm.corden.util.websocket.SignallingClient;
 import ro.atm.corden.util.websocket.callback.MediaListener;
 import ro.atm.corden.view.activity.MainActivityUser;
@@ -59,21 +62,13 @@ import ro.atm.corden.view.activity.MainActivityUser;
  * Service should not be running if main activity of user is destroyed!
  * @see MainActivityUser
  */
-public class StreamingIntentService extends IntentService implements MediaListener.RecordingListener {
+public class StreamingIntentService extends IntentService implements MediaListener.RecordingListener, MediaActivity {
     private static final String TAG = "StreamIntentService";
     private static final String ACTION_STREAM = "ActionStream";
 
     private PowerManager.WakeLock wakeLock;
 
-    private PeerConnection localPeer;
-    private PeerConnectionFactory peerConnectionFactory;
-    private MediaConstraints audioConstraints;
-    private MediaConstraints videoConstraints;
-    private MediaConstraints sdpConstraints;
-    private VideoSource videoSource;
-    private VideoTrack localVideoTrack;
-    private AudioSource audioSource;
-    private AudioTrack localAudioTrack;
+    private Session liveSession;
 
     VideoCapturer videoCapturer;
     private SurfaceTextureHelper surfaceTextureHelper;
@@ -95,8 +90,6 @@ public class StreamingIntentService extends IntentService implements MediaListen
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SteamIntent:Wakelock");
         wakeLock.acquire(600000); //wake for maximum 10 minutes when user turns off the screen, bc it drain battery
-
-        Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_video_playback);
 
         Intent activityIntent = new Intent(getApplicationContext(), MainActivityUser.class);
         PendingIntent contentInteint = PendingIntent.getActivity(getApplicationContext(), 0, activityIntent, 0);
@@ -147,170 +140,45 @@ public class StreamingIntentService extends IntentService implements MediaListen
         wakeLock.release();
         Log.d(TAG, "wakelock released");
 
-        try {
-            videoCapturer.stopCapture();
-            videoCapturer.dispose();
-            videoSource.dispose();
-            audioSource.dispose();
-            localVideoTrack.dispose();
-            localAudioTrack.dispose();
-            localPeer.dispose();
-
-            peerConnectionFactory.dispose();
-
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        liveSession.leaveLiveSession();
     }
 
     public void start() throws UserNotLoggedInException {
         SignallingClient.getInstance().subscribeMediaListenerRecord(this);
-        createPeerConnectionFactory();
-        captureFromCamera();
-        createPeerConnection();
-        if(SignallingClient.getInstance().isChannelReady){
+
+        liveSession = new Session(this.getApplicationContext(), rootEglBase, this);
+        liveSession.createLiveVideoClient();
+        if(SignallingClient.getInstance().isChannelReady)
             onTryToStart();
-        }
-    }
-
-    private void captureFromCamera() {
-        //Now create a VideoCapturer instance.
-        videoCapturer = createCameraCapturer(new Camera1Enumerator(false));
-
-        //Create MediaConstraints - Will be useful for specifying video and audio constraints.
-        audioConstraints = new MediaConstraints();
-        videoConstraints = new MediaConstraints();
-
-        //Create a VideoSource instance
-        if (videoCapturer != null) {
-            surfaceTextureHelper = SurfaceTextureHelper.create("CaptureThread", rootEglBase.getEglBaseContext());
-            videoSource = peerConnectionFactory.createVideoSource(videoCapturer.isScreencast());
-            videoCapturer.initialize(surfaceTextureHelper, this, videoSource.getCapturerObserver());
-        }
-        localVideoTrack = peerConnectionFactory.createVideoTrack("100", videoSource);
-
-        //create an AudioSource instance
-        audioSource = peerConnectionFactory.createAudioSource(audioConstraints);
-        localAudioTrack = peerConnectionFactory.createAudioTrack("101", audioSource);
-
-        if (videoCapturer != null) {
-            videoCapturer.startCapture(1024, 720, 30);
-        }
     }
 
     private void onTryToStart() {
-        if (!SignallingClient.getInstance().isStarted && localAudioTrack != null && SignallingClient.getInstance().isChannelReady) {
+        if (!SignallingClient.getInstance().isStarted && liveSession.getVideoTrack() != null && SignallingClient.getInstance().isChannelReady) {
             SignallingClient.getInstance().isStarted = true;
-            doCall();
+            liveSession.createLiveOffer();
         }
     }
 
-    /**
-     * This method is called when the app is the initiator - We generate the offer and send it over through socket
-     * to remote peer
-     */
-    private void doCall() {
-        sdpConstraints = new MediaConstraints();
-        sdpConstraints.mandatory.add(
-                new MediaConstraints.KeyValuePair("OfferToReceiveAudio", "true"));
-        sdpConstraints.mandatory.add(
-                new MediaConstraints.KeyValuePair("OfferToReceiveVideo", "true"));
-        localPeer.createOffer(new SimpleSdpObserver() {
-            @Override
-            public void onCreateSuccess(SessionDescription sessionDescription) {
-                super.onCreateSuccess(sessionDescription);
-                localPeer.setLocalDescription(new SimpleSdpObserver(), sessionDescription);
-                Log.d("onCreateSuccess", "SignallingClient emit ");
-                Log.d(TAG, "Sending video for record");
-                SignallingClient.getInstance().sendVideoForRecord(LoginUser.username, sessionDescription);
-            }
-        }, sdpConstraints);
-    }
-
-
-    private void createPeerConnectionFactory() {
-        //Initialize PeerConnectionFactory globals.
-        PeerConnectionFactory.InitializationOptions initializationOptions =
-                PeerConnectionFactory.InitializationOptions.builder(this)
-                        .createInitializationOptions();
-        PeerConnectionFactory.initialize(initializationOptions);
-
-        //Create a new PeerConnectionFactory instance - using Hardware encoder and decoder.
-        PeerConnectionFactory.Options options = new PeerConnectionFactory.Options();
-        DefaultVideoEncoderFactory defaultVideoEncoderFactory = new DefaultVideoEncoderFactory(
-                rootEglBase.getEglBaseContext(),  /* enableIntelVp8Encoder */true,  /* enableH264HighProfile */true);
-        DefaultVideoDecoderFactory defaultVideoDecoderFactory = new DefaultVideoDecoderFactory(rootEglBase.getEglBaseContext());
-        peerConnectionFactory = PeerConnectionFactory.builder()
-                .setOptions(options)
-                .setVideoEncoderFactory(defaultVideoEncoderFactory)
-                .setVideoDecoderFactory(defaultVideoDecoderFactory)
-                .createPeerConnectionFactory();
-    }
-
-    /**
-     * Creating the local peerconnection instance
-     */
-    private void createPeerConnection() {
-        List<PeerConnection.IceServer> stunICEServers = new ArrayList<>();
-        PeerConnection.IceServer stunServerList = PeerConnection.IceServer.builder("stun:stun.l.google.com:19302").createIceServer();
-        stunICEServers.add(stunServerList);
-
-        PeerConnection.RTCConfiguration rtcConfig = new PeerConnection.RTCConfiguration(stunICEServers);//peerIceServers);
-        //PeerConnection.RTCConfiguration rtcConfig = new PeerConnection.RTCConfiguration(peerIceServers);
-        // TCP candidates are only useful when connecting to a server that supports
-        // ICE-TCP.
-        rtcConfig.tcpCandidatePolicy = PeerConnection.TcpCandidatePolicy.DISABLED;
-        rtcConfig.bundlePolicy = PeerConnection.BundlePolicy.MAXBUNDLE;
-        rtcConfig.rtcpMuxPolicy = PeerConnection.RtcpMuxPolicy.REQUIRE;
-        rtcConfig.continualGatheringPolicy = PeerConnection.ContinualGatheringPolicy.GATHER_CONTINUALLY;
-        // Use ECDSA encryption.
-        rtcConfig.keyType = PeerConnection.KeyType.ECDSA;
-
-        localPeer = peerConnectionFactory.createPeerConnection(rtcConfig, new SimplePeerConnectionObserver() {
-            @Override
-            public void onIceCandidate(IceCandidate iceCandidate) {
-                super.onIceCandidate(iceCandidate);
-                Log.d(TAG, "Received ice candidates");
-                onIceCandidateReceived(iceCandidate);
-            }
-        });
-
-        addStreamToLocalPeer();
-        SignallingClient.getInstance().isChannelReady = true;
-    }
-
-    /**
-     * Received local ice candidate. Send it to remote peer through signalling for negotiation
-     */
-    public void onIceCandidateReceived(IceCandidate iceCandidate) {
-        //we have received ice candidate. We can set it to the other peer.
-        SignallingClient.getInstance().emitIceCandidate(iceCandidate, JsonConstants.ICE_FOR_REC);
-    }
-
-    /**
-     * Adding the stream to the local peer
-     */
-    private void addStreamToLocalPeer() {
-        //creating local media stream
-        MediaStream stream = peerConnectionFactory.createLocalMediaStream("102");
-        stream.addTrack(localAudioTrack);
-        stream.addTrack(localVideoTrack);
-        localPeer.addStream(stream);
-    }
 
     @Override
     public void onStartResponse(String answer) {
         showToast("Received start response from media server");
         Log.d(TAG, "Received sdp answer!");
-        localPeer.setRemoteDescription(new SimpleSdpObserver(),
-                new SessionDescription(SessionDescription.Type.ANSWER, answer));
+        liveSession.setRemoteResponse(answer);
     }
 
     @Override
     public void onIceCandidate(JsonObject data) {
         showToast("Receiving ice candidates");
         Log.d(TAG, "OnIceCandidate Rec");
-        localPeer.addIceCandidate(new IceCandidate(data.get("sdpMid").getAsString(), data.get("sdpMLineIndex").getAsInt(), data.get("candidate").getAsString()));
+        liveSession.addIceCandidate(new IceCandidate(data.get("sdpMid").getAsString(),
+                                    data.get("sdpMLineIndex").getAsInt(),
+                                    data.get("candidate").getAsString()));
+    }
+
+    @Override
+    public void gotRemoteStream(MediaStream mediaStream) {
+        // never receive remote stream
     }
 
     public void showToast(final String message) {
@@ -320,37 +188,5 @@ public class StreamingIntentService extends IntentService implements MediaListen
                 Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
             }
         });
-    }
-
-    private VideoCapturer createCameraCapturer(CameraEnumerator enumerator) {
-        final String[] deviceNames = enumerator.getDeviceNames();
-
-        // First, try to find front facing camera
-        Log.d(TAG, "Looking for front facing cameras.");
-        for (String deviceName : deviceNames) {
-            if (enumerator.isFrontFacing(deviceName)) {
-                Logging.d(TAG, "Creating front facing camera capturer.");
-                VideoCapturer videoCapturer = enumerator.createCapturer(deviceName, null);
-
-                if (videoCapturer != null) {
-                    return videoCapturer;
-                }
-            }
-        }
-
-        // Front facing camera not found, try something else
-        Log.d(TAG, "Looking for other cameras.");
-        for (String deviceName : deviceNames) {
-            if (!enumerator.isFrontFacing(deviceName)) {
-                Log.d(TAG, "Creating other camera capturer.");
-                VideoCapturer videoCapturer = enumerator.createCapturer(deviceName, null);
-
-                if (videoCapturer != null) {
-                    return videoCapturer;
-                }
-            }
-        }
-
-        return null;
     }
 }

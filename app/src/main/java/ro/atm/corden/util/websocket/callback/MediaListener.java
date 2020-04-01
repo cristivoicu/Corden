@@ -35,6 +35,8 @@ public interface MediaListener {
         void onVideoInfo(VideoInfo videoInfo);
 
         void onGotPosition(long position);
+
+        void onPlayEnd();
     }
 
     /**

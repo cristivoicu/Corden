@@ -38,6 +38,7 @@ public class JsonConstants {
 
     // media player events
     public static final String EVENT_PLAY_RESPONSE = "playResponse";
+    public static final String EVENT_VIDEO_PLAY_END = "playEnd";
     public static final String EVENT_GET_POSITION_RESPONSE = "getPositionResponse";
     public static final String EVENT_VIDEO_INFO = "videoInfo";
     // media player video info

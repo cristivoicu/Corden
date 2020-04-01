@@ -1,4 +1,4 @@
-package ro.atm.corden.util.webrtc;
+package ro.atm.corden.util.webrtc.observer;
 
 import android.util.Log;
 

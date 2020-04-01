@@ -723,6 +723,9 @@ public class SignallingClient implements com.neovisionaries.ws.client.WebSocketL
                     long position = jsonObject.get("position").getAsLong();
                     playbackListener.onGotPosition(position);
                     break;
+                case EVENT_VIDEO_PLAY_END:
+                    playbackListener.onPlayEnd();
+                    break;
                 case EVENT_VIDEO_INFO:
                     boolean isSeekable = jsonObject.get(VIDEO_INFO_IS_SEEKABLE).getAsBoolean();
                     long seekableInit = jsonObject.get(VIDEO_INFO_INIT_SEEKABLE).getAsLong();

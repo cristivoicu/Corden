@@ -14,7 +14,6 @@ import com.google.gson.JsonObject;
 
 import org.webrtc.AudioSource;
 import org.webrtc.AudioTrack;
-import org.webrtc.Camera1Enumerator;
 import org.webrtc.DefaultVideoDecoderFactory;
 import org.webrtc.DefaultVideoEncoderFactory;
 import org.webrtc.EglBase;
@@ -26,7 +25,6 @@ import org.webrtc.PeerConnectionFactory;
 import org.webrtc.SessionDescription;
 import org.webrtc.SurfaceTextureHelper;
 import org.webrtc.SurfaceViewRenderer;
-import org.webrtc.VideoCapturer;
 import org.webrtc.VideoSource;
 import org.webrtc.VideoTrack;
 
@@ -37,9 +35,8 @@ import ro.atm.corden.R;
 import ro.atm.corden.databinding.ActivityMediaBinding;
 import ro.atm.corden.util.constant.JsonConstants;
 import ro.atm.corden.util.exception.websocket.UserNotLoggedInException;
-import ro.atm.corden.util.webrtc.CameraControl;
-import ro.atm.corden.util.webrtc.SimplePeerConnectionObserver;
-import ro.atm.corden.util.webrtc.SimpleSdpObserver;
+import ro.atm.corden.util.webrtc.observer.SimplePeerConnectionObserver;
+import ro.atm.corden.util.webrtc.observer.SimpleSdpObserver;
 import ro.atm.corden.util.websocket.SignallingClient;
 import ro.atm.corden.util.websocket.callback.MediaListener;
 
