@@ -9,6 +9,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.util.Log;
 
 import ro.atm.corden.R;
 import ro.atm.corden.databinding.ActivityLoginBinding;
@@ -32,6 +35,7 @@ public class LoginActivity extends AppCompatActivity implements LoginListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d("Log", "onCreate");
         context = this;
         binding = DataBindingUtil.setContentView(this, R.layout.activity_login);
 
@@ -45,17 +49,19 @@ public class LoginActivity extends AppCompatActivity implements LoginListener {
 
         //set live data listeners
         viewModel.getUser().observe(this, (LoginUser loginUser) -> {
-            //loginUser.checkLogin();
+            Log.d("Log", "on observe clicked.");
             LoginAsyncTask loginAsyncTask = new LoginAsyncTask();
             loginAsyncTask.execute(loginUser);
         });
-
     }
 
     @Override
     public void onLoginError() {
-        binding.textInputPassword.setError("Invalid");
-        binding.textInputUsername.setError("Invalid");
+        new Handler(Looper.getMainLooper()).post(() -> {
+            binding.textInputPassword.setError("Invalid");
+            binding.textInputUsername.setError("Invalid");
+        });
+
     }
 
     @Override

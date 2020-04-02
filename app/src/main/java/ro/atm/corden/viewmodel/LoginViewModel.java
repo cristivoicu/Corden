@@ -29,10 +29,8 @@ public class LoginViewModel extends AndroidViewModel {
     }
 
     public void onClick(View view) {
-
         LoginUser loginUser = new LoginUser(username.getValue(), password.getValue());
 
         user.setValue(loginUser);
-
     }
 }
