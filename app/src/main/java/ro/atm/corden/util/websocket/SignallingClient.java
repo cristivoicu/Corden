@@ -12,6 +12,7 @@ import com.google.gson.JsonObject;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
 import org.webrtc.IceCandidate;
 import org.webrtc.SessionDescription;
 
@@ -35,6 +36,7 @@ import javax.net.ssl.X509TrustManager;
 import javax.security.auth.x500.X500Principal;
 
 import ro.atm.corden.model.Roles;
+import ro.atm.corden.model.transport_model.Action;
 import ro.atm.corden.model.transport_model.User;
 import ro.atm.corden.model.transport_model.Video;
 import ro.atm.corden.util.exception.login.LoginListenerNotInitialisedException;
@@ -183,6 +185,28 @@ public class SignallingClient {
             }
         } catch (JSONException e) {
             e.printStackTrace();
+        }
+        return null;
+    }
+
+    /***/
+    synchronized List<Action> getTimelineForUser(String username, String date){
+        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+            Log.e(TAG, "Main thread is used! in SignallingClient.getAllUsersRequest");
+            throw new NetworkOnMainThreadException();
+        }
+        JsonObject message = new JsonObject();
+
+        message.addProperty(ID, REQ_USER_TIMELINE);
+        message.addProperty("forUser", username);
+        message.addProperty("date", date);
+
+        webSocket.send(message.toString());
+
+        webSocket.timelineConditionVariable = new ConditionVariable(false);
+        webSocket.timelineConditionVariable.block();
+        if(webSocket.actions != null){
+            return webSocket.actions;
         }
         return null;
     }
@@ -521,6 +545,10 @@ public class SignallingClient {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+    }
+
+    public void logout(){
+        webSocket.close();
     }
 
     public void subscribeLoginListener(@NonNull LoginListener loginListener) {

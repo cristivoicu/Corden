@@ -31,7 +31,9 @@ public class UsersActivity extends AppCompatActivity implements GetUsersListener
         binding = DataBindingUtil.setContentView(this, R.layout.activity_users);
         binding.setLifecycleOwner(this);
 
-        viewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(this.getApplication()).create(UsersViewModel.class);
+        viewModel = ViewModelProvider.AndroidViewModelFactory
+                .getInstance(this.getApplication())
+                .create(UsersViewModel.class);
         binding.setViewModel(viewModel);
 
         setSupportActionBar(binding.toolbar);

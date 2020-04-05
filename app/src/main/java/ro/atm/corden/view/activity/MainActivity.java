@@ -1,16 +1,19 @@
 package ro.atm.corden.view.activity;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 
 import ro.atm.corden.R;
 import ro.atm.corden.databinding.ActivityMainBinding;
 import ro.atm.corden.util.constant.ExtraConstant;
+import ro.atm.corden.util.websocket.SignallingClient;
 
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
@@ -34,6 +37,17 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.admin_main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.itemLogout:
+                SignallingClient.getInstance().logout();
+                finish();
+                break;
+        }
         return true;
     }
 

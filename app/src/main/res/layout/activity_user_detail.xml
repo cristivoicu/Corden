@@ -98,9 +98,10 @@
                             android:drawableTop="@drawable/ic_edit_location_24dp"
                             android:drawableTint="@color/color2"
                             android:fontFamily="@font/lato_light"
-                            android:text="Edit location"
+                            android:text="Assign job"
                             android:textColor="@color/busAccident"
-                            android:textSize="12sp" />
+                            android:textSize="12sp"
+                            android:onClick="onAssignJobClicked"/>
 
                         <Button
                             android:layout_width="0dp"
@@ -254,7 +255,8 @@
                             android:fontFamily="@font/lato_light"
                             android:text="Timeline"
                             android:textColor="@color/busAccident"
-                            android:textSize="12sp" />
+                            android:textSize="12sp"
+                            android:onClick="onTimelineButtonClicked"/>
 
                         <Button
                             android:layout_width="0dp"
@@ -293,7 +295,7 @@
                     android:fontFamily="@font/lato_light"
                     android:text="Disable account"
                     android:letterSpacing="0.25"
-                    android:textColor="#8B0000"
+                    android:textColor="#fff"
                     android:textStyle="bold"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"

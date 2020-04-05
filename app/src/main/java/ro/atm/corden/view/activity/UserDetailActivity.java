@@ -63,4 +63,15 @@ public class UserDetailActivity extends AppCompatActivity {
         intent.putExtra(ExtraConstant.GET_USERNAME, user.getUsername());
         startActivity(intent);
     }
+
+    public void onAssignJobClicked(View view) {
+        Intent intent = new Intent(this, UserJobsMapsActivity.class);
+        startActivity(intent);
+    }
+
+    public void onTimelineButtonClicked(View view) {
+        Intent intent = new Intent(this, UserTimeline.class);
+        intent.putExtra(ExtraConstant.GET_USERNAME, user.getUsername());
+        startActivity(intent);
+    }
 }

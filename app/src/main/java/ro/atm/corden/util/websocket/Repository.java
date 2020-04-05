@@ -6,6 +6,7 @@ import android.view.View;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import ro.atm.corden.model.transport_model.Action;
 import ro.atm.corden.model.transport_model.User;
 import ro.atm.corden.model.transport_model.Video;
 import ro.atm.corden.util.exception.websocket.TransportException;
@@ -48,6 +49,16 @@ public class Repository {
         }
     }
 
+    public List<Action> requestTimelineForUserOnDate(String username, String date){
+        RequestTimelineAsyncTask requestTimelineAsyncTask = new RequestTimelineAsyncTask();
+        try {
+            return requestTimelineAsyncTask.execute(username, date).get();
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     private static class RequestUsersAsyncTask extends AsyncTask<Void, Void, List<User>> {
         @Override
         protected List<User> doInBackground(Void... voids) {
@@ -64,6 +75,14 @@ public class Repository {
             } catch (TransportException e) {
                 return null;
             }
+        }
+    }
+
+    private static class RequestTimelineAsyncTask extends AsyncTask<String, Void, List<Action>>{
+
+        @Override
+        protected List<Action> doInBackground(String... strings) {
+            return signallingClient.getTimelineForUser(strings[0], strings[1]);
         }
     }
 

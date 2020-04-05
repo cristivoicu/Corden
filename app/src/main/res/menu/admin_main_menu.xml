@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:title="My account"/>
     <item
-        android:title="About application"/>
-    <item android:title="Logout"/>
+        android:id="@+id/itemMyAccount"
+        android:title="My account" />
+    <item
+        android:id="@+id/itemSetting"
+        android:title="Settings" />
+    <item
+        android:id="@+id/itemAboutApp"
+        android:title="About application" />
+    <item
+        android:id="@+id/itemLogout"
+        android:title="Logout" />
 </menu>

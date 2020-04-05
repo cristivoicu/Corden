@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:gravity="center">
+    <com.github.vipulasri.timelineview.TimelineView
+        android:id="@+id/timelineView"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+        android:layout_width="wrap_content"
+        android:layout_height="100dp"
+        app:markerSize="20dp"
+        app:marker="@drawable/marker_timeline"
+        app:startLineColor="@color/color4"
+        app:endLineColor="@color/color4"
+        app:lineOrientation="vertical"
+        app:lineWidth="2dp"
+        app:linePadding="5dp"
+        app:lineStyle="normal"
+        />
+
+    <TextView
+        android:id="@+id/time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#fff"
+        android:textSize="30sp"
+        android:text="16 PM"
+
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/description"
+            android:textSize="20sp"
+            android:text="User has logged in"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textColor="#efeeee"/>
+        <TextView
+            android:id="@+id/doneBy"
+            android:textSize="15sp"
+            android:text="USER"
+            android:textColor="#efeeee"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+</LinearLayout>

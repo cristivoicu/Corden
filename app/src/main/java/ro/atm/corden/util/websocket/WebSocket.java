@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ro.atm.corden.model.Roles;
+import ro.atm.corden.model.transport_model.Action;
 import ro.atm.corden.model.transport_model.User;
 import ro.atm.corden.model.transport_model.Video;
 import ro.atm.corden.model.transport_model.VideoInfo;
@@ -39,6 +40,7 @@ import static ro.atm.corden.util.constant.JsonConstants.EVENT_STOP_COMMUNICATION
 import static ro.atm.corden.util.constant.JsonConstants.EVENT_VIDEO_INFO;
 import static ro.atm.corden.util.constant.JsonConstants.EVENT_VIDEO_PLAY_END;
 import static ro.atm.corden.util.constant.JsonConstants.REQ_LIST_VIDEO_RESPONSE;
+import static ro.atm.corden.util.constant.JsonConstants.REQ_TIMELINE_RESPONSE;
 import static ro.atm.corden.util.constant.JsonConstants.RESPONSE_ACCEPTED;
 import static ro.atm.corden.util.constant.JsonConstants.SDP_OFFER;
 import static ro.atm.corden.util.constant.JsonConstants.STATUS_RECORDING_STARTED;
@@ -72,9 +74,11 @@ final class WebSocket extends WebSocketClient {
 
     ConditionVariable videosConditionVariable = null;
     ConditionVariable usersConditionVariable = null;
+    ConditionVariable timelineConditionVariable = null;
 
     final List<Video> videos = new ArrayList<>();
     final List<User> users = new ArrayList<>();
+    final List<Action> actions = new ArrayList<>();
 
 
     public WebSocket(URI serverUri) {
@@ -187,16 +191,31 @@ final class WebSocket extends WebSocketClient {
                 case REQ_LIST_VIDEO_RESPONSE:
                     response = jsonObject.get("videos").getAsString();
 
-                    Type userListType = new TypeToken<ArrayList<Video>>() {
+                    Type videoListType = new TypeToken<ArrayList<Video>>() {
                     }.getType();
 
                     synchronized (videos) {
                         videos.clear();
-                        videos.addAll(gson.fromJson(response, userListType));
+                        videos.addAll(gson.fromJson(response, videoListType));
                         videosConditionVariable.open();
                     }
 
                     break;
+                case REQ_TIMELINE_RESPONSE:
+                {
+                    response = jsonObject.get("actions").getAsString();
+
+                    Type actionsListType = new TypeToken<ArrayList<Action>>() {
+                    }.getType();
+
+                    synchronized (actions) {
+                        actions.clear();
+                        actions.addAll(gson.fromJson(response, actionsListType));
+                        timelineConditionVariable.open();
+                    }
+
+                    break;
+                }
                 default:
                     Log.e(TAG, "Client received an unknown message from server!");
                     break;
@@ -217,6 +236,6 @@ final class WebSocket extends WebSocketClient {
 
     @Override
     public void onError(Exception ex) {
-
+        Log.d(TAG, "onError: " + ex.getMessage());
     }
 }

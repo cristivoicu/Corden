@@ -9,6 +9,7 @@ public class JsonConstants {
     // requests response
     public static final String EVENT_LIST_USERS_RESPONSE = "list_users_response";
     public static final String REQ_LIST_VIDEO_RESPONSE = "requestListVideoResponse";
+    public static final String REQ_TIMELINE_RESPONSE = "requestTimelineResponse";
     public static final String EVENT_ENROLL_RESPONSE = "enrollResponse";
 
     // events
@@ -57,6 +58,8 @@ public class JsonConstants {
 
     public static final String USERS_TYPE_REQ_ALL = "all";
     public static final String USERS_TYPE_REQ_ONLINE = "online";
+
+    public static final String REQ_USER_TIMELINE = "requestTimeline";
 
     public static final String ID = "id";
     public static final String TYPE = "type";
