@@ -320,6 +320,20 @@ public class SignallingClient {
         }
     }
 
+    /***/
+    public void updateUser(@NonNull User user){
+        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+            Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
+            throw new NetworkOnMainThreadException();
+        }
+
+        JsonObject message = new JsonObject();
+        message.addProperty(ID, ID_UPDATE_USER);
+        message.addProperty(USER, user.toJson());
+
+        webSocket.send(message.toString());
+    }
+
     /**
      * Used by admin to intercept user recording session
      *

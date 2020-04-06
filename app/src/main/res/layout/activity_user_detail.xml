@@ -123,7 +123,8 @@
                             android:drawableTint="@color/color2"
                             android:fontFamily="@font/lato_light"
                             android:text="Edit user"
-                            android:textColor="@color/busAccident" />
+                            android:textColor="@color/busAccident"
+                            android:onClick="onEditUserButtonClicked"/>
                     </LinearLayout>
 
                 </androidx.cardview.widget.CardView>

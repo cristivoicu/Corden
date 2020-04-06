@@ -110,7 +110,7 @@
                     <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="User name"
+                        android:hint="Name..."
                         android:inputType="text"
                         android:text="@={viewModel.userRealName}" />
 
@@ -130,7 +130,7 @@
                     <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="User address"
+                        android:hint="Address..."
                         android:text="@={viewModel.userAddress}" />
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -148,7 +148,7 @@
                     <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="User's phone number"
+                        android:hint="Phone number..."
                         android:inputType="phone"
                         android:text="@={viewModel.userPhoneNumber}" />
                 </com.google.android.material.textfield.TextInputLayout>
@@ -196,7 +196,7 @@
                     <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Username"
+                        android:hint="Username..."
                         android:inputType="text"
                         android:text="@={viewModel.userName}" />
 
@@ -215,7 +215,7 @@
                     <com.google.android.material.textfield.TextInputEditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Password"
+                        android:hint="Password..."
                         android:inputType="textPassword"
                         android:text="@={viewModel.password}" />
                 </com.google.android.material.textfield.TextInputLayout>

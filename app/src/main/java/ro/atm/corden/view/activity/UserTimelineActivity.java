@@ -8,7 +8,6 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.app.DatePickerDialog;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,7 +16,6 @@ import android.widget.DatePicker;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.List;
 
 import ro.atm.corden.R;
@@ -27,7 +25,7 @@ import ro.atm.corden.util.adapter.TimelineAdapter;
 import ro.atm.corden.util.constant.ExtraConstant;
 import ro.atm.corden.viewmodel.UserTimelineViewModel;
 
-public class UserTimeline extends AppCompatActivity {
+public class UserTimelineActivity extends AppCompatActivity {
     private ActivityUserTimelineBinding binding;
     private UserTimelineViewModel viewModel;
 
@@ -47,7 +45,7 @@ public class UserTimeline extends AppCompatActivity {
                 int day = cldr.get(Calendar.DAY_OF_MONTH);
                 int month = cldr.get(Calendar.MONTH);
                 int year = cldr.get(Calendar.YEAR);
-                DatePickerDialog picker = new DatePickerDialog(UserTimeline.this,
+                DatePickerDialog picker = new DatePickerDialog(UserTimelineActivity.this,
                         new DatePickerDialog.OnDateSetListener() {
                             @Override
                             public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {

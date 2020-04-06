@@ -1,6 +1,5 @@
-package ro.atm.corden.view.Fragment;
+package ro.atm.corden.view.fragment;
 
-import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.databinding.DataBindingUtil;

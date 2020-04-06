@@ -6,17 +6,13 @@ import androidx.lifecycle.ViewModelProvider;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.view.View;
-
-import java.io.Serializable;
 
 import ro.atm.corden.R;
 import ro.atm.corden.databinding.ActivityUserDetailBinding;
 import ro.atm.corden.model.Roles;
 import ro.atm.corden.model.transport_model.User;
 import ro.atm.corden.util.constant.ExtraConstant;
-import ro.atm.corden.viewmodel.LoginViewModel;
 import ro.atm.corden.viewmodel.UserDetailViewModel;
 
 public class UserDetailActivity extends AppCompatActivity {
@@ -70,8 +66,15 @@ public class UserDetailActivity extends AppCompatActivity {
     }
 
     public void onTimelineButtonClicked(View view) {
-        Intent intent = new Intent(this, UserTimeline.class);
+        Intent intent = new Intent(this, UserTimelineActivity.class);
         intent.putExtra(ExtraConstant.GET_USERNAME, user.getUsername());
+        startActivity(intent);
+    }
+
+    public void onEditUserButtonClicked(View view) {
+        Intent intent = new Intent(this, EditUserDetailsActivity.class);
+        intent.putExtra(ExtraConstant.GET_USERNAME, user.getUsername());
+        intent.putExtra(Intent.EXTRA_USER, user);
         startActivity(intent);
     }
 }

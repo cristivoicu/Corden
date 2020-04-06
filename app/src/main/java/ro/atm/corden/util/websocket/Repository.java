@@ -29,6 +29,12 @@ public class Repository {
 
     private static SignallingClient signallingClient = SignallingClient.getInstance();
 
+    public void updateUser(User user){
+        UpdateUserAsyncTask updateUserAsyncTask = new UpdateUserAsyncTask();
+
+        updateUserAsyncTask.execute(user);
+    }
+
     public List<User> requestAllUsers() {
         RequestUsersAsyncTask requestUsersAsyncTask = new RequestUsersAsyncTask();
         try {
@@ -86,4 +92,12 @@ public class Repository {
         }
     }
 
+    private static class UpdateUserAsyncTask extends  AsyncTask<User, Void, Void>{
+
+        @Override
+        protected Void doInBackground(User... users) {
+            signallingClient.updateUser(users[0]);
+            return null;
+        }
+    }
 }

@@ -27,7 +27,7 @@ import ro.atm.corden.util.exception.register.PhoneNumberException;
 import ro.atm.corden.util.exception.websocket.UserNotLoggedInException;
 import ro.atm.corden.util.websocket.SignallingClient;
 import ro.atm.corden.util.websocket.callback.EnrollListener;
-import ro.atm.corden.view.Fragment.TimePickerFragment;
+import ro.atm.corden.view.fragment.TimePickerFragment;
 import ro.atm.corden.viewmodel.RegisterViewModel;
 
 import static ro.atm.corden.util.constant.ExceptionCodes.EMPTY_FIELD_CODE;
@@ -35,7 +35,8 @@ import static ro.atm.corden.util.constant.ExceptionCodes.INVALID_PASSWORD_CODE;
 import static ro.atm.corden.util.constant.ExceptionCodes.INVALID_PHONE_NUMBER_CODE;
 import static ro.atm.corden.util.constant.ExceptionCodes.OK_CODE;
 
-public class RegisterUserActivity extends AppCompatActivity implements TimePickerDialog.OnTimeSetListener, EnrollListener {
+public class RegisterUserActivity extends AppCompatActivity
+        implements TimePickerDialog.OnTimeSetListener, EnrollListener {
     private static ActivityRegisterUserBinding binding;
     private RegisterViewModel mViewModel;
 
@@ -56,7 +57,9 @@ public class RegisterUserActivity extends AppCompatActivity implements TimePicke
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_register_user);
 
-        mViewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(this.getApplication()).create(RegisterViewModel.class);
+        mViewModel = ViewModelProvider.AndroidViewModelFactory
+                .getInstance(this.getApplication())
+                .create(RegisterViewModel.class);
 
         binding.setLifecycleOwner(this);
         binding.setViewModel(mViewModel);
@@ -120,7 +123,7 @@ public class RegisterUserActivity extends AppCompatActivity implements TimePicke
             this.minute = minute;
         } else {
             // verify
-            if(hourOfDay < hour || (hourOfDay == hour && minute <= this.minute)){
+            if (hourOfDay < hour || (hourOfDay == hour && minute <= this.minute)) {
                 AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
                 dialogBuilder.setTitle("Warning")
                         .setMessage("The end program time is invalid!")
@@ -138,7 +141,7 @@ public class RegisterUserActivity extends AppCompatActivity implements TimePicke
         binding.infoLayout.setVisibility(View.INVISIBLE);
     }
 
-    private void refreshView(){
+    private void refreshView() {
         binding.userPhoneNumber.getEditText().setText("");
         binding.userPassword.getEditText().setText("");
         binding.textInputUsername.getEditText().setText("");
@@ -208,7 +211,7 @@ public class RegisterUserActivity extends AppCompatActivity implements TimePicke
 
         @Override
         protected void onPostExecute(Integer integer) {
-            switch (integer){
+            switch (integer) {
                 case EMPTY_FIELD_CODE:
                     if (isUsernameEmpty) {
                         binding.textAccountName.setError("You have to enter the username!");

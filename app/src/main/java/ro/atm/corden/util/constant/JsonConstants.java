@@ -29,6 +29,7 @@ public class JsonConstants {
     public static final String ID_LIST_USERS = "listUsers";
     public static final String ID_ENROLL_USER = "enroll";
     public static final String ID_GET_LIVE = "liveVideo";
+    public static final String ID_UPDATE_USER = "updateUser";
 
     // sent live stream to the media server where it is recorded
     public static final String EVENT_RECORD_RESPONSE = "startResponse";

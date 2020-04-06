@@ -1,4 +1,4 @@
-package ro.atm.corden.view.Fragment;
+package ro.atm.corden.view.fragment;
 
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -20,8 +20,6 @@ import org.webrtc.AudioTrack;
 import org.webrtc.EglBase;
 import org.webrtc.IceCandidate;
 import org.webrtc.MediaStream;
-import org.webrtc.PeerConnection;
-import org.webrtc.PeerConnectionFactory;
 import org.webrtc.VideoTrack;
 
 import java.util.Timer;
