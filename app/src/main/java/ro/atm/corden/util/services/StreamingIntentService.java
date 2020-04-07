@@ -6,7 +6,9 @@ import android.app.PendingIntent;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Binder;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.util.Log;
@@ -65,6 +67,7 @@ import ro.atm.corden.view.activity.MainActivityUser;
 public class StreamingIntentService extends IntentService implements MediaListener.RecordingListener, MediaActivity {
     private static final String TAG = "StreamIntentService";
     private static final String ACTION_STREAM = "ActionStream";
+    private IBinder mBind = new LocalBinder();
 
     private PowerManager.WakeLock wakeLock;
 
@@ -74,6 +77,19 @@ public class StreamingIntentService extends IntentService implements MediaListen
     private SurfaceTextureHelper surfaceTextureHelper;
 
     EglBase rootEglBase;
+
+    public class LocalBinder extends Binder{
+        public StreamingIntentService getService(){
+            return StreamingIntentService.this;
+        }
+    }
+
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return mBind;
+    }
 
     private boolean gotUserMedia = false;
 
@@ -174,6 +190,10 @@ public class StreamingIntentService extends IntentService implements MediaListen
         liveSession.addIceCandidate(new IceCandidate(data.get("sdpMid").getAsString(),
                                     data.get("sdpMLineIndex").getAsInt(),
                                     data.get("candidate").getAsString()));
+    }
+
+    public Session getLiveSession(){
+        return liveSession;
     }
 
     @Override

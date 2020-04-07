@@ -6,6 +6,7 @@ import android.util.Log;
 import org.webrtc.AudioSource;
 import org.webrtc.AudioTrack;
 import org.webrtc.Camera1Enumerator;
+import org.webrtc.CameraVideoCapturer;
 import org.webrtc.EglBase;
 import org.webrtc.MediaConstraints;
 import org.webrtc.MediaStream;
@@ -46,6 +47,7 @@ public class LiveVideoClient extends Client {
     private void captureFromCamera(Context context, EglBase eglBase, PeerConnectionFactory peerConnectionFactory){
         //Now create a VideoCapturer instance.
         videoCapturer = CameraControl.createCameraCapturer(new Camera1Enumerator(false));
+
 
         //Create MediaConstraints - Will be useful for specifying video and audio constraints.
         audioConstraints = new MediaConstraints();
@@ -97,6 +99,10 @@ public class LiveVideoClient extends Client {
 
     VideoTrack getVideoTrack(){
         return videoTrack;
+    }
+
+    VideoCapturer getVideoCapturer(){
+        return videoCapturer;
     }
 
     @Override

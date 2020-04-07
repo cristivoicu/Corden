@@ -7,14 +7,16 @@
     tools:context=".view.activity.MainActivityUser">
 
     <androidx.cardview.widget.CardView
+        android:id="@+id/cardView4"
         android:layout_width="match_parent"
         android:layout_height="120dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:cardBackgroundColor="@color/bittersweetSewage"
         android:layout_margin="8dp"
+        android:onClick="startService"
+        app:cardBackgroundColor="@color/bittersweetSewage"
         app:cardCornerRadius="8dp"
-        android:onClick="startService">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -25,17 +27,45 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="START STREAM VIDEO"
+                android:fontFamily="sans-serif-condensed"
                 android:gravity="center"
+                android:text="START STREAM VIDEO"
                 android:textColor="@color/colorWhile"
-                android:textSize="18sp"
-                android:fontFamily="sans-serif-condensed" />
+                android:textSize="18sp" />
+
             <ImageView
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:layout_gravity="center"
-                android:src="@drawable/ic_record"
-                android:layout_marginTop="4dp"/>
+                android:layout_marginTop="4dp"
+                android:src="@drawable/ic_record" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        app:cardCornerRadius="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/cardView4">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="stop" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="cahange camera"
+                android:onClick="onChangeCameraClicked"/>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 

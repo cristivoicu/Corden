@@ -7,6 +7,7 @@ import org.webrtc.DefaultVideoEncoderFactory;
 import org.webrtc.EglBase;
 import org.webrtc.IceCandidate;
 import org.webrtc.PeerConnectionFactory;
+import org.webrtc.VideoCapturer;
 import org.webrtc.VideoTrack;
 
 import ro.atm.corden.util.webrtc.interfaces.MediaActivity;
@@ -79,6 +80,10 @@ public class Session {
 
     public VideoTrack getVideoTrack() {
         return ((LiveVideoClient) client).getVideoTrack();
+    }
+
+    public VideoCapturer getVideoCapturer(){
+        return ((LiveVideoClient)client).getVideoCapturer();
     }
 
     public void leaveLiveSession() {

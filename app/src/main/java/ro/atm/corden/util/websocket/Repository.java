@@ -82,6 +82,11 @@ public class Repository {
                 return null;
             }
         }
+
+        @Override
+        protected void onPostExecute(List<Video> videos) {
+            super.onPostExecute(videos);
+        }
     }
 
     private static class RequestTimelineAsyncTask extends AsyncTask<String, Void, List<Action>>{
