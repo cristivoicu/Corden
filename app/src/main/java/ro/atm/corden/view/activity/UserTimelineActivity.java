@@ -20,7 +20,7 @@ import java.util.List;
 
 import ro.atm.corden.R;
 import ro.atm.corden.databinding.ActivityUserTimelineBinding;
-import ro.atm.corden.model.transport_model.Action;
+import ro.atm.corden.model.user.Action;
 import ro.atm.corden.util.adapter.TimelineAdapter;
 import ro.atm.corden.util.constant.ExtraConstant;
 import ro.atm.corden.viewmodel.UserTimelineViewModel;

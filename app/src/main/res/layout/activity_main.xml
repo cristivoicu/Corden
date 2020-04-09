@@ -261,7 +261,8 @@
                 app:layout_constraintBottom_toTopOf="@+id/guideline8"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="@+id/guideline"
-                app:layout_constraintTop_toTopOf="@+id/guideline3">
+                app:layout_constraintTop_toTopOf="@+id/guideline3"
+                android:onClick="onLocationCardClicked">
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"

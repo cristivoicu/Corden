@@ -3,8 +3,6 @@ package ro.atm.corden.util.adapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -15,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ro.atm.corden.R;
-import ro.atm.corden.model.transport_model.User;
+import ro.atm.corden.model.user.User;
 
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserHolder> {
     private List<User> users = new ArrayList<>();

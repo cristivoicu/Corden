@@ -87,7 +87,7 @@ public class Session {
     }
 
     public void leaveLiveSession() {
-        this.client.dispose();
+        ((LiveVideoClient)client).dispose();
         if (peerConnectionFactory != null) {
             peerConnectionFactory.dispose();
             peerConnectionFactory = null;
@@ -95,7 +95,7 @@ public class Session {
     }
 
     public void leavePlaybackSession() {
-        this.client.dispose();
+        ((PlaybackClient)client).dispose();
         if (peerConnectionFactory != null) {
             peerConnectionFactory.dispose();
             peerConnectionFactory = null;

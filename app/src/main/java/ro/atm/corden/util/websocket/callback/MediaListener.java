@@ -2,7 +2,7 @@ package ro.atm.corden.util.websocket.callback;
 
 import com.google.gson.JsonObject;
 
-import ro.atm.corden.model.transport_model.VideoInfo;
+import ro.atm.corden.model.video.VideoInfo;
 
 /**
  * Contain interfaces for different calls with media server

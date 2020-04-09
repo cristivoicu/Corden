@@ -1,4 +1,4 @@
-package ro.atm.corden.model.transport_model;
+package ro.atm.corden.model.video;
 
 import java.io.Serializable;
 import java.util.Date;

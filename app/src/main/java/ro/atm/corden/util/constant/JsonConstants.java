@@ -2,12 +2,14 @@ package ro.atm.corden.util.constant;
 
 /**
  * There should be a documentation for communication protocol between client and application server
+ *
  * @author Cristian VOICU
  */
 public class JsonConstants {
     // requests (ex. list users)
     // requests response
     public static final String EVENT_LIST_USERS_RESPONSE = "list_users_response";
+    public static final String EVENT_LIST_USERS_RESPONSE_USER = "list_users_response_USER";
     public static final String REQ_LIST_VIDEO_RESPONSE = "requestListVideoResponse";
     public static final String REQ_TIMELINE_RESPONSE = "requestTimelineResponse";
     public static final String EVENT_ENROLL_RESPONSE = "enrollResponse";
@@ -19,6 +21,11 @@ public class JsonConstants {
     public static final String EVENT_STOP_COMMUNICATION = "stopCommunication";
 
     public static final String EVENT_LIVE_RESPONSE = "liveResponse";
+
+    /**
+     * when admin wants a user to send live stream to the server
+     */
+    public static final String EVENT_START_RECODRING = "startRecording";
 
     // id send through socket
     public static final String ID_ICE_CANDIDATE = "onIceCandidate";
@@ -58,6 +65,7 @@ public class JsonConstants {
     public static final String ID_GET_POSITION_VIDEO = "getPositionVideo";
 
     public static final String USERS_TYPE_REQ_ALL = "all";
+    public static final String USERS_TYPE_REQ_USER_ROLE = "userRole";
     public static final String USERS_TYPE_REQ_ONLINE = "online";
 
     public static final String REQ_USER_TIMELINE = "requestTimeline";

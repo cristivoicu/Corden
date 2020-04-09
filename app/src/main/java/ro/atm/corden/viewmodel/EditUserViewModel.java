@@ -1,13 +1,12 @@
 package ro.atm.corden.viewmodel;
 
 import android.app.Application;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 
-import ro.atm.corden.model.Roles;
-import ro.atm.corden.model.transport_model.User;
+import ro.atm.corden.model.user.Role;
+import ro.atm.corden.model.user.User;
 import ro.atm.corden.util.websocket.Repository;
 
 public class EditUserViewModel extends AndroidViewModel {
@@ -19,7 +18,7 @@ public class EditUserViewModel extends AndroidViewModel {
     private String username = "";
     private String password = "";
 
-    private Roles role;
+    private Role role;
     private String startHour = "";
     private String endHour = "";
 
@@ -68,10 +67,10 @@ public class EditUserViewModel extends AndroidViewModel {
         user.setProgramStart(startHour);
         user.setProgramEnd(endHour);
         if(isAdmin){
-            user.setRoles(Roles.ADMIN);
+            user.setRoles(Role.ADMIN);
         }
         if(isUser){
-            user.setRoles(Roles.USER);
+            user.setRoles(Role.USER);
         }
 
         Repository.getInstance().updateUser(user);
@@ -119,11 +118,11 @@ public class EditUserViewModel extends AndroidViewModel {
         this.password = password;
     }
 
-    public Roles getRole() {
+    public Role getRole() {
         return role;
     }
 
-    public void setRole(Roles role) {
+    public void setRole(Role role) {
         this.role = role;
     }
 

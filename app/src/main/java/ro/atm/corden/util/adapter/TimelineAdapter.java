@@ -10,13 +10,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.vipulasri.timelineview.TimelineView;
 
-import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
 import ro.atm.corden.R;
-import ro.atm.corden.model.transport_model.Action;
+import ro.atm.corden.model.user.Action;
 
 public class TimelineAdapter extends RecyclerView.Adapter<TimelineAdapter.TimelineViewHolder> {
     private List<Action> actions = new ArrayList<>();

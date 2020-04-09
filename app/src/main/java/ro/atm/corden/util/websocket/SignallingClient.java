@@ -8,11 +8,14 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.slf4j.Logger;
 import org.webrtc.IceCandidate;
 import org.webrtc.SessionDescription;
 
@@ -27,7 +30,6 @@ import java.security.PublicKey;
 import java.security.SignatureException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.net.ssl.SSLContext;
@@ -35,10 +37,14 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import javax.security.auth.x500.X500Principal;
 
-import ro.atm.corden.model.Roles;
-import ro.atm.corden.model.transport_model.Action;
-import ro.atm.corden.model.transport_model.User;
-import ro.atm.corden.model.transport_model.Video;
+import ro.atm.corden.model.map.MapItem;
+import ro.atm.corden.model.map.Mark;
+import ro.atm.corden.model.map.Path;
+import ro.atm.corden.model.map.Zone;
+import ro.atm.corden.model.user.Role;
+import ro.atm.corden.model.user.Action;
+import ro.atm.corden.model.user.User;
+import ro.atm.corden.model.video.Video;
 import ro.atm.corden.util.exception.login.LoginListenerNotInitialisedException;
 import ro.atm.corden.util.exception.websocket.TransportException;
 import ro.atm.corden.util.exception.websocket.UserNotLoggedInException;
@@ -55,7 +61,7 @@ import static ro.atm.corden.util.constant.JsonConstants.*;
  *     <li> parsing the server messages events</li>
  *     <li> has the methods necessary for sending messages and requests to the server</li>
  * </ul>
- * Methods used from this class should not be used from the main thread
+ * <p>Methods used from this class should not be used from the main thread</p>
  */
 public class SignallingClient {
     private static final String TAG = "SignallingClient";
@@ -189,8 +195,35 @@ public class SignallingClient {
         return null;
     }
 
+    /**
+     * Gets all the users that has a USER role {@link Role}
+     */
+    synchronized List<User> getUsersRequestWithUserRole() throws NetworkOnMainThreadException {
+        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+            Log.e(TAG, "Main thread is used! in SignallingClient.getAllUsersRequest");
+            throw new NetworkOnMainThreadException();
+        }
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put(ID, ID_LIST_USERS);
+            jsonObject.put(TYPE, USERS_TYPE_REQ_USER_ROLE);
+
+            Log.i(TAG, "Get all users event: " + jsonObject.toString());
+            webSocket.send(jsonObject.toString());
+            webSocket.usersConditionVariable = new ConditionVariable(false);
+
+            webSocket.usersConditionVariable.block();
+            if (webSocket.users != null) {
+                return webSocket.users;
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     /***/
-    synchronized List<Action> getTimelineForUser(String username, String date){
+    synchronized List<Action> getTimelineForUser(String username, String date) {
         if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
             Log.e(TAG, "Main thread is used! in SignallingClient.getAllUsersRequest");
             throw new NetworkOnMainThreadException();
@@ -205,7 +238,7 @@ public class SignallingClient {
 
         webSocket.timelineConditionVariable = new ConditionVariable(false);
         webSocket.timelineConditionVariable.block();
-        if(webSocket.actions != null){
+        if (webSocket.actions != null) {
             return webSocket.actions;
         }
         return null;
@@ -321,7 +354,7 @@ public class SignallingClient {
     }
 
     /***/
-    public void updateUser(@NonNull User user){
+    public void updateUser(@NonNull User user) {
         if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
             Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
             throw new NetworkOnMainThreadException();
@@ -365,7 +398,7 @@ public class SignallingClient {
      * Used by admin to send a video playback request to the application server
      * This method should not be used on the main thread
      *
-     * @param sdpOffer  is the Session Description Offer {@link SessionDescription} of the admin {@link Roles}user
+     * @param sdpOffer  is the Session Description Offer {@link SessionDescription} of the admin {@link Role}user
      * @param videoPath is the video path in media server, user should already have it from the app server
      * @throws NetworkOnMainThreadException if main thread is used
      */
@@ -561,7 +594,45 @@ public class SignallingClient {
         }
     }
 
-    public void logout(){
+    /***/
+    public void saveMapItems(List<MapItem> items){
+        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+            Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
+            throw new NetworkOnMainThreadException();
+        }
+        Log.i(TAG, "Sending map items to the server.");
+
+        JsonObject message = new JsonObject();
+
+        message.addProperty(ID, "saveMapItems");
+
+        JsonArray marks = new JsonArray();
+        JsonArray paths = new JsonArray();
+        JsonArray zones = new JsonArray();
+
+        for (MapItem mapItem : items){
+            String json = "";
+            if(mapItem instanceof Mark){
+                json = mapItem.toJson();
+                marks.add(json);
+            }
+            if(mapItem instanceof Zone){
+                json = mapItem.toJson();
+                paths.add(json);
+            }
+            if(mapItem instanceof Path){
+                json = mapItem.toJson();
+                zones.add(json);
+            }
+        }
+        message.add("marks", marks);
+        message.add("paths", paths);
+        message.add("zones", zones);
+
+        webSocket.send(message.toString());
+    }
+
+    public void logout() {
         webSocket.close();
     }
 

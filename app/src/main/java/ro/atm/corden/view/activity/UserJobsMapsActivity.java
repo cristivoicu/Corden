@@ -4,6 +4,10 @@ import androidx.annotation.ColorInt;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.FragmentActivity;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
@@ -14,7 +18,9 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polygon;
 import com.google.android.gms.maps.model.PolygonOptions;
@@ -26,6 +32,11 @@ import java.util.List;
 
 import ro.atm.corden.R;
 import ro.atm.corden.databinding.ActivityUserJobsMapsBinding;
+import ro.atm.corden.model.map.MapItem;
+import ro.atm.corden.model.map.Mark;
+import ro.atm.corden.model.map.Path;
+import ro.atm.corden.model.map.Zone;
+import ro.atm.corden.util.websocket.Repository;
 import ro.atm.corden.view.dialog.SaveMapItemDialog;
 
 public class UserJobsMapsActivity extends FragmentActivity
@@ -48,6 +59,11 @@ public class UserJobsMapsActivity extends FragmentActivity
     private Polygon currentPolygon;
     private PolygonOptions polygonOptions;
     private List<LatLng> points = new LinkedList<>();
+
+    private Marker currentMarker = null;
+    private MarkerOptions markerOptions;
+
+    private List<MapItem> mapItems = new LinkedList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +103,8 @@ public class UserJobsMapsActivity extends FragmentActivity
         polygonOptions = new PolygonOptions();
         currentPolyline = googleMap.addPolyline(polylineOptions);
 
+        markerOptions = new MarkerOptions();
+
         // Add a marker in Sydney and move the camera
         LatLng sydney = new LatLng(-34, 151);
         mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
@@ -102,7 +120,12 @@ public class UserJobsMapsActivity extends FragmentActivity
                     return;
                 }
                 if (isLocation) {
-
+                    if (currentMarker != null) {
+                        currentMarker.remove();
+                        markerOptions = new MarkerOptions();
+                    }
+                    markerOptions.position(latLng);
+                    currentMarker = mMap.addMarker(markerOptions);
                     return;
                 }
                 if (isZone) {
@@ -190,6 +213,8 @@ public class UserJobsMapsActivity extends FragmentActivity
             currentPolyline.setTag(name);
             currentPolyline.setWidth(10);
             currentPolyline.setClickable(true);
+
+            mapItems.add(new Path(name, description, color, currentPolyline.getPoints()));
         } else {
             if (isZone) {
                 isZone = !isZone;
@@ -197,9 +222,19 @@ public class UserJobsMapsActivity extends FragmentActivity
                 currentPolygon.setTag(name);
                 currentPolygon.setStrokeColor(color);
                 currentPolygon.setClickable(true);
+                mapItems.add(new Zone(name, description, color, currentPolygon.getPoints()));
             } else {
                 if (isLocation) {
                     isLocation = !isLocation;
+                    markerOptions.title(name)
+                            .snippet(description)
+                            .alpha(0.6f);
+                    currentMarker.remove();
+                    currentMarker = mMap.addMarker(markerOptions);
+
+                    mapItems.add(new Mark(name, description, color, currentMarker.getPosition()));
+                    currentMarker = null;
+                    markerOptions = new MarkerOptions();
                 }
             }
         }
@@ -218,6 +253,8 @@ public class UserJobsMapsActivity extends FragmentActivity
             } else {
                 if (isLocation) {
                     isLocation = !isLocation;
+                    currentMarker.remove();
+                    currentMarker = null;
                 }
             }
         }
@@ -240,5 +277,26 @@ public class UserJobsMapsActivity extends FragmentActivity
     @Override
     public void onPolylineClick(Polyline polyline) {
         Toast.makeText(this, "Clicked polyline TAG: " + polyline.getTag().toString(), Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onBackPressed() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("You are about to exit!")
+                .setMessage("Do you want to save the modified map?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        UserJobsMapsActivity.super.onBackPressed();
+                        Repository.getInstance().saveMapItems(mapItems);
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        UserJobsMapsActivity.super.onBackPressed();
+                    }
+                });
+        builder.show();
     }
 }

@@ -10,8 +10,8 @@ import android.view.View;
 
 import ro.atm.corden.R;
 import ro.atm.corden.databinding.ActivityUserDetailBinding;
-import ro.atm.corden.model.Roles;
-import ro.atm.corden.model.transport_model.User;
+import ro.atm.corden.model.user.Role;
+import ro.atm.corden.model.user.User;
 import ro.atm.corden.util.constant.ExtraConstant;
 import ro.atm.corden.viewmodel.UserDetailViewModel;
 
@@ -41,7 +41,7 @@ public class UserDetailActivity extends AppCompatActivity {
         }
 
         if(user != null){
-            if(user.getRoles() == Roles.ADMIN){
+            if(user.getRoles() == Role.ADMIN){
                 binding.image.setImageResource(R.drawable.ic_boss);
                 binding.textUserType.setText("ADMIN");
             }

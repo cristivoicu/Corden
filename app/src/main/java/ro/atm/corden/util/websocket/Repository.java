@@ -1,14 +1,14 @@
 package ro.atm.corden.util.websocket;
 
 import android.os.AsyncTask;
-import android.view.View;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-import ro.atm.corden.model.transport_model.Action;
-import ro.atm.corden.model.transport_model.User;
-import ro.atm.corden.model.transport_model.Video;
+import ro.atm.corden.model.map.MapItem;
+import ro.atm.corden.model.user.Action;
+import ro.atm.corden.model.user.User;
+import ro.atm.corden.model.video.Video;
 import ro.atm.corden.util.exception.websocket.TransportException;
 
 /**
@@ -45,6 +45,16 @@ public class Repository {
         }
     }
 
+    public List<User> requestUsersWithUserRole(){
+        RequestUsersWithUserRoleAsyncTask requestUsersWithUserRoleAsyncTask = new RequestUsersWithUserRoleAsyncTask();
+        try {
+            return requestUsersWithUserRoleAsyncTask.execute().get();
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public List<Video> requestVideosForUsername(String username){
         RequestVideosAsyncTask requestVideosAsyncTask = new RequestVideosAsyncTask();
         try {
@@ -63,6 +73,11 @@ public class Repository {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public void saveMapItems(List<MapItem> items){
+        SendMapItemsToServerAsyncTask sendMapItemsToServerAsyncTask = new SendMapItemsToServerAsyncTask();
+        sendMapItemsToServerAsyncTask.execute(items);
     }
 
     private static class RequestUsersAsyncTask extends AsyncTask<Void, Void, List<User>> {
@@ -105,4 +120,22 @@ public class Repository {
             return null;
         }
     }
+
+    private static class RequestUsersWithUserRoleAsyncTask extends AsyncTask<Void, Void, List<User>>{
+
+        @Override
+        protected List<User>doInBackground(Void... voids) {
+            return  signallingClient.getUsersRequestWithUserRole();
+        }
+    }
+
+    private static class SendMapItemsToServerAsyncTask extends AsyncTask<List<MapItem>, Void, Void>{
+
+        @Override
+        protected Void doInBackground(List<MapItem>... lists) {
+            SignallingClient.getInstance().saveMapItems(lists[0]);
+            return null;
+        }
+    }
+
 }

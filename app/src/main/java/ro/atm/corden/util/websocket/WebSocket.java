@@ -2,7 +2,6 @@ package ro.atm.corden.util.websocket;
 
 import android.os.ConditionVariable;
 import android.util.Log;
-import android.webkit.HttpAuthHandler;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -12,18 +11,17 @@ import com.google.gson.reflect.TypeToken;
 
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
-import org.slf4j.Logger;
 
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
-import ro.atm.corden.model.Roles;
-import ro.atm.corden.model.transport_model.Action;
-import ro.atm.corden.model.transport_model.User;
-import ro.atm.corden.model.transport_model.Video;
-import ro.atm.corden.model.transport_model.VideoInfo;
+import ro.atm.corden.model.user.Role;
+import ro.atm.corden.model.user.Action;
+import ro.atm.corden.model.user.User;
+import ro.atm.corden.model.video.Video;
+import ro.atm.corden.model.video.VideoInfo;
 import ro.atm.corden.util.websocket.callback.EnrollListener;
 import ro.atm.corden.util.websocket.callback.LoginListener;
 import ro.atm.corden.util.websocket.callback.MediaListener;
@@ -32,10 +30,12 @@ import static ro.atm.corden.util.constant.JsonConstants.EVENT_ENROLL_RESPONSE;
 import static ro.atm.corden.util.constant.JsonConstants.EVENT_GET_POSITION_RESPONSE;
 import static ro.atm.corden.util.constant.JsonConstants.EVENT_ICE_CANDIDATE;
 import static ro.atm.corden.util.constant.JsonConstants.EVENT_LIST_USERS_RESPONSE;
+import static ro.atm.corden.util.constant.JsonConstants.EVENT_LIST_USERS_RESPONSE_USER;
 import static ro.atm.corden.util.constant.JsonConstants.EVENT_LIVE_RESPONSE;
 import static ro.atm.corden.util.constant.JsonConstants.EVENT_PLAY_RESPONSE;
 import static ro.atm.corden.util.constant.JsonConstants.EVENT_RECORDING;
 import static ro.atm.corden.util.constant.JsonConstants.EVENT_RECORD_RESPONSE;
+import static ro.atm.corden.util.constant.JsonConstants.EVENT_START_RECODRING;
 import static ro.atm.corden.util.constant.JsonConstants.EVENT_STOP_COMMUNICATION;
 import static ro.atm.corden.util.constant.JsonConstants.EVENT_VIDEO_INFO;
 import static ro.atm.corden.util.constant.JsonConstants.EVENT_VIDEO_PLAY_END;
@@ -89,7 +89,7 @@ final class WebSocket extends WebSocketClient {
     public void onOpen(ServerHandshake handshakedata) {
         Log.i(TAG, "connection established");
         try {
-            Roles role = Roles.valueOf(handshakedata.getFieldValue("role"));
+            Role role = Role.valueOf(handshakedata.getFieldValue("role"));
             isLoggedIn = true;
             loginListener.onLoginSuccess(role);
         } catch (NullPointerException e) {
@@ -104,6 +104,9 @@ final class WebSocket extends WebSocketClient {
             Log.i(TAG, "Rec brut: " + message);
             JsonObject jsonObject = gson.fromJson(message, JsonObject.class);
             switch (jsonObject.get("id").getAsString()) {
+                case EVENT_START_RECODRING:
+
+                    break;
                 case EVENT_RECORD_RESPONSE:
                     Log.d(TAG, "Got record response");
                     String sdpAnswer = jsonObject.get("sdpAnswer").getAsString();
@@ -159,7 +162,7 @@ final class WebSocket extends WebSocketClient {
                         enrollListener.onEnrollSuccess();
                     }
                     break;
-                case EVENT_LIST_USERS_RESPONSE: {
+                case EVENT_LIST_USERS_RESPONSE:
                     response = jsonObject.get("users").getAsString();
 
                     Type userListType = new TypeToken<ArrayList<User>>() {
@@ -169,14 +172,24 @@ final class WebSocket extends WebSocketClient {
                         users.addAll(gson.fromJson(response, userListType));
                         usersConditionVariable.open();
                     }
-                }
-                case EVENT_LIVE_RESPONSE: {
+                    break;
+                case EVENT_LIST_USERS_RESPONSE_USER:
+                    response = jsonObject.get("users").getAsString();
+                    userListType = new TypeToken<ArrayList<User>>() {
+                    }.getType();
+                    synchronized (users) {
+                        users.clear();
+                        users.addAll(gson.fromJson(response, userListType));
+                        usersConditionVariable.open();
+                    }
+                    break;
+                case EVENT_LIVE_RESPONSE:
                     if (RESPONSE_ACCEPTED.equals(jsonObject.get("response"))) {
                         Log.d(TAG, "Received sdp answer, live response!");
                         sdpAnswer = jsonObject.get(SDP_OFFER).getAsString();
                         livePlayListener.onLiveResponse(sdpAnswer);
                     }
-                }
+                    break;
                 case EVENT_RECORDING:
                     String status = jsonObject.get("status").getAsString();
                     switch (status) {
@@ -199,10 +212,8 @@ final class WebSocket extends WebSocketClient {
                         videos.addAll(gson.fromJson(response, videoListType));
                         videosConditionVariable.open();
                     }
-
                     break;
                 case REQ_TIMELINE_RESPONSE:
-                {
                     response = jsonObject.get("actions").getAsString();
 
                     Type actionsListType = new TypeToken<ArrayList<Action>>() {
@@ -215,7 +226,6 @@ final class WebSocket extends WebSocketClient {
                     }
 
                     break;
-                }
                 default:
                     Log.e(TAG, "Client received an unknown message from server!");
                     break;
@@ -228,7 +238,7 @@ final class WebSocket extends WebSocketClient {
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
-        if(code == 1002){
+        if (code == 1002) {
             Log.d(TAG, "onClose");
             loginListener.onLoginError();
         }

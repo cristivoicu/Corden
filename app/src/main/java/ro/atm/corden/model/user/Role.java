@@ -1,6 +1,4 @@
-package ro.atm.corden.model;
-
-import com.google.gson.internal.Primitives;
+package ro.atm.corden.model.user;
 
 /**
  * This enum represents the roles that a user can have
@@ -35,13 +33,13 @@ import com.google.gson.internal.Primitives;
  *
  * @author Cristian VOICU
  */
-public enum Roles {
+public enum Role {
     ADMIN,
     PRIVILEGED_I,
     PRIVILEGED_II,
     USER;
 
-    public static Roles toRole(String role){
+    public static Role toRole(String role){
         switch (role){
             case "Admin":
                 return ADMIN;

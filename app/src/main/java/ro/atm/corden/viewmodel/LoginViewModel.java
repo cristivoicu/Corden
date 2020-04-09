@@ -7,7 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.MutableLiveData;
 
-import ro.atm.corden.model.LoginUser;
+import ro.atm.corden.model.user.LoginUser;
 
 public class LoginViewModel extends AndroidViewModel {
     public MutableLiveData<String> username = new MutableLiveData<>();

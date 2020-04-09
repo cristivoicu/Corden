@@ -8,7 +8,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import java.util.List;
 
-import ro.atm.corden.model.transport_model.Action;
+import ro.atm.corden.model.user.Action;
 import ro.atm.corden.util.websocket.Repository;
 
 public class UserTimelineViewModel extends AndroidViewModel {

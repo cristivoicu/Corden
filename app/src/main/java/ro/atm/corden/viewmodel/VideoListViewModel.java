@@ -8,7 +8,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import java.util.List;
 
-import ro.atm.corden.model.transport_model.Video;
+import ro.atm.corden.model.video.Video;
 import ro.atm.corden.util.websocket.Repository;
 
 public class VideoListViewModel extends AndroidViewModel {

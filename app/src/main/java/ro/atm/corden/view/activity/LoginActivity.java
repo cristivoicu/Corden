@@ -15,8 +15,8 @@ import android.util.Log;
 
 import ro.atm.corden.R;
 import ro.atm.corden.databinding.ActivityLoginBinding;
-import ro.atm.corden.model.LoginUser;
-import ro.atm.corden.model.Roles;
+import ro.atm.corden.model.user.LoginUser;
+import ro.atm.corden.model.user.Role;
 import ro.atm.corden.util.exception.login.EmptyTextException;
 import ro.atm.corden.util.exception.login.LoginListenerNotInitialisedException;
 import ro.atm.corden.util.websocket.callback.LoginListener;
@@ -65,13 +65,13 @@ public class LoginActivity extends AppCompatActivity implements LoginListener {
     }
 
     @Override
-    public void onLoginSuccess(Roles role) {
-        if(role == Roles.ADMIN){
-            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+    public void onLoginSuccess(Role role) {
+        if(role == Role.ADMIN){
+            Intent intent = new Intent(LoginActivity.this, MainActivityAdmin.class);
             startActivity(intent);
             return;
         }
-        if(role == Roles.USER){
+        if(role == Role.USER){
             Intent intent = new Intent(this, MainActivityUser.class);
             startActivity(intent);
             return;

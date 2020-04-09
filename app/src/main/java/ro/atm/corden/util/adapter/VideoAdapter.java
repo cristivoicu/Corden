@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ro.atm.corden.R;
-import ro.atm.corden.model.transport_model.Video;
+import ro.atm.corden.model.video.Video;
 
 public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoHolder> {
     private List<Video> videos = new ArrayList<>();

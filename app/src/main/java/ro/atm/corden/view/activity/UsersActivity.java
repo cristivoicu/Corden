@@ -13,11 +13,9 @@ import java.util.List;
 
 import ro.atm.corden.R;
 import ro.atm.corden.databinding.ActivityUsersBinding;
-import ro.atm.corden.model.transport_model.User;
+import ro.atm.corden.model.user.User;
 import ro.atm.corden.util.adapter.UserAdapter;
 import ro.atm.corden.util.constant.ExtraConstant;
-import ro.atm.corden.util.websocket.Repository;
-import ro.atm.corden.util.websocket.SignallingClient;
 import ro.atm.corden.util.websocket.callback.GetUsersListener;
 import ro.atm.corden.viewmodel.UsersViewModel;
 

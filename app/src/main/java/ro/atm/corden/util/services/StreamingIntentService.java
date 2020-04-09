@@ -4,15 +4,12 @@ import android.app.IntentService;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.util.Log;
-import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -20,48 +17,34 @@ import androidx.core.app.NotificationCompat;
 
 import com.google.gson.JsonObject;
 
-import org.webrtc.AudioSource;
-import org.webrtc.AudioTrack;
-import org.webrtc.Camera1Enumerator;
-import org.webrtc.CameraEnumerator;
-import org.webrtc.DefaultVideoDecoderFactory;
-import org.webrtc.DefaultVideoEncoderFactory;
+import org.webrtc.CameraVideoCapturer;
 import org.webrtc.EglBase;
 import org.webrtc.IceCandidate;
-import org.webrtc.Logging;
-import org.webrtc.MediaConstraints;
 import org.webrtc.MediaStream;
-import org.webrtc.PeerConnection;
-import org.webrtc.PeerConnectionFactory;
-import org.webrtc.SessionDescription;
+import org.webrtc.RendererCommon;
 import org.webrtc.SurfaceTextureHelper;
+import org.webrtc.SurfaceViewRenderer;
 import org.webrtc.VideoCapturer;
-import org.webrtc.VideoSource;
-import org.webrtc.VideoTrack;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import ro.atm.corden.R;
-import ro.atm.corden.model.LoginUser;
 import ro.atm.corden.util.App;
-import ro.atm.corden.util.constant.JsonConstants;
 import ro.atm.corden.util.exception.websocket.UserNotLoggedInException;
 import ro.atm.corden.util.receiver.NotificationReceiver;
 import ro.atm.corden.util.webrtc.client.Session;
 import ro.atm.corden.util.webrtc.interfaces.MediaActivity;
-import ro.atm.corden.util.webrtc.observer.SimplePeerConnectionObserver;
-import ro.atm.corden.util.webrtc.observer.SimpleSdpObserver;
 import ro.atm.corden.util.websocket.SignallingClient;
 import ro.atm.corden.util.websocket.callback.MediaListener;
 import ro.atm.corden.view.activity.MainActivityUser;
+
+import static org.webrtc.RendererCommon.ScalingType.SCALE_ASPECT_FILL;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
  * a service on a separate handler thread.
  * <p>
- *
+ * <p>
  * Service should not be running if main activity of user is destroyed!
+ *
  * @see MainActivityUser
  */
 public class StreamingIntentService extends IntentService implements MediaListener.RecordingListener, MediaActivity {
@@ -73,13 +56,12 @@ public class StreamingIntentService extends IntentService implements MediaListen
 
     private Session liveSession;
 
-    VideoCapturer videoCapturer;
-    private SurfaceTextureHelper surfaceTextureHelper;
+    private boolean isInited = false;
 
     EglBase rootEglBase;
 
-    public class LocalBinder extends Binder{
-        public StreamingIntentService getService(){
+    public class LocalBinder extends Binder {
+        public StreamingIntentService getService() {
             return StreamingIntentService.this;
         }
     }
@@ -90,8 +72,6 @@ public class StreamingIntentService extends IntentService implements MediaListen
     public IBinder onBind(Intent intent) {
         return mBind;
     }
-
-    private boolean gotUserMedia = false;
 
     public StreamingIntentService() {
         super("StreamingIntentService");
@@ -137,7 +117,7 @@ public class StreamingIntentService extends IntentService implements MediaListen
             if (ACTION_STREAM.equals(action)) {
                 try {
                     start();
-                    while(true){
+                    while (true) {
 
                     }
                 } catch (UserNotLoggedInException e) {
@@ -164,7 +144,7 @@ public class StreamingIntentService extends IntentService implements MediaListen
 
         liveSession = new Session(this.getApplicationContext(), rootEglBase, this);
         liveSession.createLiveVideoClient();
-        if(SignallingClient.getInstance().isChannelReady)
+        if (SignallingClient.getInstance().isChannelReady)
             onTryToStart();
     }
 
@@ -188,12 +168,34 @@ public class StreamingIntentService extends IntentService implements MediaListen
         showToast("Receiving ice candidates");
         Log.d(TAG, "OnIceCandidate Rec");
         liveSession.addIceCandidate(new IceCandidate(data.get("sdpMid").getAsString(),
-                                    data.get("sdpMLineIndex").getAsInt(),
-                                    data.get("candidate").getAsString()));
+                data.get("sdpMLineIndex").getAsInt(),
+                data.get("candidate").getAsString()));
     }
 
-    public Session getLiveSession(){
+    public Session getLiveSession() {
         return liveSession;
+    }
+
+    public void showVideo(SurfaceViewRenderer localVideoView) {
+        if (!isInited) {
+            localVideoView.init(rootEglBase.getEglBaseContext(), null);
+            localVideoView.setZOrderMediaOverlay(true);
+            localVideoView.setMirror(true);
+            localVideoView.setScalingType(SCALE_ASPECT_FILL);
+            isInited = true;
+        }
+
+        liveSession.getVideoTrack().addSink(localVideoView);
+    }
+
+    public void hideVideo(SurfaceViewRenderer localVideoView) {
+        liveSession.getVideoTrack().removeSink(localVideoView);
+    }
+
+    public void switchCamera(SurfaceViewRenderer localVideoView, boolean isMirrored){
+        CameraVideoCapturer cameraVideoCapturer = (CameraVideoCapturer) liveSession.getVideoCapturer();
+        cameraVideoCapturer.switchCamera(null);
+        localVideoView.setMirror(isMirrored);
     }
 
     @Override

@@ -15,7 +15,7 @@ import ro.atm.corden.databinding.ActivityMainBinding;
 import ro.atm.corden.util.constant.ExtraConstant;
 import ro.atm.corden.util.websocket.SignallingClient;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivityAdmin extends AppCompatActivity {
     private ActivityMainBinding binding;
 
     @Override
@@ -69,5 +69,10 @@ public class MainActivity extends AppCompatActivity {
 
     public void onClickedSettings(View view) {
 
+    }
+
+    public void onLocationCardClicked(View view) {
+        Intent intent = new Intent(this, UserJobsMapsActivity.class);
+        startActivity(intent);
     }
 }

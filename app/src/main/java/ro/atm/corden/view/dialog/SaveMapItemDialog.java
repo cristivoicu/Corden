@@ -13,11 +13,14 @@ import android.widget.Button;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDialogFragment;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.textfield.TextInputLayout;
 
 import petrov.kristiyan.colorpicker.ColorPicker;
 import ro.atm.corden.R;
+import ro.atm.corden.util.adapter.UserMapAdapter;
+import ro.atm.corden.util.websocket.Repository;
 
 /**  */
 public class SaveMapItemDialog extends AppCompatDialogFragment {
@@ -26,6 +29,7 @@ public class SaveMapItemDialog extends AppCompatDialogFragment {
     private TextInputLayout mInputTextLayoutName;
     private TextInputLayout mInputTextLayoutDescription;
     private Button mColorPickerButton;
+
     private int mColor = 0;
 
     private SaveMapDialogListener listener;

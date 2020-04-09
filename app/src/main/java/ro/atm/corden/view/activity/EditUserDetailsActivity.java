@@ -18,7 +18,7 @@ import java.util.Locale;
 
 import ro.atm.corden.R;
 import ro.atm.corden.databinding.ActivityEditUserDetailsBinding;
-import ro.atm.corden.model.transport_model.User;
+import ro.atm.corden.model.user.User;
 import ro.atm.corden.util.constant.ExtraConstant;
 import ro.atm.corden.view.fragment.TimePickerFragment;
 import ro.atm.corden.viewmodel.EditUserViewModel;

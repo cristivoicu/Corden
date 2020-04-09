@@ -1,4 +1,4 @@
-package ro.atm.corden.model;
+package ro.atm.corden.model.user;
 
 import ro.atm.corden.util.exception.login.EmptyTextException;
 import ro.atm.corden.util.exception.login.LoginListenerNotInitialisedException;

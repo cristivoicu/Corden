@@ -18,8 +18,8 @@ import android.widget.TimePicker;
 
 import ro.atm.corden.R;
 import ro.atm.corden.databinding.ActivityRegisterUserBinding;
-import ro.atm.corden.model.Roles;
-import ro.atm.corden.model.transport_model.User;
+import ro.atm.corden.model.user.Role;
+import ro.atm.corden.model.user.User;
 import ro.atm.corden.util.exception.register.EmptyFieldException;
 import ro.atm.corden.util.exception.register.InvalidPasswordException;
 import ro.atm.corden.util.exception.register.LengthException;
@@ -74,7 +74,7 @@ public class RegisterUserActivity extends AppCompatActivity
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 Object o = binding.roleSpinner.getSelectedItem();
-                mViewModel.userRole.setValue(Roles.toRole(o.toString()));
+                mViewModel.userRole.setValue(Role.toRole(o.toString()));
             }
 
             @Override

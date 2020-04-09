@@ -20,6 +20,7 @@ import org.webrtc.AudioTrack;
 import org.webrtc.EglBase;
 import org.webrtc.IceCandidate;
 import org.webrtc.MediaStream;
+import org.webrtc.RendererCommon;
 import org.webrtc.VideoTrack;
 
 import java.util.Timer;
@@ -27,8 +28,8 @@ import java.util.TimerTask;
 
 import ro.atm.corden.R;
 import ro.atm.corden.databinding.FragmentPlayerBinding;
-import ro.atm.corden.model.transport_model.Video;
-import ro.atm.corden.model.transport_model.VideoInfo;
+import ro.atm.corden.model.video.Video;
+import ro.atm.corden.model.video.VideoInfo;
 import ro.atm.corden.util.constant.ExtraConstant;
 import ro.atm.corden.util.exception.websocket.UserNotLoggedInException;
 import ro.atm.corden.util.webrtc.client.Session;
@@ -120,6 +121,8 @@ public class PlayerFragment extends Fragment implements MediaListener.PlaybackLi
         rootEglBase = EglBase.create();
         binding.remoteView.init(rootEglBase.getEglBaseContext(), null);
         binding.remoteView.setZOrderMediaOverlay(true);
+        binding.remoteView.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
+        binding.remoteView.setEnableHardwareScaler(true);
     }
 
 

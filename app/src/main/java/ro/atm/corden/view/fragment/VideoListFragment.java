@@ -18,7 +18,7 @@ import java.util.List;
 
 import ro.atm.corden.R;
 import ro.atm.corden.databinding.FragmentVideoListBinding;
-import ro.atm.corden.model.transport_model.Video;
+import ro.atm.corden.model.video.Video;
 import ro.atm.corden.util.adapter.VideoAdapter;
 import ro.atm.corden.util.constant.ExtraConstant;
 import ro.atm.corden.viewmodel.VideoListViewModel;

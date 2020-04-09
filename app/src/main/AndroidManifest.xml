@@ -72,10 +72,10 @@
             android:launchMode="singleTop" />
         <activity
             android:name=".view.activity.UsersActivity"
-            android:parentActivityName=".view.activity.MainActivity" />
+            android:parentActivityName=".view.activity.MainActivityAdmin" />
         <activity
             android:name=".view.activity.RegisterUserActivity"
-            android:parentActivityName=".view.activity.MainActivity" />
+            android:parentActivityName=".view.activity.MainActivityAdmin" />
         <activity android:name=".view.activity.LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -84,7 +84,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".view.activity.MainActivity"
+            android:name=".view.activity.MainActivityAdmin"
             android:launchMode="singleTop" />
 
         <receiver android:name=".util.receiver.NotificationReceiver" />

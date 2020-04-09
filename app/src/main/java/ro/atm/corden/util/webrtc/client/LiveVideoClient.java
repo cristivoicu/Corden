@@ -6,7 +6,6 @@ import android.util.Log;
 import org.webrtc.AudioSource;
 import org.webrtc.AudioTrack;
 import org.webrtc.Camera1Enumerator;
-import org.webrtc.CameraVideoCapturer;
 import org.webrtc.EglBase;
 import org.webrtc.MediaConstraints;
 import org.webrtc.MediaStream;
@@ -17,7 +16,7 @@ import org.webrtc.VideoCapturer;
 import org.webrtc.VideoSource;
 import org.webrtc.VideoTrack;
 
-import ro.atm.corden.model.LoginUser;
+import ro.atm.corden.model.user.LoginUser;
 import ro.atm.corden.util.constant.JsonConstants;
 import ro.atm.corden.util.webrtc.interfaces.MediaActivity;
 import ro.atm.corden.util.webrtc.observer.SimpleSdpObserver;
@@ -58,6 +57,7 @@ public class LiveVideoClient extends Client {
             surfaceTextureHelper = SurfaceTextureHelper.create("CaptureThread",
                     eglBase.getEglBaseContext());
             videoSource = peerConnectionFactory.createVideoSource(videoCapturer.isScreencast());
+            videoSource.adaptOutputFormat(1920, 1080, 30);
             videoCapturer.initialize(surfaceTextureHelper, context , videoSource.getCapturerObserver());
         }
         videoTrack = peerConnectionFactory.createVideoTrack("100", videoSource);
@@ -65,6 +65,7 @@ public class LiveVideoClient extends Client {
         //create an AudioSource instance
         audioSource = peerConnectionFactory.createAudioSource(audioConstraints);
         audioTrack = peerConnectionFactory.createAudioTrack("101", audioSource);
+        audioTrack.setEnabled(true);
 
         if (videoCapturer != null) {
             //videoCapturer.startCapture(1280, 720, 30);

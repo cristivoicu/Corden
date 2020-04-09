@@ -1,4 +1,4 @@
-package ro.atm.corden.model.transport_model;
+package ro.atm.corden.model.user;
 
 import com.google.gson.annotations.Expose;
 

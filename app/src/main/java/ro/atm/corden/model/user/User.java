@@ -1,4 +1,4 @@
-package ro.atm.corden.model.transport_model;
+package ro.atm.corden.model.user;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -8,14 +8,13 @@ import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
 import java.util.Date;
 
-import ro.atm.corden.model.Roles;
 import ro.atm.corden.util.exception.register.EmptyFieldException;
 import ro.atm.corden.util.exception.register.InvalidPasswordException;
 import ro.atm.corden.util.exception.register.LengthException;
 import ro.atm.corden.util.exception.register.PhoneNumberException;
 
 public class User implements Serializable {
-    public User(String username, String password, String phoneNumber, String name, String address, String programStart, String programEnd, Date creationDate, Roles roles) {
+    public User(String username, String password, String phoneNumber, String name, String address, String programStart, String programEnd, Date creationDate, Role roles) {
         this.username = username;
         this.password = password;
         this.phoneNumber = phoneNumber;
@@ -56,7 +55,7 @@ public class User implements Serializable {
     private boolean isOnline;
 
     @SerializedName("role")
-    private Roles roles;
+    private Role roles;
 
     public String getUsername() {
         return username;
@@ -195,11 +194,11 @@ public class User implements Serializable {
         this.creationDate = creationDate;
     }
 
-    public Roles getRoles() {
+    public Role getRoles() {
         return roles;
     }
 
-    public void setRoles(Roles roles) {
+    public void setRoles(Role roles) {
         this.roles = roles;
     }
 
