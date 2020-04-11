@@ -1,6 +1,7 @@
 package ro.atm.corden.util.websocket;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.os.ConditionVariable;
 import android.os.Looper;
 import android.os.NetworkOnMainThreadException;
@@ -19,24 +20,32 @@ import org.json.JSONObject;
 import org.webrtc.IceCandidate;
 import org.webrtc.SessionDescription;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.Principal;
 import java.security.PublicKey;
 import java.security.SignatureException;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.List;
 
+import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 import javax.security.auth.x500.X500Principal;
 
+import ro.atm.corden.R;
 import ro.atm.corden.model.map.MapItem;
 import ro.atm.corden.model.map.Mark;
 import ro.atm.corden.model.map.Path;
@@ -78,20 +87,57 @@ public class SignallingClient {
      * Class is initialised at application start
      */
     private SignallingClient() {
+
+    }
+
+    public void initWebSociet(Context context){
         try {
             //uri = new URI("wss://192.168.8.100:8443/websocket"); // atunci cand e conectat prin stick
             URI uri = new URI("wss://192.168.0.103:8443/websocket"); // wifi acasa
 
             try {
-                SSLContext context = SSLContext.getInstance("TLS");
-                context.init(null, trustAllCerts, null);
+                String keyStoreType = KeyStore.getDefaultType();
+                keyStoreType = "PKCS12";
+                KeyStore trustStore = KeyStore.getInstance(keyStoreType);
+                InputStream serverCert = context.getResources().openRawResource(R.raw.applicationserver);
+                InputStream caCert = context.getResources().openRawResource(R.raw.corden_ca);
+                trustStore.load(serverCert, "parola".toCharArray());
+                trustStore.load(caCert, "parola".toCharArray());
+
+                TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                trustManagerFactory.init(trustStore);
+
+                InputStream clientCert = context.getResources().openRawResource(R.raw.androidclient);
+                KeyStore keyStore = KeyStore.getInstance(keyStoreType);
+                keyStore.load(clientCert, "parola".toCharArray());
+
+                // initialize key manager factory with the read client certificate
+                KeyManagerFactory keyManagerFactory = null;
+                keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+                keyManagerFactory.init(keyStore, "parola".toCharArray());
+
+                // Create a TrustManager that trusts the CAs in our KeyStore
+                String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
+                TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
+                tmf.init(trustStore);
+
+                SSLContext sslContext = SSLContext.getInstance("TLS");
+                sslContext.init(null, tmf.getTrustManagers(), null);
 
                 webSocket = new WebSocket(uri);
-                webSocket.setSocketFactory(context.getSocketFactory());
+                webSocket.setSocketFactory(sslContext.getSocketFactory());
 
             } catch (NoSuchAlgorithmException e) {
                 e.printStackTrace();
             } catch (KeyManagementException e) {
+                e.printStackTrace();
+            } catch (KeyStoreException e) {
+                e.printStackTrace();
+            } catch (CertificateException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (UnrecoverableKeyException e) {
                 e.printStackTrace();
             }
 
@@ -139,6 +185,7 @@ public class SignallingClient {
         return INSTANCE;
     }
 
+
     /**
      * Method used to initialise websocket
      * <b>It should be called only at login</b>
@@ -154,6 +201,7 @@ public class SignallingClient {
             Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
             throw new NetworkOnMainThreadException();
         }
+
         if (webSocket.loginListener == null) {
             throw new LoginListenerNotInitialisedException();
         }
@@ -370,10 +418,10 @@ public class SignallingClient {
     /**
      * Used by admin to intercept user recording session
      *
-     * @param from     is the username that is sending live video to the media server for recording
+     * @param username     is the username that is sending live video to the media server for recording
      * @param sdpOffer is the session description offer
      */
-    public void sendVideoLiveRequest(@NonNull String from, @NonNull SessionDescription sdpOffer) {
+    public void sendWatchVideoRequest(@NonNull String username, @NonNull SessionDescription sdpOffer) {
         if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
             Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
             throw new NetworkOnMainThreadException();
@@ -385,7 +433,7 @@ public class SignallingClient {
 
         try {
             jsonObject.put(ID, ID_GET_LIVE);
-            jsonObject.put(FROM, from);
+            jsonObject.put(FROM, username);
             jsonObject.put(SDP_OFFER, sdpOffer.description);
 
             webSocket.send(jsonObject.toString());

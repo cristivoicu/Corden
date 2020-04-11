@@ -63,7 +63,6 @@ public class PlayerFragment extends Fragment implements MediaListener.PlaybackLi
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        Log.d(TAG, "onCreateView");
         // Inflate the layout for this fragment
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_player, container, false);
 
@@ -74,14 +73,12 @@ public class PlayerFragment extends Fragment implements MediaListener.PlaybackLi
 
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                Log.d("SEEKBAR", "On progress changed" + progress + "  " + fromUser);
                 if (fromUser)
                     this.progress = progress;
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-                Log.d("SEEKBAR", "onStartTrackongTouch");
             }
 
             @Override
@@ -138,7 +135,7 @@ public class PlayerFragment extends Fragment implements MediaListener.PlaybackLi
             try {
                 binding.remoteView.setVisibility(View.VISIBLE);
                 videoTrack.addSink(binding.remoteView);
-
+                audioTrack.setEnabled(true);
             } catch (Exception e) {
                 e.printStackTrace();
             }

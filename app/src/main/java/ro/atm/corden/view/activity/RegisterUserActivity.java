@@ -10,6 +10,8 @@ import android.app.AlertDialog;
 import android.app.TimePickerDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -154,13 +156,17 @@ public class RegisterUserActivity extends AppCompatActivity
 
     @Override
     public void onEnrollSuccess() {
-        refreshView();
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-        dialogBuilder.setTitle("Information")
-                .setMessage("User was added to the database")
-                .setPositiveButton("OK", null);
-        AlertDialog alertDialog = dialogBuilder.create();
-        alertDialog.show();
+        // because response comes from a thread different from UI thread
+        new Handler(Looper.getMainLooper())
+                .post(() -> {
+                    refreshView();
+                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+                    dialogBuilder.setTitle("Information")
+                            .setMessage("User was added to the database")
+                            .setPositiveButton("OK", null);
+                    AlertDialog alertDialog = dialogBuilder.create();
+                    alertDialog.show();
+                });
     }
 
     @Override

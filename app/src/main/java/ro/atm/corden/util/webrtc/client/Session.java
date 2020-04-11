@@ -37,6 +37,10 @@ public class Session {
         this.client = new LiveVideoClient(eglBase, context, mediaActivity, peerConnectionFactory);
     }
 
+    public void createLiveWatcherClient() {
+        this.client = new LiveWatcherClient(mediaActivity, peerConnectionFactory);
+    }
+
     private void createPeerConnectionFactory() {
         PeerConnectionFactory.InitializationOptions initializationOptions =
                 PeerConnectionFactory.InitializationOptions.builder(context)
@@ -59,15 +63,27 @@ public class Session {
     }
 
     public void createPlaybackOffer(String videoPath) {
-        if (client instanceof PlaybackClient) {
+        try {
             ((PlaybackClient) client).createPlaybackOffer(videoPath);
-        }// throw incopatibleExc
+        } catch (ClassCastException e) {
+            e.printStackTrace();
+        }
     }
 
     public void createLiveOffer() {
-        if (client instanceof LiveVideoClient) {
+        try {
             ((LiveVideoClient) client).createOffer();
-        }// throw incopatibleExc
+        } catch (ClassCastException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void createWatchOffer(String username){
+        try {
+            ((LiveWatcherClient)client).createWatchOffer(username);
+        } catch (ClassCastException e) {
+            e.printStackTrace();
+        }
     }
 
     public void addIceCandidate(IceCandidate iceCandidate) {
@@ -82,12 +98,12 @@ public class Session {
         return ((LiveVideoClient) client).getVideoTrack();
     }
 
-    public VideoCapturer getVideoCapturer(){
-        return ((LiveVideoClient)client).getVideoCapturer();
+    public VideoCapturer getVideoCapturer() {
+        return ((LiveVideoClient) client).getVideoCapturer();
     }
 
     public void leaveLiveSession() {
-        ((LiveVideoClient)client).dispose();
+        ((LiveVideoClient) client).dispose();
         if (peerConnectionFactory != null) {
             peerConnectionFactory.dispose();
             peerConnectionFactory = null;
@@ -95,7 +111,7 @@ public class Session {
     }
 
     public void leavePlaybackSession() {
-        ((PlaybackClient)client).dispose();
+        ((PlaybackClient) client).dispose();
         if (peerConnectionFactory != null) {
             peerConnectionFactory.dispose();
             peerConnectionFactory = null;

@@ -13,6 +13,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
+import com.google.android.gms.common.SignInButton;
+
 import ro.atm.corden.R;
 import ro.atm.corden.databinding.ActivityLoginBinding;
 import ro.atm.corden.model.user.LoginUser;
@@ -37,6 +39,7 @@ public class LoginActivity extends AppCompatActivity implements LoginListener {
         super.onCreate(savedInstanceState);
         Log.d("Log", "onCreate");
         context = this;
+        SignallingClient.getInstance().initWebSociet(context);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_login);
 
         viewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(this.getApplication())
@@ -53,10 +56,13 @@ public class LoginActivity extends AppCompatActivity implements LoginListener {
             LoginAsyncTask loginAsyncTask = new LoginAsyncTask();
             loginAsyncTask.execute(loginUser);
         });
+
+
     }
 
     @Override
     public void onLoginError() {
+        // because it comes from another thread (different from UI thread)
         new Handler(Looper.getMainLooper()).post(() -> {
             binding.textInputPassword.setError("Invalid");
             binding.textInputUsername.setError("Invalid");

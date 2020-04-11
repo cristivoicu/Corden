@@ -21,6 +21,18 @@
             app:layout_constraintTop_toTopOf="parent"
             android:layout_margin="10dp"/>
 
+        <ImageButton
+            android:id="@+id/play"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_margin="8dp"
+            android:src="@drawable/ic_play_arrow_white_24dp"
+            app:layout_constraintBottom_toBottomOf="@+id/remoteView"
+            app:layout_constraintEnd_toEndOf="@+id/remoteView"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:onClick="onPlayButtonClicked"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
