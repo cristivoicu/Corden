@@ -9,8 +9,30 @@
         <item name="android:windowBackground"> @color/activityBackground </item>
         <item name="fontFamily">@font/lato</item>
         <item name="android:windowActivityTransitions">true</item>
-        <item name="android:windowEnterTransition">@android:transition/slide_right</item>
-        <item name="android:windowExitTransition">@android:transition/slide_left</item>
+        <item name="android:windowEnterTransition">@android:transition/slide_top</item>
+        <item name="android:windowExitTransition">@android:transition/slide_bottom</item>
+    </style>
+
+    <style name="MaterialTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimary">@color/colorAccent</item>
+        <item name="colorPrimaryVariant">#C5CAE9</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorOnPrimary">#212121</item>
+        <item name="colorSecondary">#FFC107</item>
+        <item name="colorSecondaryVariant">#C5CAE9</item>
+        <item name="colorOnSecondary">#212121</item>
+        <item name="colorAccent">#FFC107</item>
+        <item name="android:colorBackground">#212121</item>
+        <item name="colorSurface">#FFFFFF</item>
+        <item name="colorOnSurface">#212121</item>
+        <item name="android:windowBackground"> @color/activityBackground </item>
+
+        <item name="colorError">@color/colorError</item>
+
+        <item name="fontFamily">@font/lato</item>
+        <item name="android:windowActivityTransitions">true</item>
+        <item name="android:windowEnterTransition">@android:transition/slide_top</item>
+        <item name="android:windowExitTransition">@android:transition/slide_bottom</item>
     </style>
 
     <style name="cardView_dashBoard">

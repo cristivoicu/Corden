@@ -37,7 +37,7 @@ public class EditUserViewModel extends AndroidViewModel {
         phoneNumber = user.getPhoneNumber();
         username = user.getUsername();
         password = user.getPassword();
-        role = user.getRoles();
+        role = Role.valueOf(user.getRoles());
         startHour = user.getProgramStart();
         endHour = user.getProgramEnd();
 
@@ -67,10 +67,10 @@ public class EditUserViewModel extends AndroidViewModel {
         user.setProgramStart(startHour);
         user.setProgramEnd(endHour);
         if(isAdmin){
-            user.setRoles(Role.ADMIN);
+            user.setRoles(Role.ADMIN.name());
         }
         if(isUser){
-            user.setRoles(Role.USER);
+            user.setRoles(Role.USER.name());
         }
 
         Repository.getInstance().updateUser(user);

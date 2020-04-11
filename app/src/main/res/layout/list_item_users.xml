@@ -36,7 +36,7 @@
             android:layout_marginTop="8dp"
             android:text="Username: voicu.cristian"
             android:textColor="@color/busAccident"
-            android:textSize="18sp"
+            android:textSize="16sp"
             app:layout_constraintEnd_toStartOf="@+id/onlineStatus"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/name" />
@@ -47,7 +47,7 @@
             android:layout_height="wrap_content"
             android:text="Program from 06:00 to 18:00."
             android:textColor="@color/busAccident"
-            android:textSize="18sp"
+            android:textSize="15sp"
             app:layout_constraintEnd_toStartOf="@+id/onlineStatus"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/username" />

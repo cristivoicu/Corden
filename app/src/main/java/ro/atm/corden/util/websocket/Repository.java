@@ -1,6 +1,11 @@
 package ro.atm.corden.util.websocket;
 
 import android.os.AsyncTask;
+import android.os.ConditionVariable;
+import android.util.Log;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -11,12 +16,17 @@ import ro.atm.corden.model.user.User;
 import ro.atm.corden.model.video.Video;
 import ro.atm.corden.util.exception.websocket.TransportException;
 
+import static ro.atm.corden.util.constant.JsonConstants.ID;
+import static ro.atm.corden.util.constant.JsonConstants.ID_LIST_USERS;
+import static ro.atm.corden.util.constant.JsonConstants.TYPE;
+import static ro.atm.corden.util.constant.JsonConstants.USERS_TYPE_REQ_ALL;
+
 /**
  * This class is used to get data from the server
  * Singleton class
  */
 public class Repository {
-
+    private static final String TAG = "Repository";
     private static Repository INSTANCE = new Repository();
 
     private Repository() {
@@ -83,7 +93,24 @@ public class Repository {
     private static class RequestUsersAsyncTask extends AsyncTask<Void, Void, List<User>> {
         @Override
         protected List<User> doInBackground(Void... voids) {
-            return signallingClient.getAllUsersRequest();
+            //return signallingClient.getAllUsersRequest();
+            JSONObject jsonObject = new JSONObject();
+            try {
+                jsonObject.put(ID, ID_LIST_USERS);
+                jsonObject.put(TYPE, USERS_TYPE_REQ_ALL);
+
+                Log.i(TAG, "Get all users event: " + jsonObject.toString());
+                signallingClient.webSocket.send(jsonObject.toString());
+                signallingClient.webSocket.usersConditionVariable = new ConditionVariable(false);
+
+                signallingClient.webSocket.usersConditionVariable.block();
+                if (signallingClient.webSocket.users != null) {
+                    return signallingClient.webSocket.users;
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return null;
         }
     }
 

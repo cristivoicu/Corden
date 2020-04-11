@@ -76,7 +76,8 @@
         <activity
             android:name=".view.activity.RegisterUserActivity"
             android:parentActivityName=".view.activity.MainActivityAdmin" />
-        <activity android:name=".view.activity.LoginActivity">
+        <activity android:name=".view.activity.LoginActivity"
+            android:theme="@style/MaterialTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

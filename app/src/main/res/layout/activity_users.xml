@@ -46,7 +46,9 @@
                 android:id="@+id/usersList"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                tools:listitem="@layout/list_item_users" />
+                tools:listitem="@layout/list_item_users"
+                android:paddingLeft="6dp"
+                android:paddingRight="6dp"/>
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

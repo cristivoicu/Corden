@@ -14,7 +14,7 @@ import ro.atm.corden.util.exception.register.LengthException;
 import ro.atm.corden.util.exception.register.PhoneNumberException;
 
 public class User implements Serializable {
-    public User(String username, String password, String phoneNumber, String name, String address, String programStart, String programEnd, Date creationDate, Role roles) {
+    public User(String username, String password, String phoneNumber, String name, String address, String programStart, String programEnd, Date creationDate, Role role) {
         this.username = username;
         this.password = password;
         this.phoneNumber = phoneNumber;
@@ -23,7 +23,7 @@ public class User implements Serializable {
         this.programStart = programStart;
         this.programEnd = programEnd;
         this.creationDate = creationDate;
-        this.roles = roles;
+        this.roles = role.name();
     }
 
     @Expose(serialize = false, deserialize = false)
@@ -52,10 +52,10 @@ public class User implements Serializable {
     private String programEnd;
     private Date creationDate;
 
-    private boolean isOnline;
+    private String status;
 
     @SerializedName("role")
-    private Role roles;
+    private String roles;
 
     public String getUsername() {
         return username;
@@ -194,18 +194,17 @@ public class User implements Serializable {
         this.creationDate = creationDate;
     }
 
-    public Role getRoles() {
+    public String getRoles() {
         return roles;
     }
 
-    public void setRoles(Role roles) {
-        this.roles = roles;
+    public void setRoles(String role) {
+        this.roles = role;
     }
 
-    public boolean isOnline() {
-        return isOnline;
+    public String getStatus() {
+        return status;
     }
-
     //endregion
 
     public String toJson() {

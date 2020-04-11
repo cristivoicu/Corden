@@ -75,7 +75,7 @@ import static ro.atm.corden.util.constant.JsonConstants.*;
 public class SignallingClient {
     private static final String TAG = "SignallingClient";
 
-    private WebSocket webSocket;
+    WebSocket webSocket = null;
 
     public boolean isChannelReady = false;
     public boolean isInitiator = false;
@@ -127,17 +127,7 @@ public class SignallingClient {
                 webSocket = new WebSocket(uri);
                 webSocket.setSocketFactory(sslContext.getSocketFactory());
 
-            } catch (NoSuchAlgorithmException e) {
-                e.printStackTrace();
-            } catch (KeyManagementException e) {
-                e.printStackTrace();
-            } catch (KeyStoreException e) {
-                e.printStackTrace();
-            } catch (CertificateException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (UnrecoverableKeyException e) {
+            } catch (NoSuchAlgorithmException | UnrecoverableKeyException | IOException | CertificateException | KeyStoreException | KeyManagementException e) {
                 e.printStackTrace();
             }
 

@@ -41,11 +41,11 @@ public class UserDetailActivity extends AppCompatActivity {
         }
 
         if(user != null){
-            if(user.getRoles() == Role.ADMIN){
+            if(user.getRoles().equals(Role.ADMIN.name())){
                 binding.image.setImageResource(R.drawable.ic_boss);
                 binding.textUserType.setText("ADMIN");
             }
-            viewModel.setRole(user.getRoles().name());
+            viewModel.setRole(user.getRoles());
             viewModel.setUserAddress(user.getAddress());
             viewModel.setUsername(user.getUsername());
             viewModel.setUserPhoneNumber(user.getPhoneNumber());

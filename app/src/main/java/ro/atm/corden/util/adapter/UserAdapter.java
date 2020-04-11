@@ -1,5 +1,6 @@
 package ro.atm.corden.util.adapter;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ro.atm.corden.R;
+import ro.atm.corden.model.user.Status;
 import ro.atm.corden.model.user.User;
 
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserHolder> {
@@ -37,10 +39,13 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserHolder> {
         holder.name.setText(currentUser.getName());
         holder.username.setText(currentUser.getUsername());
         holder.program.setText(String.format("Program: %s to %s.", currentUser.getProgramStart(), currentUser.getProgramEnd()));
-        if(currentUser.isOnline()){
-            holder.status.setCardBackgroundColor(0x006400); // color online
-        }else{
-            holder.status.setCardBackgroundColor(0x8B0000);// color offline
+
+        if(currentUser.getStatus().equals(Status.ONLINE.name())){
+            holder.status.setCardBackgroundColor(0xFF006400); // color online
+        }if(currentUser.getStatus().equals(Status.OFFLINE.name())){
+            holder.status.setCardBackgroundColor(0xFF696969); // color offline
+        }if(currentUser.getStatus().equals(Status.DISABLED.name())){
+            holder.status.setCardBackgroundColor(0xFF8B0000); // color disabled
         }
     }
 
