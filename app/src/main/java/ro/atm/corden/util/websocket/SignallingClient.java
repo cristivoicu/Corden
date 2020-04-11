@@ -1,18 +1,12 @@
 package ro.atm.corden.util.websocket;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
-import android.os.ConditionVariable;
 import android.os.Looper;
 import android.os.NetworkOnMainThreadException;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import org.json.JSONException;
@@ -24,38 +18,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.security.InvalidKeyException;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.security.Principal;
-import java.security.PublicKey;
-import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
-import java.util.List;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
-import javax.security.auth.x500.X500Principal;
 
 import ro.atm.corden.R;
-import ro.atm.corden.model.map.MapItem;
-import ro.atm.corden.model.map.Mark;
-import ro.atm.corden.model.map.Path;
-import ro.atm.corden.model.map.Zone;
 import ro.atm.corden.model.user.Role;
-import ro.atm.corden.model.user.Action;
 import ro.atm.corden.model.user.User;
-import ro.atm.corden.model.video.Video;
 import ro.atm.corden.util.exception.login.LoginListenerNotInitialisedException;
-import ro.atm.corden.util.exception.websocket.TransportException;
 import ro.atm.corden.util.exception.websocket.UserNotLoggedInException;
 import ro.atm.corden.util.websocket.callback.EnrollListener;
 import ro.atm.corden.util.websocket.callback.LoginListener;
@@ -136,41 +113,6 @@ public class SignallingClient {
         }
     }
 
-    //This piece of code should not go into production!!
-    //This will help in cases where the node server is running in non-https server and you want to ignore the warnings
-    @SuppressLint("TrustAllX509TrustManager")
-    private final TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
-        public X509Certificate[] getAcceptedIssuers() {
-            return new X509Certificate[]{};
-        }
-
-        @Override
-        public void checkServerTrusted(final X509Certificate[] chain, final String authType) throws CertificateException {
-            Log.i(TAG, ": authType: " + authType);
-            PublicKey publicKey = chain[0].getPublicKey();
-            Principal principal = chain[0].getSubjectDN();
-            X500Principal x500Principal = chain[0].getSubjectX500Principal();
-            x500Principal = chain[0].getIssuerX500Principal();
-
-            try {
-                chain[0].verify(publicKey);
-            } catch (InvalidKeyException e) {
-                e.printStackTrace();
-            } catch (NoSuchAlgorithmException e) {
-                e.printStackTrace();
-            } catch (NoSuchProviderException e) {
-                e.printStackTrace();
-            } catch (SignatureException e) {
-                e.printStackTrace();
-            }
-        }
-
-        @Override
-        public void checkClientTrusted(final X509Certificate[] chain, final String authType) throws CertificateException {
-            Log.i(TAG, ": authType: " + authType);
-        }
-    }};
-
     public static SignallingClient getInstance() {
         return INSTANCE;
     }
@@ -198,150 +140,6 @@ public class SignallingClient {
         webSocket.addHeader("username", username);
         webSocket.addHeader("password", password);
         webSocket.connect();
-    }
-
-    /**
-     * This method send a request to the server for getting the users
-     * It's package private, can be used only by Repository
-     * Should be called from async task
-     *
-     * @return a list with all users from server database or null in case of error
-     * @throws NetworkOnMainThreadException if main thread is used
-     * @see Repository
-     */
-    synchronized List<User> getAllUsersRequest() throws NetworkOnMainThreadException {
-        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
-            Log.e(TAG, "Main thread is used! in SignallingClient.getAllUsersRequest");
-            throw new NetworkOnMainThreadException();
-        }
-        JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put(ID, ID_LIST_USERS);
-            jsonObject.put(TYPE, USERS_TYPE_REQ_ALL);
-
-            Log.i(TAG, "Get all users event: " + jsonObject.toString());
-            webSocket.send(jsonObject.toString());
-            webSocket.usersConditionVariable = new ConditionVariable(false);
-
-            webSocket.usersConditionVariable.block();
-            if (webSocket.users != null) {
-                return webSocket.users;
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    /**
-     * Gets all the users that has a USER role {@link Role}
-     */
-    synchronized List<User> getUsersRequestWithUserRole() throws NetworkOnMainThreadException {
-        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
-            Log.e(TAG, "Main thread is used! in SignallingClient.getAllUsersRequest");
-            throw new NetworkOnMainThreadException();
-        }
-        JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put(ID, ID_LIST_USERS);
-            jsonObject.put(TYPE, USERS_TYPE_REQ_USER_ROLE);
-
-            Log.i(TAG, "Get all users event: " + jsonObject.toString());
-            webSocket.send(jsonObject.toString());
-            webSocket.usersConditionVariable = new ConditionVariable(false);
-
-            webSocket.usersConditionVariable.block();
-            if (webSocket.users != null) {
-                return webSocket.users;
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    /***/
-    synchronized List<Action> getTimelineForUser(String username, String date) {
-        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
-            Log.e(TAG, "Main thread is used! in SignallingClient.getAllUsersRequest");
-            throw new NetworkOnMainThreadException();
-        }
-        JsonObject message = new JsonObject();
-
-        message.addProperty(ID, REQ_USER_TIMELINE);
-        message.addProperty("forUser", username);
-        message.addProperty("date", date);
-
-        webSocket.send(message.toString());
-
-        webSocket.timelineConditionVariable = new ConditionVariable(false);
-        webSocket.timelineConditionVariable.block();
-        if (webSocket.actions != null) {
-            return webSocket.actions;
-        }
-        return null;
-    }
-
-    /**
-     * Used to send a request for recorded video path list
-     *
-     * @param forUsername is the username of the user that recorded the videos
-     * @return null if an exception is thrown or the videos list
-     * @throws NetworkOnMainThreadException if is working on the main thread
-     * @throws TransportException           if the server does not return the requested videos
-     */
-    synchronized List<Video> getVideosForUser(String forUsername)
-            throws NetworkOnMainThreadException, TransportException {
-        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
-            Log.e(TAG, "Main thread is used! in SignallingClient.getAllUsersRequest");
-            throw new NetworkOnMainThreadException();
-        }
-
-        JSONObject message = new JSONObject();
-
-        try {
-            message.put(ID, "recordedVideos");
-            message.put("forUser", forUsername);
-
-            webSocket.send(message.toString());
-            webSocket.videosConditionVariable = new ConditionVariable(false);
-            webSocket.videosConditionVariable.block();
-            if (webSocket.videos != null) {
-                return webSocket.videos;
-            }
-
-            throw new TransportException("Could not get the requested videos!");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    /**
-     * Methods is package private, can be used from Repository
-     * Used to fetch online users from the server database
-     * <b>It should not be called from the main thread</b>
-     *
-     * @throws NetworkOnMainThreadException if main thread is used
-     * @see Repository
-     */
-    void sendOnlineUsersRequest() throws NetworkOnMainThreadException {
-        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
-            Log.e(TAG, "Main thread is used! in SignallingClient.getOnlineUsersRequest");
-            throw new NetworkOnMainThreadException();
-        }
-        JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put(ID, ID_LIST_USERS);
-            jsonObject.put(TYPE, USERS_TYPE_REQ_ONLINE);
-
-            Log.i(TAG, "Get all users event: " + jsonObject.toString());
-
-            webSocket.send(jsonObject.toString());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-
     }
 
     /**
@@ -389,20 +187,6 @@ public class SignallingClient {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-    }
-
-    /***/
-    public void updateUser(@NonNull User user) {
-        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
-            Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
-            throw new NetworkOnMainThreadException();
-        }
-
-        JsonObject message = new JsonObject();
-        message.addProperty(ID, ID_UPDATE_USER);
-        message.addProperty(USER, user.toJson());
-
-        webSocket.send(message.toString());
     }
 
     /**
@@ -630,44 +414,6 @@ public class SignallingClient {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-    }
-
-    /***/
-    public void saveMapItems(List<MapItem> items){
-        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
-            Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
-            throw new NetworkOnMainThreadException();
-        }
-        Log.i(TAG, "Sending map items to the server.");
-
-        JsonObject message = new JsonObject();
-
-        message.addProperty(ID, "saveMapItems");
-
-        JsonArray marks = new JsonArray();
-        JsonArray paths = new JsonArray();
-        JsonArray zones = new JsonArray();
-
-        for (MapItem mapItem : items){
-            String json = "";
-            if(mapItem instanceof Mark){
-                json = mapItem.toJson();
-                marks.add(json);
-            }
-            if(mapItem instanceof Zone){
-                json = mapItem.toJson();
-                paths.add(json);
-            }
-            if(mapItem instanceof Path){
-                json = mapItem.toJson();
-                zones.add(json);
-            }
-        }
-        message.add("marks", marks);
-        message.add("paths", paths);
-        message.add("zones", zones);
-
-        webSocket.send(message.toString());
     }
 
     public void logout() {
