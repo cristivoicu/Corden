@@ -3,50 +3,33 @@ package ro.atm.corden.view.activity;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 
-import android.os.AsyncTask;
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
+import android.content.Context;
 import android.os.Bundle;
-import android.telephony.SignalStrength;
 import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.google.gson.JsonObject;
 
-import org.slf4j.Logger;
-import org.webrtc.AudioSource;
 import org.webrtc.AudioTrack;
-import org.webrtc.DefaultVideoDecoderFactory;
-import org.webrtc.DefaultVideoEncoderFactory;
 import org.webrtc.EglBase;
 import org.webrtc.IceCandidate;
-import org.webrtc.MediaConstraints;
 import org.webrtc.MediaStream;
-import org.webrtc.PeerConnection;
-import org.webrtc.PeerConnectionFactory;
 import org.webrtc.RendererCommon;
-import org.webrtc.SessionDescription;
-import org.webrtc.SurfaceTextureHelper;
-import org.webrtc.SurfaceViewRenderer;
-import org.webrtc.VideoSource;
 import org.webrtc.VideoTrack;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import ro.atm.corden.R;
 import ro.atm.corden.databinding.ActivityMediaBinding;
-import ro.atm.corden.util.constant.JsonConstants;
 import ro.atm.corden.util.exception.websocket.UserNotLoggedInException;
 import ro.atm.corden.util.webrtc.client.Session;
-import ro.atm.corden.util.webrtc.observer.SimplePeerConnectionObserver;
-import ro.atm.corden.util.webrtc.observer.SimpleSdpObserver;
 import ro.atm.corden.util.websocket.SignallingClient;
 import ro.atm.corden.util.websocket.callback.MediaListener;
 
 public class MediaActivity extends AppCompatActivity
         implements ro.atm.corden.util.webrtc.interfaces.MediaActivity,
-        MediaListener.LivePlayListener {
+        MediaListener.LiveStreamingListener {
     private static final String TAG = "MediaActivity";
     private ActivityMediaBinding binding;
 
@@ -119,6 +102,15 @@ public class MediaActivity extends AppCompatActivity
                 new IceCandidate(data.get("sdpMid").getAsString(),
                         data.get("sdpMLineIndex").getAsInt(),
                         data.get("candidate").getAsString()));
+    }
+
+    @Override
+    public void onLiveStreamingError() {
+        AlertDialog alertDialog = new AlertDialog.Builder(this)
+                .setMessage("Live watching can't be accomplished")
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .create();
+        alertDialog.show();
     }
 
     public void onPlayButtonClicked(View view) {

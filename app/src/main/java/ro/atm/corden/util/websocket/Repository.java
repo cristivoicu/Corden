@@ -4,32 +4,17 @@ import android.os.AsyncTask;
 import android.os.ConditionVariable;
 import android.util.Log;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import ro.atm.corden.model.map.MapItem;
-import ro.atm.corden.model.map.Mark;
-import ro.atm.corden.model.map.Path;
-import ro.atm.corden.model.map.Zone;
 import ro.atm.corden.model.user.Action;
 import ro.atm.corden.model.user.User;
 import ro.atm.corden.model.video.Video;
 import ro.atm.corden.util.exception.websocket.TransportException;
-
-import static ro.atm.corden.util.constant.JsonConstants.ID;
-import static ro.atm.corden.util.constant.JsonConstants.ID_LIST_USERS;
-import static ro.atm.corden.util.constant.JsonConstants.ID_UPDATE_USER;
-import static ro.atm.corden.util.constant.JsonConstants.REQ_USER_TIMELINE;
-import static ro.atm.corden.util.constant.JsonConstants.TYPE;
-import static ro.atm.corden.util.constant.JsonConstants.USER;
-import static ro.atm.corden.util.constant.JsonConstants.USERS_TYPE_REQ_ALL;
-import static ro.atm.corden.util.constant.JsonConstants.USERS_TYPE_REQ_USER_ROLE;
+import ro.atm.corden.util.websocket.protocol.Message;
+import ro.atm.corden.util.websocket.protocol.events.RequestEventTypes;
+import ro.atm.corden.util.websocket.protocol.events.UpdateEventType;
 
 /**
  * This class is used to get data from the server
@@ -93,22 +78,18 @@ public class Repository {
     private static class RequestUsersAsyncTask extends AsyncTask<Void, Void, List<User>> {
         @Override
         protected List<User> doInBackground(Void... voids) {
-            //return signallingClient.getAllUsersRequest();
-            JSONObject jsonObject = new JSONObject();
-            try {
-                jsonObject.put(ID, ID_LIST_USERS);
-                jsonObject.put(TYPE, USERS_TYPE_REQ_ALL);
 
-                Log.i(TAG, "Get all users event: " + jsonObject.toString());
-                signallingClient.webSocket.send(jsonObject.toString());
-                signallingClient.webSocket.usersConditionVariable = new ConditionVariable(false);
+            Message message = new Message.RequestMessageBuilder()
+                    .addEvent(RequestEventTypes.USERS_ALL)
+                    .build();
 
-                signallingClient.webSocket.usersConditionVariable.block();
-                if (signallingClient.webSocket.users != null) {
-                    return signallingClient.webSocket.users;
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
+            signallingClient.webSocket.send(message.toString());
+
+            signallingClient.webSocket.usersConditionVariable = new ConditionVariable(false);
+            signallingClient.webSocket.usersConditionVariable.block();
+
+            if (signallingClient.webSocket.users != null) {
+                return signallingClient.webSocket.users;
             }
             return null;
         }
@@ -119,12 +100,13 @@ public class Repository {
         @Override
         protected List<Video> doInBackground(String... usernames) {
             try {
-                JsonObject message = new JsonObject();
-
-                message.addProperty(ID, "recordedVideos");
-                message.addProperty("forUser", usernames[0]);
+                Message message = new Message.RequestMessageBuilder()
+                        .addEvent(RequestEventTypes.RECORDED_VIDEOS)
+                        .addUser(usernames[0])
+                        .build();
 
                 signallingClient.webSocket.send(message.toString());
+
                 signallingClient.webSocket.videosConditionVariable = new ConditionVariable(false);
                 signallingClient.webSocket.videosConditionVariable.block();
                 if (signallingClient.webSocket.videos != null) {
@@ -147,11 +129,11 @@ public class Repository {
 
         @Override
         protected List<Action> doInBackground(String... strings) {
-            JsonObject message = new JsonObject();
-
-            message.addProperty(ID, REQ_USER_TIMELINE);
-            message.addProperty("forUser", strings[0]);
-            message.addProperty("date", strings[1]);
+            Message message = new Message.RequestMessageBuilder()
+                    .addEvent(RequestEventTypes.TIMELINE)
+                    .addUser(strings[0])
+                    .addDate(strings[1])
+                    .build();
 
             signallingClient.webSocket.send(message.toString());
 
@@ -168,33 +150,12 @@ public class Repository {
 
         @Override
         protected Void doInBackground(User... users) {
-            JsonObject message = new JsonObject();
-            message.addProperty(ID, ID_UPDATE_USER);
-            message.addProperty(USER, users[0].toJson());
+            Message message = new Message.UpdateMessageBuilder()
+                    .addEvent(UpdateEventType.UPDATE_USER)
+                    .addPayload(users[0].toJson())
+                    .build();
 
             signallingClient.webSocket.send(message.toString());
-            return null;
-        }
-    }
-
-    private static class RequestUsersWithUserRoleAsyncTask extends AsyncTask<Void, Void, List<User>> {
-
-        @Override
-        protected List<User> doInBackground(Void... voids) {
-            JsonObject jsonObject = new JsonObject();
-
-            jsonObject.addProperty(ID, ID_LIST_USERS);
-            jsonObject.addProperty(TYPE, USERS_TYPE_REQ_USER_ROLE);
-
-            Log.i(TAG, "Get all users event: " + jsonObject.toString());
-            signallingClient.webSocket.send(jsonObject.toString());
-            signallingClient.webSocket.usersConditionVariable = new ConditionVariable(false);
-
-            signallingClient.webSocket.usersConditionVariable.block();
-            if (signallingClient.webSocket.users != null) {
-                return signallingClient.webSocket.users;
-            }
-
             return null;
         }
     }
@@ -205,32 +166,10 @@ public class Repository {
         protected Void doInBackground(List<MapItem>... lists) {
             Log.i(TAG, "Sending map items to the server.");
 
-            JsonObject message = new JsonObject();
-
-            message.addProperty(ID, "saveMapItems");
-
-            JsonArray marks = new JsonArray();
-            JsonArray paths = new JsonArray();
-            JsonArray zones = new JsonArray();
-
-            for (MapItem mapItem : lists[0]){
-                String json = "";
-                if(mapItem instanceof Mark){
-                    json = mapItem.toJson();
-                    marks.add(json);
-                }
-                if(mapItem instanceof Zone){
-                    json = mapItem.toJson();
-                    paths.add(json);
-                }
-                if(mapItem instanceof Path){
-                    json = mapItem.toJson();
-                    zones.add(json);
-                }
-            }
-            message.add("marks", marks);
-            message.add("paths", paths);
-            message.add("zones", zones);
+            Message message = new Message.UpdateMessageBuilder()
+                    .addEvent(UpdateEventType.MAP_ITEMS)
+                    .addPayload(lists[0])
+                    .build();
 
             signallingClient.webSocket.send(message.toString());
             return null;

@@ -93,7 +93,7 @@ public class LiveVideoClient extends Client {
                 localPeer.setLocalDescription(new SimpleSdpObserver(), sessionDescription);
                 Log.d("onCreateSuccess", "SignallingClient emit ");
                 Log.d(TAG, "Sending video for record");
-                SignallingClient.getInstance().sendVideoForRecord(LoginUser.username, sessionDescription);
+                SignallingClient.getInstance().sendLiveStreamVideo(LoginUser.username, sessionDescription);
             }
         }, sdpConstraints);
     }

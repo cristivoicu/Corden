@@ -10,6 +10,8 @@ import android.app.AlertDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TimePicker;
@@ -20,11 +22,15 @@ import ro.atm.corden.R;
 import ro.atm.corden.databinding.ActivityEditUserDetailsBinding;
 import ro.atm.corden.model.user.User;
 import ro.atm.corden.util.constant.ExtraConstant;
+import ro.atm.corden.util.exception.websocket.UserNotLoggedInException;
+import ro.atm.corden.util.websocket.SignallingClient;
+import ro.atm.corden.util.websocket.callback.UpdateUserListener;
 import ro.atm.corden.view.fragment.TimePickerFragment;
 import ro.atm.corden.viewmodel.EditUserViewModel;
 
 public class EditUserDetailsActivity extends AppCompatActivity
-        implements TimePickerDialog.OnTimeSetListener {
+        implements TimePickerDialog.OnTimeSetListener,
+        UpdateUserListener {
     private ActivityEditUserDetailsBinding binding;
     private EditUserViewModel viewModel;
 
@@ -82,6 +88,13 @@ public class EditUserDetailsActivity extends AppCompatActivity
             DialogFragment timePicker = new TimePickerFragment();
             timePicker.show(getSupportFragmentManager(), "time picker");
         });
+
+        try {
+            SignallingClient.getInstance().subscribeUpdateUserListener(this);
+        } catch (UserNotLoggedInException e) {
+            e.printStackTrace();
+            finish();
+        }
     }
 
     @Override
@@ -116,5 +129,33 @@ public class EditUserDetailsActivity extends AppCompatActivity
             binding.programEnd.setText(String.format(Locale.getDefault(),"%02d:%02d", hourOfDay, minute));
             viewModel.setEndHour(String.format(Locale.getDefault(),"%02d:%02d", hourOfDay, minute));
         }
+    }
+
+    @Override
+    public void onUpdateSuccess() {
+        new Handler(Looper.getMainLooper())
+                .post(() -> {
+                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+                    dialogBuilder.setTitle("Information")
+                            .setMessage("User data was successfully updated!")
+                            .setIcon(android.R.drawable.ic_dialog_info)
+                            .setPositiveButton("OK", null);
+                    AlertDialog alertDialog = dialogBuilder.create();
+                    alertDialog.show();
+                });
+    }
+
+    @Override
+    public void onUpdateFailure() {
+        new Handler(Looper.getMainLooper())
+                .post(() -> {
+                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+                    dialogBuilder.setTitle("Information")
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .setMessage("Failed to update user information...!")
+                            .setPositiveButton("OK", null);
+                    AlertDialog alertDialog = dialogBuilder.create();
+                    alertDialog.show();
+                });
     }
 }

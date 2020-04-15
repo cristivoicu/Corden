@@ -37,6 +37,8 @@ public interface MediaListener {
         void onGotPosition(long position);
 
         void onPlayEnd();
+
+        void onPlaybackRejected();
     }
 
     /**
@@ -62,7 +64,7 @@ public interface MediaListener {
         void onIceCandidate(JsonObject data);
     }
 
-    interface LivePlayListener {
+    interface LiveStreamingListener {
         /**
          * Called by web socket client
          * Used to notify user that his call was accepted by the media server
@@ -80,6 +82,8 @@ public interface MediaListener {
          * </ul>
          */
         void onIceCandidate(JsonObject data);
+
+        void onLiveStreamingError();
     }
 
 }

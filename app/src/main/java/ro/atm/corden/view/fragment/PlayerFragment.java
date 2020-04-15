@@ -1,5 +1,8 @@
 package ro.atm.corden.view.fragment;
 
+import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
@@ -201,8 +204,9 @@ public class PlayerFragment extends Fragment implements MediaListener.PlaybackLi
     @Override
     public void onIceCandidate(JsonObject data) {
         showToast("Receiving ice candidates");
-        Log.d(TAG, "OnIceCandidate Rec");
+        Log.d(TAG, "OnIceCandidate Rec" + data.toString());
         //localPeer.addIceCandidate(new IceCandidate(data.get("sdpMid").getAsString(), data.get("sdpMLineIndex").getAsInt(), data.get("candidate").getAsString()));
+
         playbackSession.addIceCandidate(new IceCandidate(data.get("sdpMid").getAsString(), data.get("sdpMLineIndex").getAsInt(), data.get("candidate").getAsString()));
     }
 
@@ -229,7 +233,7 @@ public class PlayerFragment extends Fragment implements MediaListener.PlaybackLi
 
     @Override
     public void onGotPosition(long position) {
-        Log.d(TAG, "God position: " + position);
+        Log.d(TAG, "Got position: " + position);
         if (seekBar != null) {
             seekBar.setProgress((int) position);
         }
@@ -245,6 +249,16 @@ public class PlayerFragment extends Fragment implements MediaListener.PlaybackLi
         seekBar.setProgress(0);
         binding.play.setImageResource(R.drawable.ic_play_arrow_white_24dp);
         playbackSession.leaveLiveSession();
+    }
+
+    @Override
+    public void onPlaybackRejected() {
+        AlertDialog alertDialog = new AlertDialog.Builder(this.getContext())
+                .setMessage("You are not authorised to play this video!")
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setPositiveButton("Ok", null)
+                .create();
+        alertDialog.show();
     }
 
     private static class PauseRequestAsyncTask extends AsyncTask<Void, Void, Void> {

@@ -7,8 +7,6 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import com.google.gson.JsonObject;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.webrtc.IceCandidate;
@@ -36,7 +34,12 @@ import ro.atm.corden.util.exception.login.LoginListenerNotInitialisedException;
 import ro.atm.corden.util.exception.websocket.UserNotLoggedInException;
 import ro.atm.corden.util.websocket.callback.EnrollListener;
 import ro.atm.corden.util.websocket.callback.LoginListener;
+import ro.atm.corden.util.websocket.callback.MapItemsSaveListener;
 import ro.atm.corden.util.websocket.callback.MediaListener;
+import ro.atm.corden.util.websocket.callback.RemoveVideoListener;
+import ro.atm.corden.util.websocket.callback.UpdateUserListener;
+import ro.atm.corden.util.websocket.protocol.Message;
+import ro.atm.corden.util.websocket.protocol.events.MediaEventType;
 
 import static ro.atm.corden.util.constant.JsonConstants.*;
 
@@ -67,10 +70,11 @@ public class SignallingClient {
 
     }
 
-    public void initWebSociet(Context context){
+    public void initWebSociet(Context context) {
         try {
             //uri = new URI("wss://192.168.8.100:8443/websocket"); // atunci cand e conectat prin stick
-            URI uri = new URI("wss://192.168.0.103:8443/websocket"); // wifi acasa
+             URI uri = new URI("wss://192.168.0.103:8443/websocket"); // wifi acasa
+             //URI uri = new URI("wss://82.78.75.209:3650/websocket"); // wifi acasa
 
             try {
                 String keyStoreType = KeyStore.getDefaultType();
@@ -143,27 +147,6 @@ public class SignallingClient {
     }
 
     /**
-     * Used to register users in database
-     *
-     * @deprecated
-     */
-    @Deprecated
-    public void register(String name) {
-        JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put("id", "register");
-            jsonObject.put("name", name);
-
-            Log.i(TAG, "Register event: " + jsonObject.toString());
-
-            webSocket.send(jsonObject.toString());
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
      * This method is used by admin to register new user in server's database
      * <p>The sender is recognised in the server using the session object</p>
      * <b>It should not be called from the main thread</b>
@@ -192,7 +175,7 @@ public class SignallingClient {
     /**
      * Used by admin to intercept user recording session
      *
-     * @param username     is the username that is sending live video to the media server for recording
+     * @param username is the username that is sending live video to the media server for recording
      * @param sdpOffer is the session description offer
      */
     public void sendWatchVideoRequest(@NonNull String username, @NonNull SessionDescription sdpOffer) {
@@ -229,11 +212,13 @@ public class SignallingClient {
             Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
             throw new NetworkOnMainThreadException();
         }
-        JsonObject message = new JsonObject();
-        message.addProperty(ID, ID_PLAY_VIDEO);
-        message.addProperty(SDP_OFFER, sdpOffer.description);
-        message.addProperty("videoPath", videoPath);
 
+        Message message = new Message.MediaMessageBuilder()
+                .addEvent(MediaEventType.PLAY_VIDEO_REQ)
+                .addSdpOffer(sdpOffer)
+                .addVideoPath(videoPath)
+                .build();
+        Log.e("PLAY VIDEO REQ", message.toString());
         webSocket.send(message.toString());
     }
 
@@ -246,8 +231,9 @@ public class SignallingClient {
             Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
             throw new NetworkOnMainThreadException();
         }
-        JsonObject message = new JsonObject();
-        message.addProperty(ID, ID_PAUSE_VIDEO);
+        Message message = new Message.MediaMessageBuilder()
+                .addEvent(MediaEventType.PAUSE_VIDEO_REQ)
+                .build();
 
         webSocket.send(message.toString());
     }
@@ -258,10 +244,11 @@ public class SignallingClient {
             Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
             throw new NetworkOnMainThreadException();
         }
+        Message message = new Message.MediaMessageBuilder()
+                .addEvent(MediaEventType.RESUME_VIDEO)
+                .build();
 
-        JsonObject message = new JsonObject();
-        message.addProperty(ID, ID_RESUME_VIDEO);
-
+        Log.e(TAG, "RESUME SENT: " + message.toString());
         webSocket.send(message.toString());
     }
 
@@ -271,9 +258,9 @@ public class SignallingClient {
             Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
             throw new NetworkOnMainThreadException();
         }
-
-        JsonObject message = new JsonObject();
-        message.addProperty(ID, ID_GET_POSITION_VIDEO);
+        Message message = new Message.MediaMessageBuilder()
+                .addEvent(MediaEventType.GET_VIDEO_POSITION_REQ)
+                .build();
 
         webSocket.send(message.toString());
     }
@@ -284,10 +271,10 @@ public class SignallingClient {
             Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
             throw new NetworkOnMainThreadException();
         }
-
-        JsonObject message = new JsonObject();
-        message.addProperty(ID, ID_DO_SEEK_VIDEO);
-        message.addProperty("position", position);
+        Message message = new Message.MediaMessageBuilder()
+                .addEvent(MediaEventType.SEEK_VIDEO_REQ)
+                .addVideoPosition(position)
+                .build();
 
         webSocket.send(message.toString());
     }
@@ -298,9 +285,9 @@ public class SignallingClient {
             Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
             throw new NetworkOnMainThreadException();
         }
-
-        JsonObject message = new JsonObject();
-        message.addProperty(ID, ID_STOP_VIDEO);
+        Message message = new Message.MediaMessageBuilder()
+                .addEvent(MediaEventType.STOP_VIDEO_REQ)
+                .build();
 
         webSocket.send(message.toString());
     }
@@ -313,23 +300,17 @@ public class SignallingClient {
      * @param sdpOffer is de session description offer
      * @throws NetworkOnMainThreadException if it runs on the main thread
      */
-    public void sendVideoForRecord(@NonNull String from, @NonNull SessionDescription sdpOffer) throws NetworkOnMainThreadException {
+    public void sendLiveStreamVideo(@NonNull String from, @NonNull SessionDescription sdpOffer) throws NetworkOnMainThreadException {
         if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
             Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
             throw new NetworkOnMainThreadException();
         }
+        Message message = new Message.MediaMessageBuilder()
+                .addEvent(MediaEventType.START_LIVE_STREAM)
+                .addSdpOffer(sdpOffer)
+                .build();
 
-        Log.i(TAG, String.format("Sending stream to server!"));
-        JSONObject object = new JSONObject();
-        try {
-            object.put(ID, ID_START_REC);
-            object.put(FROM, from);
-            object.put(SDP_OFFER, sdpOffer.description);
-
-            webSocket.send(object.toString());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        webSocket.send(message.toString());
     }
 
     /**
@@ -344,17 +325,11 @@ public class SignallingClient {
             Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
             throw new NetworkOnMainThreadException();
         }
+        Message message = new Message.MediaMessageBuilder()
+                .addEvent(MediaEventType.STOP_LIVE_STREAM)
+                .build();
 
-        Log.i(TAG, "Stopping streaming to the server!");
-        JSONObject message = new JSONObject();
-        try {
-            message.put(ID, ID_STOP_REC);
-            message.put(FROM, from);
-
-            webSocket.send(message.toString());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        webSocket.send(message.toString());
     }
 
     /**
@@ -370,18 +345,12 @@ public class SignallingClient {
             throw new NetworkOnMainThreadException();
         }
         try {
-            JSONObject object = new JSONObject();
-            JSONObject candidate = new JSONObject();
+            Message message = new Message.MediaMessageBuilder()
+                    .addEvent(MediaEventType.ICE_CANDIDATE)
+                    .addIceCandidate(iceCandidate, iceFor)
+                    .build();
 
-            object.put(ID, ID_ICE_CANDIDATE);
-            object.put("for", iceFor);
-            candidate.put("sdpMLineIndex", iceCandidate.sdpMLineIndex);
-            candidate.put("sdpMid", iceCandidate.sdpMid);
-            candidate.put("candidate", iceCandidate.sdp);
-
-            object.put("candidate", candidate);
-
-            webSocket.send(object.toString());
+            webSocket.send(message.toString());
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -389,37 +358,11 @@ public class SignallingClient {
 
     }
 
-    /**
-     * Used by media player to send a play request to the server from client
-     *
-     * @param from        is the username
-     * @param description is the sdp offer
-     * @throws NetworkOnMainThreadException if it runs on the main thread
-     * @deprecated
-     */
-    @Deprecated
-    public void play(String from, SessionDescription description) throws NetworkOnMainThreadException {
-        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
-            Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
-            throw new NetworkOnMainThreadException();
-        }
-        Log.i(TAG, String.format("PLaying from %s.", from));
-        JSONObject object = new JSONObject();
-        try {
-            object.put(ID, ID_PLAY);
-            object.put(USER, from);
-            object.put(SDP_OFFER, description.description);
-
-            webSocket.send(object.toString());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
     public void logout() {
         webSocket.close();
     }
 
+    //region Subscribe and unsubscribe methods
     public void subscribeLoginListener(@NonNull LoginListener loginListener) {
         webSocket.loginListener = loginListener;
     }
@@ -436,11 +379,19 @@ public class SignallingClient {
         webSocket.enrollListener = enrollListener;
     }
 
-    public void subscribeLiveVideoListener(@NonNull MediaListener.LivePlayListener livePlayListener) throws UserNotLoggedInException {
+    public void unsubscribeEnrollListener() {
+        webSocket.enrollListener = null;
+    }
+
+    public void subscribeLiveVideoListener(@NonNull MediaListener.LiveStreamingListener liveStreamingListener) throws UserNotLoggedInException {
         if (!webSocket.isLoggedIn)
             throw new UserNotLoggedInException();
 
-        webSocket.livePlayListener = livePlayListener;
+        webSocket.liveStreamingListener = liveStreamingListener;
+    }
+
+    public void unsubscribeLiveVideoListener() {
+        webSocket.liveStreamingListener = null;
     }
 
     public void subscribePlaybackVideoListener(@NonNull MediaListener.PlaybackListener playbackListener) throws UserNotLoggedInException {
@@ -449,11 +400,42 @@ public class SignallingClient {
         webSocket.playbackListener = playbackListener;
     }
 
-    public void unsubscribeLiveVideoListener() {
-        webSocket.livePlayListener = null;
-    }
-
     public void unsubscribePlaybackVideoListener() {
         webSocket.playbackListener = null;
     }
+
+    public void subscribeUpdateUserListener(@NonNull UpdateUserListener updateUserListener) throws UserNotLoggedInException {
+        if (!webSocket.isLoggedIn) {
+            throw new UserNotLoggedInException();
+        }
+        webSocket.updateUserListener = updateUserListener;
+    }
+
+    public void unsubscribeUpdateUserListener() {
+        webSocket.updateUserListener = null;
+    }
+
+    public void subscribeMapItemsSaveListener(@NonNull MapItemsSaveListener mapItemsSaveListener) throws UserNotLoggedInException {
+        if (!webSocket.isLoggedIn) {
+            throw new UserNotLoggedInException();
+        }
+        webSocket.mapItemsSaveListener = mapItemsSaveListener;
+    }
+
+    public void ubsubscribeMapItemsSaveListener() {
+        webSocket.mapItemsSaveListener = null;
+    }
+
+    public void subscribeRemoveVideoListener(@NonNull RemoveVideoListener removeVideoListener) throws UserNotLoggedInException {
+        if (!webSocket.isLoggedIn) {
+            throw new UserNotLoggedInException();
+        }
+
+        webSocket.removeVideoListener = removeVideoListener;
+    }
+
+    public void unsubscribeRemoveVideoListener() {
+        webSocket.removeVideoListener = null;
+    }
+    //endregion
 }
