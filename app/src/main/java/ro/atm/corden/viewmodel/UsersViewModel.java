@@ -24,6 +24,10 @@ public class UsersViewModel extends AndroidViewModel {
         allUsers.setValue(Repository.getInstance().requestAllUsers());
     }
 
+    public void updateUsers(List<User> users){
+        allUsers.setValue(users);
+    }
+
     public MutableLiveData<List<User>> getAllUsers() {
         return allUsers;
     }

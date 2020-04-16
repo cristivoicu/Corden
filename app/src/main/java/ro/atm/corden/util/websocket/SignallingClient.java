@@ -40,6 +40,7 @@ import ro.atm.corden.util.websocket.callback.RemoveVideoListener;
 import ro.atm.corden.util.websocket.callback.UpdateUserListener;
 import ro.atm.corden.util.websocket.protocol.Message;
 import ro.atm.corden.util.websocket.protocol.events.MediaEventType;
+import ro.atm.corden.util.websocket.subscribers.UserSubscriber;
 
 import static ro.atm.corden.util.constant.JsonConstants.*;
 
@@ -73,8 +74,8 @@ public class SignallingClient {
     public void initWebSociet(Context context) {
         try {
             //uri = new URI("wss://192.168.8.100:8443/websocket"); // atunci cand e conectat prin stick
-             URI uri = new URI("wss://192.168.0.103:8443/websocket"); // wifi acasa
-             //URI uri = new URI("wss://82.78.75.209:3650/websocket"); // wifi acasa
+            URI uri = new URI("wss://192.168.0.100:8443/websocket"); // wifi acasa
+              //URI uri = new URI("wss://192.168.43.228:8443/websocket"); // hotspot telefon
 
             try {
                 String keyStoreType = KeyStore.getDefaultType();
@@ -438,4 +439,12 @@ public class SignallingClient {
         webSocket.removeVideoListener = null;
     }
     //endregion
+
+    public void subscribeUserListListener(UserSubscriber userSubscriber){
+        webSocket.userSubscribers.add(userSubscriber);
+    }
+
+    public void unsubscribeUserListListener(UserSubscriber userSubscriber){
+        webSocket.userSubscribers.remove(userSubscriber);
+    }
 }

@@ -16,6 +16,7 @@ import org.java_websocket.handshake.ServerHandshake;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import ro.atm.corden.model.user.Role;
@@ -30,6 +31,7 @@ import ro.atm.corden.util.websocket.callback.MapItemsSaveListener;
 import ro.atm.corden.util.websocket.callback.MediaListener;
 import ro.atm.corden.util.websocket.callback.RemoveVideoListener;
 import ro.atm.corden.util.websocket.callback.UpdateUserListener;
+import ro.atm.corden.util.websocket.subscribers.UserSubscriber;
 
 import static ro.atm.corden.util.constant.JsonConstants.USE_ICE_FOR_LIVE;
 import static ro.atm.corden.util.constant.JsonConstants.USE_ICE_FOR_PLAY;
@@ -71,6 +73,8 @@ final class WebSocket extends WebSocketClient {
     final List<Video> videos = new ArrayList<>();
     final List<User> users = new ArrayList<>();
     final List<Action> actions = new ArrayList<>();
+
+    List<UserSubscriber> userSubscribers = new LinkedList<>();
 
 
     public WebSocket(URI serverUri) {
@@ -260,9 +264,10 @@ final class WebSocket extends WebSocketClient {
                 playbackListener.onGotPosition(position);
                 break;
             case "startVideoStreaming":
-                if (!receivedMessage.get("response").equals("accepted")) {
 
-                }
+                Log.d(TAG, "Got record response");
+                sdpAnswer = receivedMessage.get("sdpAnswer").getAsString();
+                mediaListenerRecord.onStartResponse(sdpAnswer);
                 break;
             default:
                 Log.e(TAG, "Json media error");
