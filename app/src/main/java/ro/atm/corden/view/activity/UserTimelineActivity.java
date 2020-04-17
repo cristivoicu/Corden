@@ -22,7 +22,7 @@ import ro.atm.corden.R;
 import ro.atm.corden.databinding.ActivityUserTimelineBinding;
 import ro.atm.corden.model.user.Action;
 import ro.atm.corden.util.adapter.TimelineAdapter;
-import ro.atm.corden.util.constant.ExtraConstant;
+import ro.atm.corden.util.constant.Constant;
 import ro.atm.corden.viewmodel.UserTimelineViewModel;
 
 public class UserTimelineActivity extends AppCompatActivity {
@@ -81,7 +81,7 @@ public class UserTimelineActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-        username = getIntent().getStringExtra(ExtraConstant.GET_USERNAME);
+        username = getIntent().getStringExtra(Constant.GET_USERNAME);
 
         if(username != null){
             viewModel.setActions(username, new SimpleDateFormat("YYYY-MM-dd").format(new Date()));

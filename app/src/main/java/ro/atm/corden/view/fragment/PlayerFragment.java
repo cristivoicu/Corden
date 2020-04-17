@@ -1,8 +1,6 @@
 package ro.atm.corden.view.fragment;
 
 import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
-import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
@@ -33,7 +31,7 @@ import ro.atm.corden.R;
 import ro.atm.corden.databinding.FragmentPlayerBinding;
 import ro.atm.corden.model.video.Video;
 import ro.atm.corden.model.video.VideoInfo;
-import ro.atm.corden.util.constant.ExtraConstant;
+import ro.atm.corden.util.constant.Constant;
 import ro.atm.corden.util.exception.websocket.UserNotLoggedInException;
 import ro.atm.corden.util.webrtc.client.Session;
 import ro.atm.corden.util.webrtc.interfaces.MediaActivity;
@@ -93,7 +91,7 @@ public class PlayerFragment extends Fragment implements MediaListener.PlaybackLi
             }
         });
 
-        Video video = (Video) getArguments().get(ExtraConstant.GET_VIDEO);
+        Video video = (Video) getArguments().get(Constant.GET_VIDEO);
         videoPath = video.getName();
 
         SignallingClient.getInstance().isInitiator = true;

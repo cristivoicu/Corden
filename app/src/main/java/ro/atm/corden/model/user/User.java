@@ -205,6 +205,11 @@ public class User implements Serializable {
     public String getStatus() {
         return status;
     }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     //endregion
 
     public String toJson() {

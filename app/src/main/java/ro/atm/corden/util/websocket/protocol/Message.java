@@ -82,7 +82,7 @@ public class Message {
         }
 
         public UpdateMessageBuilder addPayload(String username){
-            message.addProperty(USER, username);
+            message.addProperty(PAYLOAD, username);
             return this;
         }
 
@@ -157,6 +157,11 @@ public class Message {
             return this;
         }
 
+        public MediaMessageBuilder addUser(String username){
+            message.addProperty("user", username);
+            return this;
+        }
+
         public MediaMessageBuilder addVideoPosition (Long position){
             message.addProperty("position", position);
             return this;
@@ -169,6 +174,45 @@ public class Message {
         }
     }
 
+    public static class SubscribeMessageBuilder{
+        private JsonObject message;
+
+        public SubscribeMessageBuilder(){
+            message = new JsonObject();
+            message.addProperty("method", "subscribe");
+        }
+
+        public SubscribeMessageBuilder addEvent(String event){
+            message.addProperty("event", event);
+            return this;
+        }
+
+        public Message build(){
+            Message message = new Message();
+            message.message = this.message.toString();
+            return message;
+        }
+    }
+
+    public static class UnsubscribeMessageBuilder{
+        private JsonObject message;
+
+        public UnsubscribeMessageBuilder(){
+            message = new JsonObject();
+            message.addProperty("method", "unsubscribe");
+        }
+
+        public UnsubscribeMessageBuilder addEvent(String event){
+            message.addProperty("event", event);
+            return this;
+        }
+
+        public Message build(){
+            Message message = new Message();
+            message.message = this.message.toString();
+            return message;
+        }
+    }
     @NonNull
     @Override
     public String toString() {

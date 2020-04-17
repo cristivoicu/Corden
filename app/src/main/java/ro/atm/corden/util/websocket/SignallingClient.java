@@ -1,14 +1,13 @@
 package ro.atm.corden.util.websocket;
 
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Looper;
 import android.os.NetworkOnMainThreadException;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import org.json.JSONException;
-import org.json.JSONObject;
 import org.webrtc.IceCandidate;
 import org.webrtc.SessionDescription;
 
@@ -29,7 +28,6 @@ import javax.net.ssl.TrustManagerFactory;
 
 import ro.atm.corden.R;
 import ro.atm.corden.model.user.Role;
-import ro.atm.corden.model.user.User;
 import ro.atm.corden.util.exception.login.LoginListenerNotInitialisedException;
 import ro.atm.corden.util.exception.websocket.UserNotLoggedInException;
 import ro.atm.corden.util.websocket.callback.EnrollListener;
@@ -40,6 +38,8 @@ import ro.atm.corden.util.websocket.callback.RemoveVideoListener;
 import ro.atm.corden.util.websocket.callback.UpdateUserListener;
 import ro.atm.corden.util.websocket.protocol.Message;
 import ro.atm.corden.util.websocket.protocol.events.MediaEventType;
+import ro.atm.corden.util.websocket.protocol.events.SubscribeEventType;
+import ro.atm.corden.util.websocket.protocol.events.UnsubscribeEventType;
 import ro.atm.corden.util.websocket.subscribers.UserSubscriber;
 
 import static ro.atm.corden.util.constant.JsonConstants.*;
@@ -75,7 +75,6 @@ public class SignallingClient {
         try {
             //uri = new URI("wss://192.168.8.100:8443/websocket"); // atunci cand e conectat prin stick
             URI uri = new URI("wss://192.168.0.100:8443/websocket"); // wifi acasa
-              //URI uri = new URI("wss://192.168.43.228:8443/websocket"); // hotspot telefon
 
             try {
                 String keyStoreType = KeyStore.getDefaultType();
@@ -83,10 +82,10 @@ public class SignallingClient {
                 KeyStore trustStore = KeyStore.getInstance(keyStoreType);
                 InputStream serverCert = context.getResources().openRawResource(R.raw.applicationserver);
                 InputStream caCert = context.getResources().openRawResource(R.raw.corden_ca);
-                trustStore.load(serverCert, "parola".toCharArray());
+               // trustStore.load(serverCert, "parola".toCharArray());
                 trustStore.load(caCert, "parola".toCharArray());
 
-                TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+                /*TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
                 trustManagerFactory.init(trustStore);
 
                 InputStream clientCert = context.getResources().openRawResource(R.raw.androidclient);
@@ -96,7 +95,7 @@ public class SignallingClient {
                 // initialize key manager factory with the read client certificate
                 KeyManagerFactory keyManagerFactory = null;
                 keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-                keyManagerFactory.init(keyStore, "parola".toCharArray());
+                keyManagerFactory.init(keyStore, "parola".toCharArray());*/
 
                 // Create a TrustManager that trusts the CAs in our KeyStore
                 String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
@@ -109,7 +108,7 @@ public class SignallingClient {
                 webSocket = new WebSocket(uri);
                 webSocket.setSocketFactory(sslContext.getSocketFactory());
 
-            } catch (NoSuchAlgorithmException | UnrecoverableKeyException | IOException | CertificateException | KeyStoreException | KeyManagementException e) {
+            } catch (NoSuchAlgorithmException | /*UnrecoverableKeyException |*/ IOException | CertificateException | KeyStoreException | KeyManagementException e) {
                 e.printStackTrace();
             }
 
@@ -148,32 +147,6 @@ public class SignallingClient {
     }
 
     /**
-     * This method is used by admin to register new user in server's database
-     * <p>The sender is recognised in the server using the session object</p>
-     * <b>It should not be called from the main thread</b>
-     *
-     * @param user is the user that is enrolled in the database
-     * @throws NetworkOnMainThreadException if main thread is used
-     */
-    public void enrollUser(@NonNull User user) throws NetworkOnMainThreadException {
-        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
-            Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
-            throw new NetworkOnMainThreadException();
-        }
-        JSONObject jsonObject = new JSONObject();
-        try {
-            jsonObject.put(ID, ID_ENROLL_USER);
-            jsonObject.put(USER, user.toJson());
-
-            Log.i("TAG", "Enroll event: " + jsonObject.toString());
-
-            webSocket.send(jsonObject.toString());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
      * Used by admin to intercept user recording session
      *
      * @param username is the username that is sending live video to the media server for recording
@@ -187,17 +160,13 @@ public class SignallingClient {
 
         Log.i(TAG, "Sending live request to server");
 
-        JSONObject jsonObject = new JSONObject();
+        Message message = new Message.MediaMessageBuilder()
+                .addEvent(MediaEventType.START_VIDEO_WATCH)
+                .addSdpOffer(sdpOffer)
+                .addUser(username)
+                .build();
 
-        try {
-            jsonObject.put(ID, ID_GET_LIVE);
-            jsonObject.put(FROM, username);
-            jsonObject.put(SDP_OFFER, sdpOffer.description);
-
-            webSocket.send(jsonObject.toString());
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        webSocket.send(message.toString());
     }
 
     /**
@@ -321,7 +290,7 @@ public class SignallingClient {
      * @param from is the username
      * @throws NetworkOnMainThreadException
      */
-    public void stopVideoRecording(@NonNull String from) {
+    public void stopVideoStreaming(@NonNull String from) {
         if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
             Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
             throw new NetworkOnMainThreadException();
@@ -357,10 +326,6 @@ public class SignallingClient {
             e.printStackTrace();
         }
 
-    }
-
-    public void logout() {
-        webSocket.close();
     }
 
     //region Subscribe and unsubscribe methods
@@ -440,11 +405,43 @@ public class SignallingClient {
     }
     //endregion
 
-    public void subscribeUserListListener(UserSubscriber userSubscriber){
-        webSocket.userSubscribers.add(userSubscriber);
+    public void subscribeUserListListener(UserSubscriber userSubscriber) {
+        webSocket.userSubscriber = userSubscriber;
     }
 
-    public void unsubscribeUserListListener(UserSubscriber userSubscriber){
-        webSocket.userSubscribers.remove(userSubscriber);
+    public void unsubscribeUserListListener() {
+        webSocket.userSubscriber = null;
+    }
+
+    /***/
+    public void sendMessageToSubscribeToUserList() {
+        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+            Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
+            throw new NetworkOnMainThreadException();
+        }
+
+        Message message = new Message.SubscribeMessageBuilder()
+                .addEvent(SubscribeEventType.USER_UPDATED)
+                .build();
+
+        webSocket.send(message.toString());
+    }
+
+    /***/
+    public void sendMessageToUnsubscribeFromUserList() {
+        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+            Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
+            throw new NetworkOnMainThreadException();
+        }
+
+        Message message = new Message.UnsubscribeMessageBuilder()
+                .addEvent(UnsubscribeEventType.UNSUBSCRIBE_USER_UPDATED)
+                .build();
+
+        webSocket.send(message.toString());
+    }
+
+    public void logout() {
+        webSocket.close();
     }
 }

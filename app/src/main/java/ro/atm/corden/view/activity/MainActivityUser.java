@@ -14,9 +14,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
-import org.slf4j.Logger;
 import org.webrtc.CameraVideoCapturer;
-import org.webrtc.EglBase;
 
 import ro.atm.corden.R;
 import ro.atm.corden.databinding.ActivityMainUserBinding;
@@ -172,7 +170,7 @@ public class MainActivityUser extends AppCompatActivity {
     private static class StopServiceAsyncTask extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void... voids) {
-            SignallingClient.getInstance().stopVideoRecording(LoginUser.username);
+            SignallingClient.getInstance().stopVideoStreaming(LoginUser.username);
             return null;
         }
     }

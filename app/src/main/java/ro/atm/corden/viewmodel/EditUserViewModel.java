@@ -158,5 +158,9 @@ public class EditUserViewModel extends AndroidViewModel {
         isUser = user;
     }
 
+    public User getUserAccount() {
+        return user;
+    }
+
     //endregion
 }

@@ -4,6 +4,9 @@ import android.os.AsyncTask;
 import android.os.ConditionVariable;
 import android.util.Log;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -36,8 +39,12 @@ public class Repository {
 
     public void updateUser(User user) {
         UpdateUserAsyncTask updateUserAsyncTask = new UpdateUserAsyncTask();
-
         updateUserAsyncTask.execute(user);
+    }
+
+    public void disableUser(String username){
+        MessageToDisableUserAsyncTask messageToDisableUserAsyncTask = new MessageToDisableUserAsyncTask();
+        messageToDisableUserAsyncTask.execute(username);
     }
 
     public List<User> requestAllUsers() {
@@ -68,6 +75,11 @@ public class Repository {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public void enrollUser(User user){
+        EnrollUserAsyncTask enrollUserAsyncTask = new EnrollUserAsyncTask();
+        enrollUserAsyncTask.execute(user);
     }
 
     public void saveMapItems(List<MapItem> items) {
@@ -152,7 +164,7 @@ public class Repository {
         protected Void doInBackground(User... users) {
             Message message = new Message.UpdateMessageBuilder()
                     .addEvent(UpdateEventType.UPDATE_USER)
-                    .addPayload(users[0].toJson())
+                    .addPayload(users[0])
                     .build();
 
             signallingClient.webSocket.send(message.toString());
@@ -169,6 +181,40 @@ public class Repository {
             Message message = new Message.UpdateMessageBuilder()
                     .addEvent(UpdateEventType.MAP_ITEMS)
                     .addPayload(lists[0])
+                    .build();
+
+            signallingClient.webSocket.send(message.toString());
+            return null;
+        }
+    }
+
+    private static class EnrollUserAsyncTask extends AsyncTask<User, Void, Void>{
+
+        @Override
+        protected Void doInBackground(User... users) {
+            JSONObject jsonObject = new JSONObject();
+            try {
+                jsonObject.put("method", "update");
+                jsonObject.put("event", "enrollUser");
+                jsonObject.put("payload", users[0].toJson());
+
+                Log.i(TAG, "Enroll event: " + jsonObject.toString());
+
+                signallingClient.webSocket.send(jsonObject.toString());
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+    }
+
+    private static class MessageToDisableUserAsyncTask extends AsyncTask<String, Void, Void>{
+
+        @Override
+        protected Void doInBackground(String... strings) {
+            Message message = new Message.UpdateMessageBuilder()
+                    .addEvent(UpdateEventType.DISABLE_USER)
+                    .addPayload(strings[0])
                     .build();
 
             signallingClient.webSocket.send(message.toString());

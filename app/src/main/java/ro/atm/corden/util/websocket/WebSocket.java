@@ -16,15 +16,14 @@ import org.java_websocket.handshake.ServerHandshake;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import ro.atm.corden.model.user.Role;
 import ro.atm.corden.model.user.Action;
+import ro.atm.corden.model.user.Status;
 import ro.atm.corden.model.user.User;
 import ro.atm.corden.model.video.Video;
 import ro.atm.corden.model.video.VideoInfo;
-import ro.atm.corden.util.websocket.callback.DisableUserListener;
 import ro.atm.corden.util.websocket.callback.EnrollListener;
 import ro.atm.corden.util.websocket.callback.LoginListener;
 import ro.atm.corden.util.websocket.callback.MapItemsSaveListener;
@@ -64,7 +63,6 @@ final class WebSocket extends WebSocketClient {
     UpdateUserListener updateUserListener;
     MapItemsSaveListener mapItemsSaveListener;
     RemoveVideoListener removeVideoListener;
-    DisableUserListener disableUserListener;
 
     ConditionVariable videosConditionVariable = null;
     ConditionVariable usersConditionVariable = null;
@@ -74,7 +72,7 @@ final class WebSocket extends WebSocketClient {
     final List<User> users = new ArrayList<>();
     final List<Action> actions = new ArrayList<>();
 
-    List<UserSubscriber> userSubscribers = new LinkedList<>();
+    UserSubscriber userSubscriber;
 
 
     public WebSocket(URI serverUri) {
@@ -107,7 +105,6 @@ final class WebSocket extends WebSocketClient {
      * <ul>
      *     <li> {@link EnrollListener}</li>
      *     <li> {@link UpdateUserListener}</li>
-     *     <li> {@link DisableUserListener}</li>
      *     <li> {@link RemoveVideoListener}</li>
      *     <li> {@link MapItemsSaveListener}</li>
      * </ul></p>
@@ -125,38 +122,58 @@ final class WebSocket extends WebSocketClient {
 
         switch (receivedMessage.get("event").getAsString()) {
             case "enroll":
-                if (isSuccess) {
-                    enrollListener.onEnrollSuccess();
-                } else {
-                    enrollListener.onEnrollError();
+                try {
+                    if (isSuccess) {
+                        enrollListener.onEnrollSuccess();
+                    } else {
+                        enrollListener.onEnrollError();
+                    }
+                } catch (NullPointerException e) {
+                    Log.e(TAG, "Enroll listener has not subscribers!");
                 }
                 break;
             case "updateUser":
-                if (isSuccess) {
-                    updateUserListener.onUpdateSuccess();
-                } else {
-                    updateUserListener.onUpdateFailure();
+                try {
+                    if (isSuccess) {
+                        updateUserListener.onUpdateSuccess();
+                    } else {
+                        updateUserListener.onUpdateFailure();
+                    }
+                } catch (NullPointerException e) {
+                    Log.e(TAG, "Update user listener has not subscribers!");
                 }
                 break;
             case "disableUser":
-                if (isSuccess) {
-                    disableUserListener.onDisableUserSuccess();
-                } else {
-                    disableUserListener.inDisableUserFailure();
+                try {
+                    if (isSuccess) {
+                        updateUserListener.onUserDisableSuccess();
+                    } else {
+                        updateUserListener.onUserDisableFailure();
+                    }
+                } catch (NullPointerException e) {
+                    Log.e(TAG, "Disable user listener has not subscribers!");
                 }
                 break;
             case "removeVideo":
-                if (isSuccess) {
-                    removeVideoListener.onRemoveVideoSuccess();
-                } else {
-                    removeVideoListener.onRemoveVideoFailure();
+                try {
+                    if (isSuccess) {
+                        removeVideoListener.onRemoveVideoSuccess();
+                    } else {
+                        removeVideoListener.onRemoveVideoFailure();
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Remove video listener has not subscribers!");
                 }
                 break;
             case "mapItems":
-                if (isSuccess) {
-                    mapItemsSaveListener.onMapItemsSaveSuccess();
-                } else {
-                    mapItemsSaveListener.onMapItemsSaveFailure();
+                try {
+                    if (isSuccess) {
+                        mapItemsSaveListener.onMapItemsSaveSuccess();
+                    } else {
+                        mapItemsSaveListener.onMapItemsSaveFailure();
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Map items save listener has not subscribers!");
                 }
                 break;
             default:
@@ -274,6 +291,22 @@ final class WebSocket extends WebSocketClient {
         }
     }
 
+    private void handleSubscribeMethodMessage(JsonObject receivedMessage){
+        switch (receivedMessage.get("event").getAsString()){
+            case "userUpdated":
+                String userJson = receivedMessage.get("payload").getAsString();
+                userSubscriber.onUserDataChanged(User.fromJson(userJson));
+                break;
+            case "userStatus":
+                String status = receivedMessage.get("status").getAsString();
+                String username = receivedMessage.get("username").getAsString();
+                userSubscriber.onUserStatusChanged(username, Status.valueOf(status));
+                break;
+            default:
+                Log.e("TAG", "Unknown subscribe event received from application server");
+        }
+    }
+
     @Override
     public void onMessage(String message) {
         Log.e(TAG, "Received Text message: " + message);
@@ -290,86 +323,12 @@ final class WebSocket extends WebSocketClient {
                 case "media":
                     handleMediaMethodMessage(receivedMessage);
                     break;
+                case "subscribe":
+                    handleSubscribeMethodMessage(receivedMessage);
+                    break;
                 default:
-
+                    Log.e(TAG, "Wrong method received from application server");
             }
-
-            /*switch (receivedMessage.get("id").getAsString()) {
-                case EVENT_START_RECODRING:
-
-                    break;
-                case EVENT_RECORD_RESPONSE:
-                    Log.d(TAG, "Got record response");
-                    String sdpAnswer = receivedMessage.get("sdpAnswer").getAsString();
-                    mediaListenerRecord.onStartResponse(sdpAnswer);
-                case EVENT_STOP_COMMUNICATION:
-                    Log.i(TAG, "Got stop communication");
-                case EVENT_ICE_CANDIDATE: // rec ice candidate
-                    Log.i(TAG, "Got ice candidate");
-                    String usedFor = receivedMessage.get("for").getAsString();
-                    switch (usedFor) {
-                        case USE_ICE_FOR_LIVE:
-                            if (livePlayListener != null)
-                                livePlayListener.onIceCandidate(receivedMessage.getAsJsonObject("candidate"));
-                            break;
-                        case USE_ICE_FOR_PLAY:
-                            if (playbackListener != null)
-                                playbackListener.onIceCandidate(receivedMessage.getAsJsonObject("candidate"));
-                            break;
-                        case USE_ICE_FOR_RECORDING:
-                            if (mediaListenerRecord != null)
-                                mediaListenerRecord.onIceCandidate(receivedMessage.getAsJsonObject("candidate"));
-                            break;
-                    }
-                    break;
-                case EVENT_PLAY_RESPONSE:
-                    String response = receivedMessage.get("response").getAsString();
-                    if (!response.equals("accepted")) {
-                        Log.e(TAG, "Play request rejected!");
-                        break;
-                    }
-                    String sdpAnwer = receivedMessage.get("sdpAnswer").getAsString();
-                    playbackListener.onPlayResponse(sdpAnwer);
-                    break;
-                case EVENT_GET_POSITION_RESPONSE:
-                    long position = receivedMessage.get("position").getAsLong();
-                    playbackListener.onGotPosition(position);
-                    break;
-                case EVENT_VIDEO_PLAY_END:
-                    playbackListener.onPlayEnd();
-                    break;
-                case EVENT_VIDEO_INFO:
-                    boolean isSeekable = receivedMessage.get(VIDEO_INFO_IS_SEEKABLE).getAsBoolean();
-                    long seekableInit = receivedMessage.get(VIDEO_INFO_INIT_SEEKABLE).getAsLong();
-                    long seekableEnd = receivedMessage.get(VIDEO_INFO_END_SEEKABLE).getAsLong();
-                    long duration = receivedMessage.get(VIDEO_INFO_DURATION).getAsLong();
-
-                    VideoInfo videoInfo = new VideoInfo(isSeekable, seekableInit, seekableEnd, duration);
-                    playbackListener.onVideoInfo(videoInfo);
-                    break;
-                case EVENT_LIVE_RESPONSE:
-                    if (RESPONSE_ACCEPTED.equals(receivedMessage.get("response"))) {
-                        Log.d(TAG, "Received sdp answer, live response!");
-                        sdpAnswer = receivedMessage.get(SDP_OFFER).getAsString();
-                        livePlayListener.onLiveResponse(sdpAnswer);
-                    }
-                    break;
-                case EVENT_RECORDING:
-                    String status = receivedMessage.get("status").getAsString();
-                    switch (status) {
-                        case STATUS_RECORDING_STARTED:
-                            Log.d(TAG, "Recording has started!");
-                            break;
-                        case STATUS_RECORDING_STOPPED:
-                            Log.d(TAG, "Recording has stopped");
-                            break;
-                    }
-                    break;
-                default:
-                    Log.e(TAG, "Client received an unknown message from server!");
-                    break;
-
-            }*/
         } catch (JsonSyntaxException e) {
             Log.e(TAG, "json invalid");
         }

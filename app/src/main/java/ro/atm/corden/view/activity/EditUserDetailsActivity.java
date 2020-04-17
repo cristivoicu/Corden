@@ -6,6 +6,7 @@ import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.DialogFragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.TimePickerDialog;
 import android.content.Intent;
@@ -15,18 +16,21 @@ import android.os.Looper;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import java.util.Locale;
 
 import ro.atm.corden.R;
 import ro.atm.corden.databinding.ActivityEditUserDetailsBinding;
 import ro.atm.corden.model.user.User;
-import ro.atm.corden.util.constant.ExtraConstant;
+import ro.atm.corden.util.constant.Constant;
 import ro.atm.corden.util.exception.websocket.UserNotLoggedInException;
 import ro.atm.corden.util.websocket.SignallingClient;
 import ro.atm.corden.util.websocket.callback.UpdateUserListener;
 import ro.atm.corden.view.fragment.TimePickerFragment;
 import ro.atm.corden.viewmodel.EditUserViewModel;
+
+import static android.content.Intent.EXTRA_USER;
 
 public class EditUserDetailsActivity extends AppCompatActivity
         implements TimePickerDialog.OnTimeSetListener,
@@ -62,7 +66,7 @@ public class EditUserDetailsActivity extends AppCompatActivity
                 .getInstance(this.getApplication())
                 .create(EditUserViewModel.class);
         binding.setViewModel(viewModel);
-        String username = getIntent().getStringExtra(ExtraConstant.GET_USERNAME);
+        String username = getIntent().getStringExtra(Constant.GET_USERNAME);
 
         binding.toolbar.setTitle("Edit user account");
         binding.toolbar.setSubtitle("For user: " + username);
@@ -74,7 +78,7 @@ public class EditUserDetailsActivity extends AppCompatActivity
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
-            user = (User) getIntent().getSerializableExtra(Intent.EXTRA_USER);
+            user = (User) getIntent().getSerializableExtra(EXTRA_USER);
         }
         viewModel.init(user);
 
@@ -98,6 +102,12 @@ public class EditUserDetailsActivity extends AppCompatActivity
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        SignallingClient.getInstance().unsubscribeUpdateUserListener();
+    }
+
+    @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.save:
@@ -106,6 +116,12 @@ public class EditUserDetailsActivity extends AppCompatActivity
         }
 
         return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        setResult(Activity.RESULT_CANCELED);
+        finish();
     }
 
     @Override
@@ -139,7 +155,19 @@ public class EditUserDetailsActivity extends AppCompatActivity
                     dialogBuilder.setTitle("Information")
                             .setMessage("User data was successfully updated!")
                             .setIcon(android.R.drawable.ic_dialog_info)
-                            .setPositiveButton("OK", null);
+                            .setOnCancelListener(dialog -> {
+                                Intent returnIntent = new Intent();
+                                returnIntent.putExtra(Intent.EXTRA_USER, viewModel.getUserAccount());
+                                setResult(Activity.RESULT_OK, returnIntent);
+                                finish();
+                            })
+                            .setPositiveButton("OK", (dialog, which) ->
+                            {
+                                Intent returnIntent = new Intent();
+                                returnIntent.putExtra(Intent.EXTRA_USER, viewModel.getUserAccount());
+                                setResult(Activity.RESULT_OK, returnIntent);
+                                finish();
+                            });
                     AlertDialog alertDialog = dialogBuilder.create();
                     alertDialog.show();
                 });
@@ -156,6 +184,28 @@ public class EditUserDetailsActivity extends AppCompatActivity
                             .setPositiveButton("OK", null);
                     AlertDialog alertDialog = dialogBuilder.create();
                     alertDialog.show();
+                });
+    }
+
+    @Override
+    public void onUserDisableSuccess() {
+        new Handler(Looper.getMainLooper())
+                .post(() -> {
+                    Toast.makeText(EditUserDetailsActivity.this,
+                            "User account was disabled!",
+                            Toast.LENGTH_SHORT)
+                            .show();
+                });
+    }
+
+    @Override
+    public void onUserDisableFailure() {
+        new Handler(Looper.getMainLooper())
+                .post(() -> {
+                    Toast.makeText(EditUserDetailsActivity.this,
+                            "Failed to disable user account",
+                            Toast.LENGTH_SHORT)
+                            .show();
                 });
     }
 }

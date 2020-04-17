@@ -302,7 +302,8 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="0.473"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/cardView2" />
+                    app:layout_constraintTop_toBottomOf="@+id/cardView2"
+                    android:onClick="onDisableAccountClicked"/>
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 

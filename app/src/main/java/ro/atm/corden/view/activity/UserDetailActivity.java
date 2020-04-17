@@ -1,18 +1,24 @@
 package ro.atm.corden.view.activity;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+
+import java.util.Locale;
 
 import ro.atm.corden.R;
 import ro.atm.corden.databinding.ActivityUserDetailBinding;
 import ro.atm.corden.model.user.Role;
 import ro.atm.corden.model.user.User;
-import ro.atm.corden.util.constant.ExtraConstant;
+import ro.atm.corden.util.constant.Constant;
 import ro.atm.corden.viewmodel.UserDetailViewModel;
 
 public class UserDetailActivity extends AppCompatActivity {
@@ -45,18 +51,13 @@ public class UserDetailActivity extends AppCompatActivity {
                 binding.image.setImageResource(R.drawable.ic_boss);
                 binding.textUserType.setText("ADMIN");
             }
-            viewModel.setRole(user.getRoles());
-            viewModel.setUserAddress(user.getAddress());
-            viewModel.setUsername(user.getUsername());
-            viewModel.setUserPhoneNumber(user.getPhoneNumber());
-            viewModel.setUserProgram(String.format("Program from %s to %s", user.getProgramStart(), user.getProgramEnd()));
-            viewModel.setUserRealName(user.getName());
+            viewModel.setData(user);
         }
     }
 
     public void onListVideosClicked(View view) {
         Intent intent = new Intent(this, VideoListActivity.class);
-        intent.putExtra(ExtraConstant.GET_USERNAME, user.getUsername());
+        intent.putExtra(Constant.GET_USERNAME, user.getUsername());
         startActivity(intent);
     }
 
@@ -67,14 +68,39 @@ public class UserDetailActivity extends AppCompatActivity {
 
     public void onTimelineButtonClicked(View view) {
         Intent intent = new Intent(this, UserTimelineActivity.class);
-        intent.putExtra(ExtraConstant.GET_USERNAME, user.getUsername());
+        intent.putExtra(Constant.GET_USERNAME, user.getUsername());
         startActivity(intent);
     }
 
     public void onEditUserButtonClicked(View view) {
         Intent intent = new Intent(this, EditUserDetailsActivity.class);
-        intent.putExtra(ExtraConstant.GET_USERNAME, user.getUsername());
+        intent.putExtra(Constant.GET_USERNAME, user.getUsername());
         intent.putExtra(Intent.EXTRA_USER, user);
-        startActivity(intent);
+        startActivityForResult(intent, Constant.USER_DETAIL_ACTIVITY);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode == Constant.USER_DETAIL_ACTIVITY){
+            if(resultCode == Activity.RESULT_OK){
+                user = (User) data.getSerializableExtra(Intent.EXTRA_USER);
+                viewModel.setData(user);
+            }
+        }
+    }
+
+    public void onDisableAccountClicked(View view) {
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        dialogBuilder.setTitle("Warning")
+                .setMessage("You want to disable this account?\nThis action is irreversible!")
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setPositiveButton("Yes", (dialog, which) ->
+                {
+                    viewModel.diseableUser();
+                });
+        AlertDialog alertDialog = dialogBuilder.create();
+        alertDialog.show();
     }
 }

@@ -1,9 +1,15 @@
 package ro.atm.corden.viewmodel;
 
 import android.app.Application;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
+
+import java.util.Locale;
+
+import ro.atm.corden.model.user.User;
+import ro.atm.corden.util.websocket.Repository;
 
 public class UserDetailViewModel extends AndroidViewModel {
     private String userRealName;
@@ -63,5 +69,21 @@ public class UserDetailViewModel extends AndroidViewModel {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public void setData(User user){
+        userRealName = user.getName();
+        userAddress = user.getAddress();
+        userPhoneNumber = user.getPhoneNumber();
+        username = user.getUsername();
+        userProgram = String.format(Locale.getDefault(),
+                "Program from %s to %s",
+                user.getProgramStart(),
+                user.getProgramEnd());
+        role = user.getRoles();
+    }
+
+    public void diseableUser(){
+        Repository.getInstance().disableUser(this.username);
     }
 }

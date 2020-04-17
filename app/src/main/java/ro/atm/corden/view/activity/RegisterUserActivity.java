@@ -27,6 +27,7 @@ import ro.atm.corden.util.exception.register.InvalidPasswordException;
 import ro.atm.corden.util.exception.register.LengthException;
 import ro.atm.corden.util.exception.register.PhoneNumberException;
 import ro.atm.corden.util.exception.websocket.UserNotLoggedInException;
+import ro.atm.corden.util.websocket.Repository;
 import ro.atm.corden.util.websocket.SignallingClient;
 import ro.atm.corden.util.websocket.callback.EnrollListener;
 import ro.atm.corden.view.fragment.TimePickerFragment;
@@ -53,6 +54,22 @@ public class RegisterUserActivity extends AppCompatActivity
      */
     private int minute = 60;
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        try {
+            SignallingClient.getInstance().subscribeEnrollListener(this);
+        } catch (UserNotLoggedInException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        SignallingClient.getInstance().unsubscribeEnrollListener();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,12 +82,6 @@ public class RegisterUserActivity extends AppCompatActivity
 
         binding.setLifecycleOwner(this);
         binding.setViewModel(mViewModel);
-
-        try {
-            SignallingClient.getInstance().subscribeEnrollListener(this);
-        } catch (UserNotLoggedInException e) {
-            e.printStackTrace();
-        }
 
         binding.roleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -186,7 +197,7 @@ public class RegisterUserActivity extends AppCompatActivity
             try {
                 user[0].validateData();
                 Log.i("USER JSON", user[0].toJson());
-                SignallingClient.getInstance().enrollUser(user[0]);
+                Repository.getInstance().enrollUser(user[0]);
             } catch (LengthException e) {
                 // do nothing
             } catch (EmptyFieldException | NullPointerException e) {

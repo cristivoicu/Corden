@@ -12,7 +12,7 @@ import android.view.View;
 
 import ro.atm.corden.R;
 import ro.atm.corden.databinding.ActivityMainBinding;
-import ro.atm.corden.util.constant.ExtraConstant;
+import ro.atm.corden.util.constant.Constant;
 import ro.atm.corden.util.websocket.SignallingClient;
 
 public class MainActivityAdmin extends AppCompatActivity {
@@ -58,7 +58,7 @@ public class MainActivityAdmin extends AppCompatActivity {
 
     public void onShowAllUsersClicked(View view) {
         Intent intent = new Intent(this, UsersActivity.class);
-        intent.putExtra(ExtraConstant.GET_USERS_TYPE, ExtraConstant.GET_USERS_ALL);
+        intent.putExtra(Constant.GET_USERS_TYPE, Constant.GET_USERS_ALL);
         startActivity(intent);
     }
 
