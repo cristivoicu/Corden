@@ -195,7 +195,7 @@ public class Repository {
             JSONObject jsonObject = new JSONObject();
             try {
                 jsonObject.put("method", "update");
-                jsonObject.put("event", "enrollUser");
+                jsonObject.put("event", "enroll");
                 jsonObject.put("payload", users[0].toJson());
 
                 Log.i(TAG, "Enroll event: " + jsonObject.toString());

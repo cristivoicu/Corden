@@ -268,7 +268,8 @@
                             android:drawableTint="@color/color2"
                             android:fontFamily="@font/lato_light"
                             android:text="RT location"
-                            android:textColor="@color/busAccident" />
+                            android:textColor="@color/busAccident"
+                            android:onClick="onRealTimeLocationButtonClicked"/>
 
                         <Button
                             android:layout_width="0dp"

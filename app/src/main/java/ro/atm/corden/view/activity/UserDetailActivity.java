@@ -103,4 +103,8 @@ public class UserDetailActivity extends AppCompatActivity {
         AlertDialog alertDialog = dialogBuilder.create();
         alertDialog.show();
     }
+
+    public void onRealTimeLocationButtonClicked(View view) {
+
+    }
 }

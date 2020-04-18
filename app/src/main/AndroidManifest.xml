@@ -8,6 +8,7 @@
          location permissions for the 'MyLocation' functionality.
     -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
@@ -35,6 +36,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <!-- Services -->
+        <service
+            android:name=".util.services.LocationService"
+            android:stopWithTask="true"/>
+
+        <service
+            android:name=".util.services.StreamingIntentService"
+            android:exported="false"
+            android:stopWithTask="true"/>
 
         <activity android:name=".view.activity.EditUserDetailsActivity" />
         <!--
@@ -63,10 +73,6 @@
             android:parentActivityName=".view.activity.MainActivityUser" />
         <activity android:name=".view.activity.MediaActivity" />
 
-        <service
-            android:name=".util.services.StreamingIntentService"
-            android:exported="false" />
-
         <activity
             android:name=".view.activity.MainActivityUser"
             android:launchMode="singleTop" />
@@ -76,9 +82,10 @@
         <activity
             android:name=".view.activity.RegisterUserActivity"
             android:parentActivityName=".view.activity.MainActivityAdmin" />
-        <activity android:name=".view.activity.LoginActivity"
-            android:theme="@style/MaterialTheme"
-            android:configChanges="orientation|screenSize">
+        <activity
+            android:name=".view.activity.LoginActivity"
+            android:configChanges="orientation|screenSize"
+            android:theme="@style/MaterialTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

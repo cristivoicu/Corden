@@ -1,6 +1,7 @@
 package ro.atm.corden.util.websocket;
 
 import android.content.Context;
+import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Looper;
 import android.os.NetworkOnMainThreadException;
@@ -40,6 +41,7 @@ import ro.atm.corden.util.websocket.protocol.Message;
 import ro.atm.corden.util.websocket.protocol.events.MediaEventType;
 import ro.atm.corden.util.websocket.protocol.events.SubscribeEventType;
 import ro.atm.corden.util.websocket.protocol.events.UnsubscribeEventType;
+import ro.atm.corden.util.websocket.protocol.events.UpdateEventType;
 import ro.atm.corden.util.websocket.subscribers.UserSubscriber;
 
 import static ro.atm.corden.util.constant.JsonConstants.*;
@@ -74,7 +76,7 @@ public class SignallingClient {
     public void initWebSociet(Context context) {
         try {
             //uri = new URI("wss://192.168.8.100:8443/websocket"); // atunci cand e conectat prin stick
-            URI uri = new URI("wss://192.168.0.100:8443/websocket"); // wifi acasa
+            URI uri = new URI("wss://192.168.0.101:8443/websocket"); // wifi acasa
 
             try {
                 String keyStoreType = KeyStore.getDefaultType();
@@ -106,6 +108,7 @@ public class SignallingClient {
                 sslContext.init(null, tmf.getTrustManagers(), null);
 
                 webSocket = new WebSocket(uri);
+                webSocket.setConnectionLostTimeout(0);
                 webSocket.setSocketFactory(sslContext.getSocketFactory());
 
             } catch (NoSuchAlgorithmException | /*UnrecoverableKeyException |*/ IOException | CertificateException | KeyStoreException | KeyManagementException e) {
@@ -326,6 +329,20 @@ public class SignallingClient {
             e.printStackTrace();
         }
 
+    }
+
+    public void sendLiveLocation(Location location){
+/*        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+            Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
+            throw new NetworkOnMainThreadException();
+        }*/
+
+        Message message = new Message.UpdateMessageBuilder()
+                .addEvent(UpdateEventType.LOCATION)
+                .addLocation(location.getLatitude(), location.getLongitude())
+                .build();
+
+        webSocket.send(message.toString());
     }
 
     //region Subscribe and unsubscribe methods

@@ -20,11 +20,13 @@ public class RegisterViewModel extends AndroidViewModel {
     public MutableLiveData<String> userAddress = new MutableLiveData<>();
     public MutableLiveData<String> userPhoneNumber = new MutableLiveData<>();
 
-    public MutableLiveData<Role> userRole = new MutableLiveData<>();
     public MutableLiveData<String> startHour = new MutableLiveData<>();
     public MutableLiveData<String> endHour = new MutableLiveData<>();
 
     private MutableLiveData<User> user = new MutableLiveData<>();
+
+    private boolean isAdminRole;
+    private boolean isUserRole = true;
 
     public RegisterViewModel(@NonNull Application application) {
         super(application);
@@ -38,16 +40,37 @@ public class RegisterViewModel extends AndroidViewModel {
         return user;
     }
 
-    public void onClick(View view){
+    public void onClick(View view) {
+        Role role = null;
+        if (isAdminRole)
+            role = Role.ADMIN;
+        else
+            role = Role.USER;
         User user = new User(userName.getValue(),
-                             password.getValue(),
-                             userPhoneNumber.getValue(),
-                             userRealName.getValue(),
-                             userAddress.getValue(),
-                             startHour.getValue(),
-                             endHour.getValue(),
-                             new Date(),
-                             userRole.getValue());
+                password.getValue(),
+                userPhoneNumber.getValue(),
+                userRealName.getValue(),
+                userAddress.getValue(),
+                startHour.getValue(),
+                endHour.getValue(),
+                new Date(),
+                role);
         this.user.setValue(user);
+    }
+
+    public boolean isAdminRole() {
+        return isAdminRole;
+    }
+
+    public void setAdminRole(boolean admin) {
+        isAdminRole = admin;
+    }
+
+    public boolean isUserRole() {
+        return isUserRole;
+    }
+
+    public void setUserRole(boolean user) {
+        isUserRole = user;
     }
 }

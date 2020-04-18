@@ -8,7 +8,8 @@ import android.os.Build;
 import ro.atm.corden.R;
 
 public class App extends Application {
-    public static final String STR_CHANNEL_ID = "StreamServiceChannel";
+    public static final String STREAM_CHANNEL_ID = "StreamServiceChannel";
+    public static final String LOCATION_CHANNEL_ID = "StreamServiceChannel";
 
     @Override
     public void onCreate() {
@@ -19,14 +20,20 @@ public class App extends Application {
 
     private void createNotificationChannel(){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel serviceChannel = new NotificationChannel(
-                    STR_CHANNEL_ID,
-                    "Example Service Channel",
+            NotificationChannel streamServiceChannel = new NotificationChannel(
+                    STREAM_CHANNEL_ID,
+                    "Streaming service channel",
                     NotificationManager.IMPORTANCE_HIGH
             );
-
+            CharSequence name;
+            NotificationChannel locationServiceChannel = new NotificationChannel(
+                    LOCATION_CHANNEL_ID,
+                    "Location service channel",
+                    NotificationManager.IMPORTANCE_DEFAULT
+            );
             NotificationManager manager = getSystemService(NotificationManager.class);
-            manager.createNotificationChannel(serviceChannel);
+            manager.createNotificationChannel(streamServiceChannel);
+            manager.createNotificationChannel(locationServiceChannel);
         }
     }
 }

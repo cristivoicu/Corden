@@ -1,0 +1,109 @@
+package ro.atm.corden.util.services;
+
+import android.Manifest;
+import android.annotation.SuppressLint;
+import android.app.Notification;
+import android.app.Service;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.Bundle;
+import android.os.IBinder;
+import android.os.Looper;
+import android.util.Log;
+
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+
+import com.google.android.gms.maps.model.LatLng;
+import com.google.gson.JsonObject;
+
+import ro.atm.corden.R;
+import ro.atm.corden.model.user.User;
+import ro.atm.corden.util.App;
+import ro.atm.corden.util.websocket.SignallingClient;
+import ro.atm.corden.util.websocket.protocol.Message;
+import ro.atm.corden.util.websocket.protocol.events.UpdateEventType;
+
+public class LocationService extends Service {
+    private static final String TAG = "LocationService";
+    public static final long UPDATE_INTERVAL = 4000; // 4 seconds
+
+    private LocationManager mLocationManager;
+    private LocationListener mLocationListener;
+
+    public LocationService() {
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        // TODO: Return the communication channel to the service.
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
+
+    @SuppressLint("MissingPermission")
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        Notification notification = new NotificationCompat.Builder(this, App.LOCATION_CHANNEL_ID)
+                .setContentTitle("Sending live location")
+                .setContentText("You are sending live location to the application server")
+                .build();
+
+        startForeground(2, notification);
+
+        mLocationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+
+        mLocationListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                saveUserLocation(location);
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+                Log.d("LocationListener", String.format("onStatusChanged: provider %s; status: %d, extras: %s", provider, status, extras.toString()));
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+                Log.d("LocationListener", "onProviderEnabled");
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+                Log.d("LocationListener", "onProviderDisabled");
+            }
+        };
+
+        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 10, mLocationListener);
+
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d(TAG, "onStartCommand");
+        getLocation();
+        return START_NOT_STICKY;
+    }
+
+    private void getLocation() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            stopSelf();
+            return;
+        }
+       // mLocationManager.requestLocationUpdates(Context.LOCATION_SERVICE, 0, 0, mLocationListener);
+       //Location lastLocation = mLocationManager.getLastKnownLocation(LOCATION_SERVICE);
+        //saveUserLocation(lastLocation);
+    }
+
+    private void saveUserLocation(Location location){
+        SignallingClient.getInstance().sendLiveLocation(location);
+        Log.e(TAG, String.format("SEND LIVE LOCATION: %f %f", location.getLatitude(), location.getLongitude()));
+    }
+}

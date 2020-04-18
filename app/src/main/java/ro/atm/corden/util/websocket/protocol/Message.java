@@ -86,6 +86,14 @@ public class Message {
             return this;
         }
 
+        public UpdateMessageBuilder addLocation(double lat, double lng){
+            JsonObject location = new JsonObject();
+            location.addProperty("lat", lat);
+            location.addProperty("lng", lng);
+            message.add("payload", location);
+            return this;
+        }
+
         public UpdateMessageBuilder addPayload(List<MapItem> mapItems){
             JsonArray marks = new JsonArray();
             JsonArray paths = new JsonArray();

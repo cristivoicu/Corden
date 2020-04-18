@@ -18,6 +18,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.TimePicker;
 
+import java.util.Locale;
+
 import ro.atm.corden.R;
 import ro.atm.corden.databinding.ActivityRegisterUserBinding;
 import ro.atm.corden.model.user.Role;
@@ -83,18 +85,6 @@ public class RegisterUserActivity extends AppCompatActivity
         binding.setLifecycleOwner(this);
         binding.setViewModel(mViewModel);
 
-        binding.roleSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Object o = binding.roleSpinner.getSelectedItem();
-                mViewModel.userRole.setValue(Role.toRole(o.toString()));
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
 
         binding.programStart.setOnClickListener(v -> {
             isProgramStart = true;
@@ -106,9 +96,6 @@ public class RegisterUserActivity extends AppCompatActivity
             DialogFragment timePicker = new TimePickerFragment();
             timePicker.show(getSupportFragmentManager(), "time picker");
         });
-
-        ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(this, R.array.roles, android.R.layout.simple_spinner_dropdown_item);
-        binding.roleSpinner.setAdapter(arrayAdapter);
 
         mViewModel.getUser().observe(this, new Observer<User>() {
             @Override
@@ -125,13 +112,17 @@ public class RegisterUserActivity extends AppCompatActivity
 
             }
         });
+
+        binding.userPassword.setStartIconOnClickListener(v ->{
+            binding.infoLayout.setVisibility(View.VISIBLE);
+        });
     }
 
     @Override
     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
         if (isProgramStart) {
-            binding.programStart.setText(String.format("From: %s:%s", hourOfDay, minute));
-            mViewModel.startHour.setValue(String.format("%s:%s", hourOfDay, minute));
+            binding.programStart.setText(String.format(Locale.getDefault(),"From: %02d:%02d", hourOfDay, minute));
+            mViewModel.startHour.setValue(String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute));
             hour = hourOfDay;
             this.minute = minute;
         } else {
@@ -145,8 +136,8 @@ public class RegisterUserActivity extends AppCompatActivity
                 alertDialog.show();
                 return;
             }
-            binding.programEnd.setText(String.format("to: %s:%s", hourOfDay, minute));
-            mViewModel.endHour.setValue(String.format("%s:%s", hourOfDay, minute));
+            binding.programEnd.setText(String.format(Locale.getDefault(), "to: %02d:%02d", hourOfDay, minute));
+            mViewModel.endHour.setValue(String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute));
         }
     }
 
@@ -161,8 +152,8 @@ public class RegisterUserActivity extends AppCompatActivity
         binding.userAddress.getEditText().setText("");
         binding.userPhoneNumber.getEditText().setText("");
         binding.textAccountName.getEditText().setText("");
-        binding.programStart.setText("start hour");
-        binding.programEnd.setText("end hour");
+        binding.programStart.setText("Start hour");
+        binding.programEnd.setText("End hour");
     }
 
     @Override

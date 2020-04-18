@@ -2,6 +2,7 @@ package ro.atm.corden.view.activity;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 
 import android.content.Intent;
@@ -13,6 +14,7 @@ import android.view.View;
 import ro.atm.corden.R;
 import ro.atm.corden.databinding.ActivityMainBinding;
 import ro.atm.corden.util.constant.Constant;
+import ro.atm.corden.util.services.LocationService;
 import ro.atm.corden.util.websocket.SignallingClient;
 
 public class MainActivityAdmin extends AppCompatActivity {
@@ -32,6 +34,10 @@ public class MainActivityAdmin extends AppCompatActivity {
         binding.cardViewLocation.setBackgroundResource(R.drawable.main_card);
 
         setSupportActionBar(binding.toolbar);
+
+        Intent serviceIntent = new Intent(this, LocationService.class);
+        ContextCompat.startForegroundService(this, serviceIntent);
+
     }
 
     @Override

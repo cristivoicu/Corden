@@ -6,4 +6,5 @@ public class UpdateEventType {
     public static final String DISABLE_USER = "disableUser";
     public static final String REMOVE_VIDEO = "removeVideo";
     public static final String MAP_ITEMS = "mapItems";
+    public static final String LOCATION = "location";
 }

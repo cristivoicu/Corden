@@ -87,15 +87,12 @@ public class StreamingIntentService extends IntentService implements MediaListen
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SteamIntent:Wakelock");
         wakeLock.acquire(600000); //wake for maximum 10 minutes when user turns off the screen, bc it drain battery
 
-        Intent activityIntent = new Intent(getApplicationContext(), MainActivityUser.class);
-        PendingIntent contentInteint = PendingIntent.getActivity(getApplicationContext(), 0, activityIntent, 0);
-
         Intent broadcastIntent = new Intent(this, NotificationReceiver.class);
         broadcastIntent.setAction("stop");
         PendingIntent actionIntent = PendingIntent.getBroadcast(this,
                 0, broadcastIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        Notification notification = new NotificationCompat.Builder(this, App.STR_CHANNEL_ID)
+        Notification notification = new NotificationCompat.Builder(this, App.STREAM_CHANNEL_ID)
                 .setContentTitle("Streaming is live!")
                 .setContentText("You are sending video stream to the media server")
                 .addAction(R.drawable.ic_stop_black_24dp, "Stop", actionIntent)
