@@ -281,10 +281,14 @@ final class WebSocket extends WebSocketClient {
                 playbackListener.onGotPosition(position);
                 break;
             case "startVideoStreaming":
-
                 Log.d(TAG, "Got record response");
                 sdpAnswer = receivedMessage.get("sdpAnswer").getAsString();
                 mediaListenerRecord.onStartResponse(sdpAnswer);
+                break;
+            case "liveWatchResponse":
+                Log.d(TAG, "Got live watch response");
+                sdpAnswer = receivedMessage.get("sdpAnswer").getAsString();
+                liveStreamingListener.onLiveResponse(sdpAnswer);
                 break;
             default:
                 Log.e(TAG, "Json media error");

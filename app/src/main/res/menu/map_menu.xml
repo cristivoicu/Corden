@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/userLiveLocation"
+        android:title="User live location"
+        android:titleCondensed="User location"
+        android:checkable="true"/>
+    <item android:id="@+id/mapZones"
+        android:title="Zones"
+        android:checkable="true" />
+    <item android:id="@+id/mapPaths"
+        android:title="Paths"
+        android:checkable="true"/>
+    <item android:id="@+id/mapLocations"
+        android:title="Interest location"
+        android:checkable="true" />
+
+</menu>

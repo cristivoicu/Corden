@@ -1,6 +1,8 @@
 package ro.atm.corden.view.activity;
 
 import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.FragmentActivity;
 
@@ -10,6 +12,8 @@ import android.content.DialogInterface;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
@@ -27,8 +31,11 @@ import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import ro.atm.corden.R;
 import ro.atm.corden.databinding.ActivityUserJobsMapsBinding;
@@ -39,7 +46,7 @@ import ro.atm.corden.model.map.Zone;
 import ro.atm.corden.util.websocket.Repository;
 import ro.atm.corden.view.dialog.SaveMapItemDialog;
 
-public class UserJobsMapsActivity extends FragmentActivity
+public class UserJobsMapsActivity extends AppCompatActivity
         implements OnMapReadyCallback,
         SaveMapItemDialog.SaveMapDialogListener,
         GoogleMap.OnPolygonClickListener,
@@ -64,6 +71,7 @@ public class UserJobsMapsActivity extends FragmentActivity
     private MarkerOptions markerOptions;
 
     private List<MapItem> mapItems = new LinkedList<>();
+    private Map<String, LatLng> liveLocations = new ConcurrentHashMap<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,8 +82,51 @@ public class UserJobsMapsActivity extends FragmentActivity
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        setSupportActionBar(binding.toolbar);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.map_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.userLiveLocation:
+                if(item.isChecked()){
+                    item.setChecked(false);
+                }else{
+                    item.setChecked(true);
+                }
+                return false;
+            case R.id.mapPaths:
+                if(item.isChecked()){
+                    item.setChecked(false);
+                }else{
+                    item.setChecked(true);
+                }
+                return true;
+            case R.id.mapZones:
+                if(item.isChecked()){
+                    item.setChecked(false);
+                }else{
+                    item.setChecked(true);
+                }
+                return true;
+            case R.id.mapLocations:
+                if(item.isChecked()){
+                    item.setChecked(false);
+                }else{
+                    item.setChecked(true);
+                }
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
     /**
      * Manipulates the map once available.

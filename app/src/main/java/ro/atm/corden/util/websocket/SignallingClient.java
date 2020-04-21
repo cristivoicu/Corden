@@ -75,8 +75,10 @@ public class SignallingClient {
 
     public void initWebSociet(Context context) {
         try {
-            //uri = new URI("wss://192.168.8.100:8443/websocket"); // atunci cand e conectat prin stick
-            URI uri = new URI("wss://192.168.0.101:8443/websocket"); // wifi acasa
+            // uri = new URI("wss://192.168.8.100:8443/websocket"); // atunci cand e conectat prin stick
+             URI uri = new URI("wss://192.168.0.101:8443/websocket"); // wifi acasa
+            // URI uri = new URI("wss://192.168.43.228:8443/websocket"); // hotspot telefon
+            //URI uri = new URI("wss://100.113.90.202:8443/websocket"); // public ip address
 
             try {
                 String keyStoreType = KeyStore.getDefaultType();
@@ -84,7 +86,7 @@ public class SignallingClient {
                 KeyStore trustStore = KeyStore.getInstance(keyStoreType);
                 InputStream serverCert = context.getResources().openRawResource(R.raw.applicationserver);
                 InputStream caCert = context.getResources().openRawResource(R.raw.corden_ca);
-               // trustStore.load(serverCert, "parola".toCharArray());
+                // trustStore.load(serverCert, "parola".toCharArray());
                 trustStore.load(caCert, "parola".toCharArray());
 
                 /*TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
@@ -331,7 +333,7 @@ public class SignallingClient {
 
     }
 
-    public void sendLiveLocation(Location location){
+    public void sendLiveLocation(Location location) {
 /*        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
             Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
             throw new NetworkOnMainThreadException();
