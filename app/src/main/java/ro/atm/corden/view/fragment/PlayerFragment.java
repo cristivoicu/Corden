@@ -1,6 +1,8 @@
 package ro.atm.corden.view.fragment;
 
 import android.app.AlertDialog;
+import android.content.Context;
+import android.media.AudioManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
@@ -22,8 +24,10 @@ import org.webrtc.EglBase;
 import org.webrtc.IceCandidate;
 import org.webrtc.MediaStream;
 import org.webrtc.RendererCommon;
+import org.webrtc.VideoFileRenderer;
 import org.webrtc.VideoTrack;
 
+import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -66,6 +70,10 @@ public class PlayerFragment extends Fragment implements MediaListener.PlaybackLi
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_player, container, false);
+
+        AudioManager audioManager = (AudioManager) this.getActivity().getSystemService(Context.AUDIO_SERVICE);
+        audioManager.setSpeakerphoneOn(true);
+        audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
 
         seekBar = binding.seekBar;
         binding.play.setOnClickListener(this::onPlayButtonClicked);
@@ -119,8 +127,8 @@ public class PlayerFragment extends Fragment implements MediaListener.PlaybackLi
         rootEglBase = EglBase.create();
         binding.remoteView.init(rootEglBase.getEglBaseContext(), null);
         binding.remoteView.setZOrderMediaOverlay(true);
-        binding.remoteView.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
         binding.remoteView.setEnableHardwareScaler(true);
+        binding.remoteView.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FIT);
     }
 
 
@@ -132,6 +140,8 @@ public class PlayerFragment extends Fragment implements MediaListener.PlaybackLi
         //we have remote video stream. add to the renderer.
         final VideoTrack videoTrack = stream.videoTracks.get(0);
         final AudioTrack audioTrack = stream.audioTracks.get(0);
+        audioTrack.setEnabled(true);
+        audioTrack.setVolume(100);
         getActivity().runOnUiThread(() -> {
             try {
                 binding.remoteView.setVisibility(View.VISIBLE);

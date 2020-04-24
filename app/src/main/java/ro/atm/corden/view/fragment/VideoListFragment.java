@@ -1,7 +1,9 @@
 package ro.atm.corden.view.fragment;
 
+import android.app.DatePickerDialog;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -11,9 +13,14 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.DatePicker;
 
+import java.util.Calendar;
 import java.util.List;
 
 import ro.atm.corden.R;
@@ -21,6 +28,7 @@ import ro.atm.corden.databinding.FragmentVideoListBinding;
 import ro.atm.corden.model.video.Video;
 import ro.atm.corden.util.adapter.VideoAdapter;
 import ro.atm.corden.util.constant.Constant;
+import ro.atm.corden.view.activity.UserTimelineActivity;
 import ro.atm.corden.viewmodel.VideoListViewModel;
 
 /**
@@ -38,6 +46,37 @@ public class VideoListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        inflater.inflate(R.menu.timeline_menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.selectDate:
+                final Calendar cldr = Calendar.getInstance();
+                int day = cldr.get(Calendar.DAY_OF_MONTH);
+                int month = cldr.get(Calendar.MONTH);
+                int year = cldr.get(Calendar.YEAR);
+                DatePickerDialog picker = new DatePickerDialog(this.getContext(),
+                        new DatePickerDialog.OnDateSetListener() {
+                            @Override
+                            public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+                                String date = String.format("%s-%s-%s", year, monthOfYear + 1, dayOfMonth);
+/*                                binding.toolbar.setSubtitle("On " + date);
+                                viewModel.setActions(username, date);*/
+                            }
+                        }, year, month, day);
+                picker.show();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override

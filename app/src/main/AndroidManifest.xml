@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="ro.atm.corden">
-
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
          Google Maps Android API v2, but you must specify either coarse or fine
@@ -36,15 +35,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <!-- Services -->
+        <activity android:name=".view.activity.EditUserAccountActivity"></activity>
+        <activity android:name=".view.activity.SettingsActivity" /> <!-- Services -->
         <service
             android:name=".util.services.LocationService"
-            android:stopWithTask="true"/>
-
+            android:stopWithTask="true" />
         <service
             android:name=".util.services.StreamingIntentService"
             android:exported="false"
-            android:stopWithTask="true"/>
+            android:stopWithTask="true" />
 
         <activity android:name=".view.activity.EditUserDetailsActivity" />
         <!--
@@ -72,7 +71,6 @@
             android:launchMode="singleTop"
             android:parentActivityName=".view.activity.MainActivityUser" />
         <activity android:name=".view.activity.MediaActivity" />
-
         <activity
             android:name=".view.activity.MainActivityUser"
             android:launchMode="singleTop" />

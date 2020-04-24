@@ -63,7 +63,7 @@ public class MediaActivity extends AppCompatActivity
         binding.remoteView.init(eglBase.getEglBaseContext(), null);
         binding.remoteView.setZOrderMediaOverlay(true);
         binding.remoteView.setEnableHardwareScaler(true);
-        binding.remoteView.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FILL);
+        binding.remoteView.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FIT);
     }
 
 
@@ -75,6 +75,7 @@ public class MediaActivity extends AppCompatActivity
                 AudioTrack audioTrack = mediaStream.audioTracks.get(0);
                 videoTrack.addSink(binding.remoteView);
                 audioTrack.setEnabled(true);
+                audioTrack.setVolume(1000);
             } catch (Exception e) {
                 e.printStackTrace();
             }

@@ -8,6 +8,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +16,8 @@ import ro.atm.corden.R;
 import ro.atm.corden.model.video.Video;
 
 public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoHolder> {
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("dd - MM - yyyy");
+    private static final SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
     private List<Video> videos = new ArrayList<>();
     private OnItemClickListener listener;
 
@@ -33,7 +36,8 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoHolder>
     @Override
     public void onBindViewHolder(@NonNull VideoHolder holder, int position) {
         Video curentVideo = videos.get(position);
-        holder.date.setText(curentVideo.getDate().toString());
+        holder.date.setText(dateFormat.format(curentVideo.getDate()));
+        holder.duration.setText(String.format("at %s", timeFormat.format(curentVideo.getDate())));
     }
 
     @Override
@@ -50,7 +54,6 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoHolder>
             super(itemView);
             date = itemView.findViewById(R.id.date);
             duration = itemView.findViewById(R.id.duration);
-            location = itemView.findViewById(R.id.location);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override

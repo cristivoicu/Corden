@@ -77,6 +77,16 @@ public class Repository {
         }
     }
 
+    public List<Action> requestServerLogOnDate(String date){
+        RequestServerLogAsyncTask requestServerLogAsyncTask = new RequestServerLogAsyncTask();
+        try {
+            return requestServerLogAsyncTask.execute(date).get();
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public void enrollUser(User user){
         EnrollUserAsyncTask enrollUserAsyncTask = new EnrollUserAsyncTask();
         enrollUserAsyncTask.execute(user);
@@ -85,6 +95,16 @@ public class Repository {
     public void saveMapItems(List<MapItem> items) {
         SendMapItemsToServerAsyncTask sendMapItemsToServerAsyncTask = new SendMapItemsToServerAsyncTask();
         sendMapItemsToServerAsyncTask.execute(items);
+    }
+
+    public void subscribeToMapItemsChanges(){
+        SubscribeToMapChangesAsyncTask subscribeToMapChangesAsyncTask = new SubscribeToMapChangesAsyncTask();
+        subscribeToMapChangesAsyncTask.execute();
+    }
+
+    public void unsubscribeToMapItemsChanges(){
+        UnsubscribeToMapChangesAsyncTask unsubscribeToMapChangesAsyncTask = new UnsubscribeToMapChangesAsyncTask();
+        unsubscribeToMapChangesAsyncTask.execute();
     }
 
     private static class RequestUsersAsyncTask extends AsyncTask<Void, Void, List<User>> {
@@ -158,6 +178,25 @@ public class Repository {
         }
     }
 
+    private static class RequestServerLogAsyncTask extends AsyncTask<String, Void, List<Action>>{
+        @Override
+        protected List<Action> doInBackground(String... strings) {
+            Message message = new Message.RequestMessageBuilder()
+                    .addEvent(RequestEventTypes.SERVER_LOG)
+                    .addDate(strings[0])
+                    .build();
+            signallingClient.webSocket.send(message.toString());
+
+            signallingClient.webSocket.timelineConditionVariable = new ConditionVariable(false);
+            signallingClient.webSocket.timelineConditionVariable.block();
+            if (signallingClient.webSocket.actions != null) {
+                return signallingClient.webSocket.actions;
+            }
+
+            return null;
+        }
+    }
+
     private static class UpdateUserAsyncTask extends AsyncTask<User, Void, Void> {
 
         @Override
@@ -222,4 +261,21 @@ public class Repository {
         }
     }
 
+    private static class SubscribeToMapChangesAsyncTask extends AsyncTask<Void, Void, Void>{
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            SignallingClient.getInstance().sendMessageToSubscribeToMapItems();
+            return null;
+        }
+    }
+
+    private static class UnsubscribeToMapChangesAsyncTask extends AsyncTask<Void, Void, Void>{
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            SignallingClient.getInstance().sendMessageToUnsubscribeFromMapItems();
+            return null;
+        }
+    }
 }

@@ -33,8 +33,7 @@
                 app:expandedTitleMarginEnd="56dp"
                 app:expandedTitleMarginStart="40dp"
                 app:layout_scrollFlags="scroll|exitUntilCollapsed"
-                app:title="User timeline"
-                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
 
                 <ImageView
                     android:id="@+id/image"
@@ -50,9 +49,9 @@
                     android:id="@+id/toolbar"
                     android:layout_width="match_parent"
                     android:layout_height="?attr/actionBarSize"
-                    android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-                    app:layout_collapseMode="pin"
-                    app:popupTheme="@style/ThemeOverlay.AppCompat.Light" />
+                    app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                    app:titleTextColor="@color/colorWhile"
+                    app:layout_collapseMode="pin" />
             </com.google.android.material.appbar.CollapsingToolbarLayout>
 
         </com.google.android.material.appbar.AppBarLayout>
@@ -62,7 +61,6 @@
             android:layout_height="match_parent"
             android:fillViewport="true"
             app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
-
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/timeline"

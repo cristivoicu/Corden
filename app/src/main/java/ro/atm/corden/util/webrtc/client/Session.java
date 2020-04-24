@@ -5,9 +5,11 @@ import android.content.Context;
 import org.webrtc.DefaultVideoDecoderFactory;
 import org.webrtc.DefaultVideoEncoderFactory;
 import org.webrtc.EglBase;
+import org.webrtc.HardwareVideoEncoderFactory;
 import org.webrtc.IceCandidate;
 import org.webrtc.PeerConnectionFactory;
 import org.webrtc.VideoCapturer;
+import org.webrtc.VideoCodecInfo;
 import org.webrtc.VideoTrack;
 
 import ro.atm.corden.util.webrtc.interfaces.MediaActivity;
@@ -55,11 +57,13 @@ public class Session {
                         true);
         DefaultVideoDecoderFactory defaultVideoDecoderFactory =
                 new DefaultVideoDecoderFactory(eglBase.getEglBaseContext());
+        HardwareVideoEncoderFactory hardwareVideoEncoderFactory = new HardwareVideoEncoderFactory(eglBase.getEglBaseContext(), true, true);
         peerConnectionFactory = PeerConnectionFactory.builder()
                 .setOptions(options)
                 .setVideoEncoderFactory(defaultVideoEncoderFactory)
                 .setVideoDecoderFactory(defaultVideoDecoderFactory)
                 .createPeerConnectionFactory();
+
     }
 
     public void createPlaybackOffer(String videoPath) {

@@ -68,6 +68,7 @@ public abstract class Client {
                 mediaActivity.gotRemoteStream(mediaStream);
             }
         });
+        localPeer.setBitrate(3000, 3000, 30000000);
         SignallingClient.getInstance().isChannelReady = true;
     }
 

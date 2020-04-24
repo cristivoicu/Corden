@@ -19,6 +19,7 @@ import org.webrtc.CameraVideoCapturer;
 import ro.atm.corden.R;
 import ro.atm.corden.databinding.ActivityMainUserBinding;
 import ro.atm.corden.model.user.LoginUser;
+import ro.atm.corden.util.services.LocationService;
 import ro.atm.corden.util.services.StreamingIntentService;
 import ro.atm.corden.util.websocket.SignallingClient;
 
@@ -120,6 +121,8 @@ public class MainActivityUser extends AppCompatActivity {
             }
             return false;
         });
+        Intent serviceIntent = new Intent(this, LocationService.class);
+        ContextCompat.startForegroundService(this, serviceIntent);
 
     }
 

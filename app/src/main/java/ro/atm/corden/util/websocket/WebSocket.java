@@ -5,6 +5,8 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
@@ -17,6 +19,7 @@ import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import ro.atm.corden.model.user.Role;
 import ro.atm.corden.model.user.Action;
@@ -26,7 +29,7 @@ import ro.atm.corden.model.video.Video;
 import ro.atm.corden.model.video.VideoInfo;
 import ro.atm.corden.util.websocket.callback.EnrollListener;
 import ro.atm.corden.util.websocket.callback.LoginListener;
-import ro.atm.corden.util.websocket.callback.MapItemsSaveListener;
+import ro.atm.corden.util.websocket.callback.MapItemsListener;
 import ro.atm.corden.util.websocket.callback.MediaListener;
 import ro.atm.corden.util.websocket.callback.RemoveVideoListener;
 import ro.atm.corden.util.websocket.callback.UpdateUserListener;
@@ -61,7 +64,7 @@ final class WebSocket extends WebSocketClient {
     EnrollListener enrollListener;
 
     UpdateUserListener updateUserListener;
-    MapItemsSaveListener mapItemsSaveListener;
+    MapItemsListener mapItemsListener;
     RemoveVideoListener removeVideoListener;
 
     ConditionVariable videosConditionVariable = null;
@@ -106,7 +109,7 @@ final class WebSocket extends WebSocketClient {
      *     <li> {@link EnrollListener}</li>
      *     <li> {@link UpdateUserListener}</li>
      *     <li> {@link RemoveVideoListener}</li>
-     *     <li> {@link MapItemsSaveListener}</li>
+     *     <li> {@link MapItemsListener}</li>
      * </ul></p>
      *
      * @author Cristian VOICU
@@ -168,9 +171,9 @@ final class WebSocket extends WebSocketClient {
             case "mapItems":
                 try {
                     if (isSuccess) {
-                        mapItemsSaveListener.onMapItemsSaveSuccess();
+                        mapItemsListener.onMapItemsSaveSuccess();
                     } else {
-                        mapItemsSaveListener.onMapItemsSaveFailure();
+                        mapItemsListener.onMapItemsSaveFailure();
                     }
                 } catch (Exception e) {
                     Log.e(TAG, "Map items save listener has not subscribers!");
@@ -188,7 +191,7 @@ final class WebSocket extends WebSocketClient {
      * @param receivedMessage is the message received from application server
      */
     private void handleRequestMethodMessage(JsonObject receivedMessage) {
-        String payload = receivedMessage.get("payload").getAsString();
+        JsonElement payload = receivedMessage.get("payload");
         switch (receivedMessage.get("event").getAsString()) {
             case "requestTimeline":
                 Type actionsListType = new TypeToken<ArrayList<Action>>() {
@@ -196,7 +199,17 @@ final class WebSocket extends WebSocketClient {
 
                 synchronized (actions) {
                     actions.clear();
-                    actions.addAll(gson.fromJson(payload, actionsListType));
+                    actions.addAll(gson.fromJson(payload.getAsString(), actionsListType));
+                    timelineConditionVariable.open();
+                }
+                break;
+            case "requestServerLog":
+                actionsListType = new TypeToken<ArrayList<Action>>() {
+                }.getType();
+
+                synchronized (actions) {
+                    actions.clear();
+                    actions.addAll(gson.fromJson(payload.getAsString(), actionsListType));
                     timelineConditionVariable.open();
                 }
                 break;
@@ -206,23 +219,31 @@ final class WebSocket extends WebSocketClient {
 
                 synchronized (videos) {
                     videos.clear();
-                    videos.addAll(gson.fromJson(payload, videoListType));
+                    videos.addAll(gson.fromJson(payload.getAsString(), videoListType));
                     videosConditionVariable.open();
                 }
                 break;
             case "requestAllUsers":
-
-
                 Type userListType = new TypeToken<ArrayList<User>>() {
                 }.getType();
                 synchronized (users) {
                     users.clear();
-                    users.addAll(gson.fromJson(payload, userListType));
+                    users.addAll(gson.fromJson(payload.getAsString(), userListType));
                     usersConditionVariable.open();
                 }
                 break;
             case "requestOnlineUsers":
 
+                break;
+            case "userLocations":
+                JsonArray payloadArray = payload.getAsJsonArray();
+                for (int i = 0; i < payloadArray.size(); i++) {
+                    JsonObject object = payloadArray.get(i).getAsJsonObject();
+                    String username = object.get("username").getAsString();
+                    double lat = object.get("lat").getAsDouble();
+                    double lng = object.get("lng").getAsDouble();
+                    mapItemsListener.onUserLocationUpdated(username, lat, lng);
+                }
                 break;
             default:
                 Log.e(TAG, "Json request error");
@@ -295,8 +316,8 @@ final class WebSocket extends WebSocketClient {
         }
     }
 
-    private void handleSubscribeMethodMessage(JsonObject receivedMessage){
-        switch (receivedMessage.get("event").getAsString()){
+    private void handleSubscribeMethodMessage(JsonObject receivedMessage) {
+        switch (receivedMessage.get("event").getAsString()) {
             case "userUpdated":
                 String userJson = receivedMessage.get("payload").getAsString();
                 userSubscriber.onUserDataChanged(User.fromJson(userJson));
@@ -306,6 +327,17 @@ final class WebSocket extends WebSocketClient {
                 String username = receivedMessage.get("username").getAsString();
                 userSubscriber.onUserStatusChanged(username, Status.valueOf(status));
                 break;
+            case "mapItemLocation":
+                username = receivedMessage.getAsJsonObject("payload")
+                        .get("username")
+                        .getAsString();
+                double lat = receivedMessage.getAsJsonObject("payload")
+                        .get("lat")
+                        .getAsDouble();
+                double lng = receivedMessage.getAsJsonObject("payload")
+                        .get("lng")
+                        .getAsDouble();
+                mapItemsListener.onUserLocationUpdated(username, lat, lng);
             default:
                 Log.e("TAG", "Unknown subscribe event received from application server");
         }

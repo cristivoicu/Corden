@@ -2,7 +2,6 @@ package ro.atm.corden.util.websocket;
 
 import android.content.Context;
 import android.location.Location;
-import android.os.AsyncTask;
 import android.os.Looper;
 import android.os.NetworkOnMainThreadException;
 import android.util.Log;
@@ -20,10 +19,8 @@ import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
-import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 
-import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 
@@ -33,7 +30,7 @@ import ro.atm.corden.util.exception.login.LoginListenerNotInitialisedException;
 import ro.atm.corden.util.exception.websocket.UserNotLoggedInException;
 import ro.atm.corden.util.websocket.callback.EnrollListener;
 import ro.atm.corden.util.websocket.callback.LoginListener;
-import ro.atm.corden.util.websocket.callback.MapItemsSaveListener;
+import ro.atm.corden.util.websocket.callback.MapItemsListener;
 import ro.atm.corden.util.websocket.callback.MediaListener;
 import ro.atm.corden.util.websocket.callback.RemoveVideoListener;
 import ro.atm.corden.util.websocket.callback.UpdateUserListener;
@@ -44,7 +41,6 @@ import ro.atm.corden.util.websocket.protocol.events.UnsubscribeEventType;
 import ro.atm.corden.util.websocket.protocol.events.UpdateEventType;
 import ro.atm.corden.util.websocket.subscribers.UserSubscriber;
 
-import static ro.atm.corden.util.constant.JsonConstants.*;
 
 /**
  * Singleton class used that has the following functionality
@@ -76,7 +72,7 @@ public class SignallingClient {
     public void initWebSociet(Context context) {
         try {
             // uri = new URI("wss://192.168.8.100:8443/websocket"); // atunci cand e conectat prin stick
-             URI uri = new URI("wss://192.168.0.101:8443/websocket"); // wifi acasa
+            URI uri = new URI("wss://192.168.0.102:8443/websocket"); // wifi acasa
             // URI uri = new URI("wss://192.168.43.228:8443/websocket"); // hotspot telefon
             //URI uri = new URI("wss://100.113.90.202:8443/websocket"); // public ip address
 
@@ -400,15 +396,15 @@ public class SignallingClient {
         webSocket.updateUserListener = null;
     }
 
-    public void subscribeMapItemsSaveListener(@NonNull MapItemsSaveListener mapItemsSaveListener) throws UserNotLoggedInException {
+    public void subscribeMapItemsSaveListener(@NonNull MapItemsListener mapItemsListener) throws UserNotLoggedInException {
         if (!webSocket.isLoggedIn) {
             throw new UserNotLoggedInException();
         }
-        webSocket.mapItemsSaveListener = mapItemsSaveListener;
+        webSocket.mapItemsListener = mapItemsListener;
     }
 
     public void ubsubscribeMapItemsSaveListener() {
-        webSocket.mapItemsSaveListener = null;
+        webSocket.mapItemsListener = null;
     }
 
     public void subscribeRemoveVideoListener(@NonNull RemoveVideoListener removeVideoListener) throws UserNotLoggedInException {
@@ -432,7 +428,12 @@ public class SignallingClient {
         webSocket.userSubscriber = null;
     }
 
-    /***/
+    /**
+     * Method is used to send a message to application server for subscribing to user list
+     * changing like: login, logout, user edited, etc.
+     * <p>
+     * This method must not be used from UI thread.
+     */
     public void sendMessageToSubscribeToUserList() {
         if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
             Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
@@ -446,7 +447,11 @@ public class SignallingClient {
         webSocket.send(message.toString());
     }
 
-    /***/
+    /**
+     * Method used to send a message to application server to unsubscribe  from user list changing
+     *
+     * <p>This method must not be used from UI thread</p>
+     */
     public void sendMessageToUnsubscribeFromUserList() {
         if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
             Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
@@ -458,6 +463,38 @@ public class SignallingClient {
                 .build();
 
         webSocket.send(message.toString());
+    }
+
+    /***/
+    public void sendMessageToSubscribeToMapItems() {
+        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+            Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
+            throw new NetworkOnMainThreadException();
+        }
+        Message message = new Message.SubscribeMessageBuilder()
+                .addEvent(SubscribeEventType.MAP_ITEMS)
+                .build();
+        webSocket.send(message.toString());
+    }
+
+    /***/
+    public void sendMessageToUnsubscribeFromMapItems() {
+        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+            Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
+            throw new NetworkOnMainThreadException();
+        }
+        Message message = new Message.UnsubscribeMessageBuilder()
+                .addEvent(UnsubscribeEventType.UNSUBSCRIBE_MAP_ITEM)
+                .build();
+        webSocket.send(message.toString());
+    }
+
+    public void setMapItemListener(MapItemsListener mapItemListener){
+        webSocket.mapItemsListener = mapItemListener;
+    }
+
+    public void unSetMapItemListener(){
+        webSocket.mapItemsListener = null;
     }
 
     public void logout() {

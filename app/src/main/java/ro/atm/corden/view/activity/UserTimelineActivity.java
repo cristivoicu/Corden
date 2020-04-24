@@ -50,7 +50,7 @@ public class UserTimelineActivity extends AppCompatActivity {
                             @Override
                             public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
                                 String date = String.format("%s-%s-%s", year, monthOfYear + 1, dayOfMonth);
-                                binding.toolbar.setSubtitle("On " + date);
+                                getSupportActionBar().setSubtitle("On " + date);
                                 viewModel.setActions(username, date);
                             }
                         }, year, month, day);
@@ -77,7 +77,8 @@ public class UserTimelineActivity extends AppCompatActivity {
         binding.timeline.setHasFixedSize(true);
 
         setSupportActionBar(binding.toolbar);
-        binding.toolbar.setSubtitle("On " + new SimpleDateFormat("YYYY-MM-dd").format(new Date()));
+        getSupportActionBar().setTitle("User timeline");
+        getSupportActionBar().setSubtitle("On " + new SimpleDateFormat("YYYY-MM-dd").format(new Date()));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 

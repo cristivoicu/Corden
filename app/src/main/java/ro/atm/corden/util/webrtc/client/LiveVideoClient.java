@@ -66,10 +66,11 @@ public class LiveVideoClient extends Client {
         audioSource = peerConnectionFactory.createAudioSource(audioConstraints);
         audioTrack = peerConnectionFactory.createAudioTrack("101", audioSource);
         audioTrack.setEnabled(true);
+        audioTrack.setVolume(1000);
 
         if (videoCapturer != null) {
-            //videoCapturer.startCapture(1280, 720, 30);
-            videoCapturer.startCapture(1920, 1080, 30);
+            // videoCapturer.startCapture(1280, 720, 30);
+            videoCapturer.startCapture(1920, 1080, 30); // by default, max in full hd
         }
     }
 

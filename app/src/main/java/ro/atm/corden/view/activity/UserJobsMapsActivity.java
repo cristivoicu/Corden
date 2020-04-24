@@ -12,6 +12,8 @@ import android.content.DialogInterface;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -44,13 +46,16 @@ import ro.atm.corden.model.map.Mark;
 import ro.atm.corden.model.map.Path;
 import ro.atm.corden.model.map.Zone;
 import ro.atm.corden.util.websocket.Repository;
+import ro.atm.corden.util.websocket.SignallingClient;
+import ro.atm.corden.util.websocket.callback.MapItemsListener;
 import ro.atm.corden.view.dialog.SaveMapItemDialog;
 
 public class UserJobsMapsActivity extends AppCompatActivity
         implements OnMapReadyCallback,
         SaveMapItemDialog.SaveMapDialogListener,
         GoogleMap.OnPolygonClickListener,
-        GoogleMap.OnPolylineClickListener {
+        GoogleMap.OnPolylineClickListener,
+        MapItemsListener {
     private ActivityUserJobsMapsBinding binding;
 
     private GoogleMap mMap;
@@ -71,7 +76,28 @@ public class UserJobsMapsActivity extends AppCompatActivity
     private MarkerOptions markerOptions;
 
     private List<MapItem> mapItems = new LinkedList<>();
-    private Map<String, LatLng> liveLocations = new ConcurrentHashMap<>();
+    private Map<String, Marker> liveLocations = new ConcurrentHashMap<>();
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        SignallingClient.getInstance().setMapItemListener(this);
+        Repository.getInstance().subscribeToMapItemsChanges();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        SignallingClient.getInstance().unSetMapItemListener();
+        Repository.getInstance().unsubscribeToMapItemsChanges();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        SignallingClient.getInstance().unSetMapItemListener();
+        Repository.getInstance().unsubscribeToMapItemsChanges();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,32 +120,32 @@ public class UserJobsMapsActivity extends AppCompatActivity
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.userLiveLocation:
-                if(item.isChecked()){
+                if (item.isChecked()) {
                     item.setChecked(false);
-                }else{
+                } else {
                     item.setChecked(true);
                 }
                 return false;
             case R.id.mapPaths:
-                if(item.isChecked()){
+                if (item.isChecked()) {
                     item.setChecked(false);
-                }else{
+                } else {
                     item.setChecked(true);
                 }
                 return true;
             case R.id.mapZones:
-                if(item.isChecked()){
+                if (item.isChecked()) {
                     item.setChecked(false);
-                }else{
+                } else {
                     item.setChecked(true);
                 }
                 return true;
             case R.id.mapLocations:
-                if(item.isChecked()){
+                if (item.isChecked()) {
                     item.setChecked(false);
-                }else{
+                } else {
                     item.setChecked(true);
                 }
                 return true;
@@ -350,4 +376,33 @@ public class UserJobsMapsActivity extends AppCompatActivity
                 });
         builder.show();
     }
+
+    @Override
+    public void onMapItemsSaveSuccess() {
+
+    }
+
+    @Override
+    public void onMapItemsSaveFailure() {
+
+    }
+
+    @Override
+    public void onUserLocationUpdated(String username, double lat, double lng) {
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                Marker userMarker = liveLocations.get(username);
+                if (userMarker != null)
+                    userMarker.remove();
+
+                userMarker = mMap.addMarker(new MarkerOptions()
+                        .title(username)
+                        .draggable(false)
+                        .position(new LatLng(lat, lng)));
+                liveLocations.put(username, userMarker);
+            }
+        });
+    }
+
 }

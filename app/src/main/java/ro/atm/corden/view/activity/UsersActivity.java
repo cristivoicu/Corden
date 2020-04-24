@@ -109,6 +109,21 @@ public class UsersActivity extends AppCompatActivity
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        SignallingClient.getInstance().unsubscribeUserListListener();
+
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                SignallingClient.getInstance().sendMessageToUnsubscribeFromUserList();
+                return null;
+            }
+        }.execute();
+    }
+
+    @Override
     public void onUserDataChanged(User user) {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override

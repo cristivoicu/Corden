@@ -27,7 +27,7 @@
             android:text="24 mar 2020"
             android:textColor="@color/colorBlack"
             android:textSize="22sp"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/imageView2"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -39,20 +39,19 @@
             android:text="10m:23s"
             android:textColor="@color/busAccident"
             android:textSize="18sp"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/imageView2"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/date" />
 
-        <TextView
-            android:id="@+id/location"
-            android:layout_width="0dp"
+        <ImageView
+            android:id="@+id/imageView2"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Location: At point 1"
-            android:textColor="@color/busAccident"
-            android:textSize="18sp"
+            android:src="@drawable/ic_play_circle_outlin"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/duration" />
+            app:layout_constraintTop_toTopOf="parent"
+            android:tint="@color/busAccident"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

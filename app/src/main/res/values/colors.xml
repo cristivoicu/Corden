@@ -14,6 +14,8 @@
 
     <!-- Color palette 1-->
     <color name="activityBackground">#304057</color>
+    <color name="bottomSheetBackground">#2B374A</color>
+    <color name="bottomSheetBackground2">#2E3C51</color>
     <color name="color2">#da5e5a</color>
     <color name="color3">#e2814d</color>
     <color name="color4">#fdb903</color>
@@ -28,4 +30,8 @@
     <color name="colorOnline"> #006400</color>
     <color name="colorOffline"> #8B0000</color>
     <color name="colorDisabled"> #696969</color>
+
+    <color name="colorLow">#228B22	</color>
+    <color name="colorMedium">#fdb903</color>
+    <color name="colorHigh">#8B0000</color>
 </resources>
