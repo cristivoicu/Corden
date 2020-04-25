@@ -177,4 +177,9 @@ public class MainActivityUser extends AppCompatActivity {
             return null;
         }
     }
+
+    @Override
+    public void onBackPressed() {
+
+    }
 }

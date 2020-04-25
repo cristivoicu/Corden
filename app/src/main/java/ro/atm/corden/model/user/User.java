@@ -26,6 +26,13 @@ public class User implements Serializable {
         this.roles = role.name();
     }
 
+    public User(String username, String phoneNumber, String name, String address) {
+        this.username = username;
+        this.phoneNumber = phoneNumber;
+        this.name = name;
+        this.address = address;
+    }
+
     @Expose(serialize = false, deserialize = false)
     public transient boolean isUsernameEmpty;
     @Expose(serialize = false, deserialize = false)

@@ -175,4 +175,9 @@ public class MainActivityAdmin extends AppCompatActivity {
                 }, year, month, day);
         picker.show();
     }
+
+    @Override
+    public void onBackPressed() {
+
+    }
 }

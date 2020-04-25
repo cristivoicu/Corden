@@ -72,7 +72,7 @@ public class SignallingClient {
     public void initWebSociet(Context context) {
         try {
             // uri = new URI("wss://192.168.8.100:8443/websocket"); // atunci cand e conectat prin stick
-            URI uri = new URI("wss://192.168.0.102:8443/websocket"); // wifi acasa
+            URI uri = new URI("wss://192.168.0.104:8443/websocket"); // wifi acasa
             // URI uri = new URI("wss://192.168.43.228:8443/websocket"); // hotspot telefon
             //URI uri = new URI("wss://100.113.90.202:8443/websocket"); // public ip address
 

@@ -47,6 +47,16 @@ public class Repository {
         messageToDisableUserAsyncTask.execute(username);
     }
 
+    public User requestUserData(String username){
+        RequestUserAsyncTask requestUserAsyncTask = new RequestUserAsyncTask();
+        try {
+            return requestUserAsyncTask.execute(username).get();
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public List<User> requestAllUsers() {
         RequestUsersAsyncTask requestUsersAsyncTask = new RequestUsersAsyncTask();
         try {
@@ -124,6 +134,23 @@ public class Repository {
                 return signallingClient.webSocket.users;
             }
             return null;
+        }
+    }
+
+    private static class RequestUserAsyncTask extends AsyncTask<String, Void, User>{
+
+        @Override
+        protected User doInBackground(String... strings) {
+            Message message = new Message.RequestMessageBuilder()
+                    .addEvent(RequestEventTypes.USER_DATA)
+                    .addUser(strings[0])
+                    .build();
+
+            signallingClient.webSocket.send(message.toString());
+
+            signallingClient.webSocket.userDataConditionVariable = new ConditionVariable(false);
+            signallingClient.webSocket.userDataConditionVariable.block();
+            return signallingClient.webSocket.users.get(0);
         }
     }
 

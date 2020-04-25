@@ -20,6 +20,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.Condition;
 
 import ro.atm.corden.model.user.Role;
 import ro.atm.corden.model.user.Action;
@@ -68,6 +69,7 @@ final class WebSocket extends WebSocketClient {
     RemoveVideoListener removeVideoListener;
 
     ConditionVariable videosConditionVariable = null;
+    ConditionVariable userDataConditionVariable = null;
     ConditionVariable usersConditionVariable = null;
     ConditionVariable timelineConditionVariable = null;
 
@@ -221,6 +223,14 @@ final class WebSocket extends WebSocketClient {
                     videos.clear();
                     videos.addAll(gson.fromJson(payload.getAsString(), videoListType));
                     videosConditionVariable.open();
+                }
+                break;
+            case "requestUserData":
+
+                synchronized (users){
+                    users.clear();
+                    users.add(User.fromJson(payload.getAsString()));
+                    userDataConditionVariable.open();
                 }
                 break;
             case "requestAllUsers":
