@@ -24,10 +24,8 @@ import org.webrtc.EglBase;
 import org.webrtc.IceCandidate;
 import org.webrtc.MediaStream;
 import org.webrtc.RendererCommon;
-import org.webrtc.VideoFileRenderer;
 import org.webrtc.VideoTrack;
 
-import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -35,7 +33,7 @@ import ro.atm.corden.R;
 import ro.atm.corden.databinding.FragmentPlayerBinding;
 import ro.atm.corden.model.video.Video;
 import ro.atm.corden.model.video.VideoInfo;
-import ro.atm.corden.util.constant.Constant;
+import ro.atm.corden.util.constant.AppConstants;
 import ro.atm.corden.util.exception.websocket.UserNotLoggedInException;
 import ro.atm.corden.util.webrtc.client.Session;
 import ro.atm.corden.util.webrtc.interfaces.MediaActivity;
@@ -99,7 +97,7 @@ public class PlayerFragment extends Fragment implements MediaListener.PlaybackLi
             }
         });
 
-        Video video = (Video) getArguments().get(Constant.GET_VIDEO);
+        Video video = (Video) getArguments().get(AppConstants.GET_VIDEO);
         videoPath = video.getName();
 
         SignallingClient.getInstance().isInitiator = true;

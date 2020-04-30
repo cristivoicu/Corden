@@ -7,4 +7,5 @@ public class RequestEventTypes {
     public static final String USERS_ALL = "requestAllUsers";
     public static final String USER_DATA = "requestUserData";
     public static final String USERS_ONLINE = "requestOnlineUsers";
+    public static final String REQUEST_START_STREAMING = "requestStartStreaming";
 }

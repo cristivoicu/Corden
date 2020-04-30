@@ -10,6 +10,7 @@ import ro.atm.corden.R;
 public class App extends Application {
     public static final String STREAM_CHANNEL_ID = "StreamServiceChannel";
     public static final String LOCATION_CHANNEL_ID = "StreamServiceChannel";
+    public static final String NOTIFICATION_CHANNEL_ID = "NotificationChannel";
 
     @Override
     public void onCreate() {
@@ -25,15 +26,20 @@ public class App extends Application {
                     "Streaming service channel",
                     NotificationManager.IMPORTANCE_HIGH
             );
-            CharSequence name;
             NotificationChannel locationServiceChannel = new NotificationChannel(
                     LOCATION_CHANNEL_ID,
                     "Location service channel",
                     NotificationManager.IMPORTANCE_DEFAULT
             );
+            NotificationChannel notificationServiceChannel = new NotificationChannel(
+                    NOTIFICATION_CHANNEL_ID,
+                    "Push notification service channel",
+                    NotificationManager.IMPORTANCE_DEFAULT
+            );
             NotificationManager manager = getSystemService(NotificationManager.class);
-            manager.createNotificationChannel(streamServiceChannel);
             manager.createNotificationChannel(locationServiceChannel);
+            manager.createNotificationChannel(notificationServiceChannel);
+            manager.createNotificationChannel(streamServiceChannel);
         }
     }
 }

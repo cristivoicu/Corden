@@ -28,12 +28,10 @@ import ro.atm.corden.R;
 import ro.atm.corden.databinding.ActivityMainBinding;
 import ro.atm.corden.model.user.Action;
 import ro.atm.corden.util.adapter.ServerLogAdapter;
-import ro.atm.corden.util.adapter.TimelineAdapter;
-import ro.atm.corden.util.constant.Constant;
+import ro.atm.corden.util.constant.AppConstants;
 import ro.atm.corden.util.services.LocationService;
 import ro.atm.corden.util.websocket.SignallingClient;
 import ro.atm.corden.viewmodel.MainActivityAdminViewModel;
-import ro.atm.corden.viewmodel.UserTimelineViewModel;
 
 public class MainActivityAdmin extends AppCompatActivity {
     private ActivityMainBinding binding;
@@ -44,6 +42,7 @@ public class MainActivityAdmin extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        binding.setLifecycleOwner(this);
 
         viewModel = ViewModelProvider.AndroidViewModelFactory
                 .getInstance(this.getApplication())
@@ -140,7 +139,7 @@ public class MainActivityAdmin extends AppCompatActivity {
 
     public void onShowAllUsersClicked(View view) {
         Intent intent = new Intent(this, UsersActivity.class);
-        intent.putExtra(Constant.GET_USERS_TYPE, Constant.GET_USERS_ALL);
+        intent.putExtra(AppConstants.GET_USERS_TYPE, AppConstants.GET_USERS_ALL);
         startActivity(intent);
     }
 
@@ -149,12 +148,8 @@ public class MainActivityAdmin extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void onClickedSettings(View view) {
-
-    }
-
     public void onLocationCardClicked(View view) {
-        Intent intent = new Intent(this, UserJobsMapsActivity.class);
+        Intent intent = new Intent(this, AdminMapsActivity.class);
         startActivity(intent);
     }
 

@@ -102,7 +102,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="16dp"
                     android:background="@drawable/button_action_round"
-                    android:onClick="@{(v) -> viewmodel.onClick(v)}"
+                    android:onClick="onLoginButtonClicked"
                     android:text="Login"
                     android:textAllCaps="false"
                     android:textColor="@color/colorWhile"

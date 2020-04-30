@@ -1,13 +1,11 @@
 package ro.atm.corden.view.activity;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -22,7 +20,7 @@ import ro.atm.corden.databinding.ActivityUsersBinding;
 import ro.atm.corden.model.user.Status;
 import ro.atm.corden.model.user.User;
 import ro.atm.corden.util.adapter.UserAdapter;
-import ro.atm.corden.util.constant.Constant;
+import ro.atm.corden.util.constant.AppConstants;
 import ro.atm.corden.util.websocket.SignallingClient;
 import ro.atm.corden.util.websocket.subscribers.UserSubscriber;
 import ro.atm.corden.viewmodel.UsersViewModel;
@@ -51,8 +49,8 @@ public class UsersActivity extends AppCompatActivity
         binding.usersList.setLayoutManager(new LinearLayoutManager(this));
         binding.usersList.setHasFixedSize(true);
 
-        String getType = getIntent().getStringExtra(Constant.GET_USERS_TYPE);
-        if (getType.equals(Constant.GET_USERS_ALL)) {
+        String getType = getIntent().getStringExtra(AppConstants.GET_USERS_TYPE);
+        if (getType.equals(AppConstants.GET_USERS_ALL)) {
             viewModel.setAllUsers();
         }
 

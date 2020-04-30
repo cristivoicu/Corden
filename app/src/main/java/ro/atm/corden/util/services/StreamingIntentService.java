@@ -10,10 +10,12 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.util.Log;
+import android.view.SurfaceView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import com.google.gson.JsonObject;
 
@@ -28,8 +30,10 @@ import org.webrtc.VideoCapturer;
 
 import ro.atm.corden.R;
 import ro.atm.corden.util.App;
+import ro.atm.corden.util.constant.AppConstants;
 import ro.atm.corden.util.exception.websocket.UserNotLoggedInException;
 import ro.atm.corden.util.receiver.NotificationReceiver;
+import ro.atm.corden.util.webrtc.client.CameraSelector;
 import ro.atm.corden.util.webrtc.client.Session;
 import ro.atm.corden.util.webrtc.interfaces.MediaActivity;
 import ro.atm.corden.util.websocket.SignallingClient;
@@ -50,20 +54,27 @@ import static org.webrtc.RendererCommon.ScalingType.SCALE_ASPECT_FILL;
 public class StreamingIntentService extends IntentService implements MediaListener.RecordingListener, MediaActivity {
     private static final String TAG = "StreamIntentService";
     private static final String ACTION_STREAM = "ActionStream";
+    private CameraSelector.CameraType cameraType;
+    private static boolean isRunning = false;
+
+    public static boolean isRunning(){
+        return isRunning;
+    }
+
     private IBinder mBind = new LocalBinder();
 
     private PowerManager.WakeLock wakeLock;
 
     private Session liveSession;
 
+    /** used for surface view renderer*/
     private boolean isInited = false;
 
     EglBase rootEglBase;
 
-    public class LocalBinder extends Binder {
-        public StreamingIntentService getService() {
-            return StreamingIntentService.this;
-        }
+    public StreamingIntentService() {
+        super("StreamingIntentService");
+        setIntentRedelivery(true);
     }
 
 
@@ -71,11 +82,6 @@ public class StreamingIntentService extends IntentService implements MediaListen
     @Override
     public IBinder onBind(Intent intent) {
         return mBind;
-    }
-
-    public StreamingIntentService() {
-        super("StreamingIntentService");
-        setIntentRedelivery(true);
     }
 
     @Override
@@ -87,21 +93,17 @@ public class StreamingIntentService extends IntentService implements MediaListen
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SteamIntent:Wakelock");
         wakeLock.acquire(600000); //wake for maximum 10 minutes when user turns off the screen, bc it drain battery
 
-        Intent broadcastIntent = new Intent(this, NotificationReceiver.class);
-        broadcastIntent.setAction("stop");
-        PendingIntent actionIntent = PendingIntent.getBroadcast(this,
-                0, broadcastIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        Intent intent = new Intent(this, MainActivityUser.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
         Notification notification = new NotificationCompat.Builder(this, App.STREAM_CHANNEL_ID)
                 .setContentTitle("Streaming is live!")
                 .setContentText("You are sending video stream to the media server")
-                .addAction(R.drawable.ic_stop_black_24dp, "Stop", actionIntent)
-                .setLights(getResources().getColor(R.color.colorError), 1000, 1000)
-                .setVibrate(new long[]{1000, 500, 1000, 0, 1000, 0, 1000})
+                .setContentIntent(pendingIntent)
                 .build();
 
-
-        startForeground(1, notification);
+        startForeground(15, notification);
         SignallingClient.getInstance().isInitiator = true;
         rootEglBase = EglBase.create();
     }
@@ -111,8 +113,10 @@ public class StreamingIntentService extends IntentService implements MediaListen
         Log.d(TAG, "onHandleIntent");
         if (intent != null) {
             final String action = intent.getAction();
+            cameraType = CameraSelector.CameraType.valueOf(intent.getStringExtra(AppConstants.EXTRA_CAMERA));
             if (ACTION_STREAM.equals(action)) {
                 try {
+                    isRunning = true;
                     start();
                     while (true) {
 
@@ -130,28 +134,12 @@ public class StreamingIntentService extends IntentService implements MediaListen
         super.onDestroy();
         Log.d(TAG, "onDestroy");
 
+        isRunning = false;
         wakeLock.release();
         Log.d(TAG, "wakelock released");
 
         liveSession.leaveLiveSession();
     }
-
-    public void start() throws UserNotLoggedInException {
-        SignallingClient.getInstance().subscribeMediaListenerRecord(this);
-
-        liveSession = new Session(this.getApplicationContext(), rootEglBase, this);
-        liveSession.createLiveVideoClient();
-        if (SignallingClient.getInstance().isChannelReady)
-            onTryToStart();
-    }
-
-    private void onTryToStart() {
-        if (!SignallingClient.getInstance().isStarted && liveSession.getVideoTrack() != null && SignallingClient.getInstance().isChannelReady) {
-            SignallingClient.getInstance().isStarted = true;
-            liveSession.createLiveOffer();
-        }
-    }
-
 
     @Override
     public void onStartResponse(String answer) {
@@ -167,6 +155,28 @@ public class StreamingIntentService extends IntentService implements MediaListen
         liveSession.addIceCandidate(new IceCandidate(data.get("sdpMid").getAsString(),
                 data.get("sdpMLineIndex").getAsInt(),
                 data.get("candidate").getAsString()));
+    }
+
+    @Override
+    public void gotRemoteStream(MediaStream mediaStream) {
+        // never receive remote stream
+        stopSelf();
+    }
+
+    private void start() throws UserNotLoggedInException {
+        SignallingClient.getInstance().subscribeMediaListenerRecord(this);
+
+        liveSession = new Session(this.getApplicationContext(), rootEglBase, this);
+        liveSession.createLiveVideoClient(cameraType);
+        if (SignallingClient.getInstance().isChannelReady)
+            onTryToStart();
+    }
+
+    private void onTryToStart() {
+        if (!SignallingClient.getInstance().isStarted && liveSession.getVideoTrack() != null && SignallingClient.getInstance().isChannelReady) {
+            SignallingClient.getInstance().isStarted = true;
+            liveSession.createLiveOffer();
+        }
     }
 
     public Session getLiveSession() {
@@ -195,11 +205,6 @@ public class StreamingIntentService extends IntentService implements MediaListen
         localVideoView.setMirror(isMirrored);
     }
 
-    @Override
-    public void gotRemoteStream(MediaStream mediaStream) {
-        // never receive remote stream
-    }
-
     public void showToast(final String message) {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
@@ -207,5 +212,11 @@ public class StreamingIntentService extends IntentService implements MediaListen
                 Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    public class LocalBinder extends Binder {
+        public StreamingIntentService getService() {
+            return StreamingIntentService.this;
+        }
     }
 }

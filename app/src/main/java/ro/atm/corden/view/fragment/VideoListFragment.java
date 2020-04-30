@@ -27,8 +27,7 @@ import ro.atm.corden.R;
 import ro.atm.corden.databinding.FragmentVideoListBinding;
 import ro.atm.corden.model.video.Video;
 import ro.atm.corden.util.adapter.VideoAdapter;
-import ro.atm.corden.util.constant.Constant;
-import ro.atm.corden.view.activity.UserTimelineActivity;
+import ro.atm.corden.util.constant.AppConstants;
 import ro.atm.corden.viewmodel.VideoListViewModel;
 
 /**
@@ -93,7 +92,7 @@ public class VideoListFragment extends Fragment {
         binding.videosList.setLayoutManager(new LinearLayoutManager(this.getContext()));
         binding.videosList.setHasFixedSize(true);
 
-        String getUsername = getArguments().getString(Constant.GET_USERNAME);
+        String getUsername = getArguments().getString(AppConstants.GET_USERNAME);
         if(getUsername != null){
             viewModel.setVideos(getUsername);
         }
@@ -116,7 +115,7 @@ public class VideoListFragment extends Fragment {
                 FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                 PlayerFragment playerFragment = new PlayerFragment();
                 Bundle videoBundle = new Bundle();;
-                videoBundle.putSerializable(Constant.GET_VIDEO, video);
+                videoBundle.putSerializable(AppConstants.GET_VIDEO, video);
                 playerFragment.setArguments(videoBundle);
                 fragmentTransaction.addToBackStack("videoList");
                 fragmentTransaction.hide(VideoListFragment.this);

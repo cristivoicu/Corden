@@ -4,12 +4,9 @@ import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
-import androidx.fragment.app.FragmentActivity;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
@@ -24,7 +21,6 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
-import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -33,7 +29,6 @@ import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +45,7 @@ import ro.atm.corden.util.websocket.SignallingClient;
 import ro.atm.corden.util.websocket.callback.MapItemsListener;
 import ro.atm.corden.view.dialog.SaveMapItemDialog;
 
-public class UserJobsMapsActivity extends AppCompatActivity
+public class AdminMapsActivity extends AppCompatActivity
         implements OnMapReadyCallback,
         SaveMapItemDialog.SaveMapDialogListener,
         GoogleMap.OnPolygonClickListener,
@@ -180,6 +175,8 @@ public class UserJobsMapsActivity extends AppCompatActivity
         polygonOptions = new PolygonOptions();
         currentPolyline = googleMap.addPolyline(polylineOptions);
 
+        //currentPolygon = googleMap.addPolygon(polygonOptions);
+
         markerOptions = new MarkerOptions();
 
         // Add a marker in Sydney and move the camera
@@ -207,10 +204,17 @@ public class UserJobsMapsActivity extends AppCompatActivity
                 }
                 if (isZone) {
                     points.add(latLng);
-                    currentPolyline.setPoints(points);
+                    polygonOptions = new PolygonOptions();
+                    polygonOptions.addAll(points);
+                    if(currentPolygon != null)
+                        currentPolygon.remove();
+                    currentPolygon = googleMap.addPolygon(polygonOptions);
+
+                    //currentPolyline.setPoints(points);
                     return;
                 }
             }
+
         });
     }
 
@@ -253,6 +257,7 @@ public class UserJobsMapsActivity extends AppCompatActivity
         }
     }
 
+    /** saving*/
     public void onTextViewClicked(View view) {
         binding.buttonLayout.setVisibility(View.VISIBLE);
         binding.currentTaskTextView.setVisibility(View.GONE);
@@ -269,10 +274,10 @@ public class UserJobsMapsActivity extends AppCompatActivity
             for (LatLng latLng : currentPolyline.getPoints()) {
                 polygonOptions.add(latLng);
             }
-            currentPolyline.remove();
+            /*currentPolyline.remove();
             polylineOptions = new PolylineOptions();
             currentPolygon = mMap.addPolygon(polygonOptions);
-            polygonOptions = new PolygonOptions();
+            polygonOptions = new PolygonOptions();*/
             return;
         }
     }
@@ -364,14 +369,14 @@ public class UserJobsMapsActivity extends AppCompatActivity
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        UserJobsMapsActivity.super.onBackPressed();
+                        AdminMapsActivity.super.onBackPressed();
                         Repository.getInstance().saveMapItems(mapItems);
                     }
                 })
                 .setNegativeButton("No", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        UserJobsMapsActivity.super.onBackPressed();
+                        AdminMapsActivity.super.onBackPressed();
                     }
                 });
         builder.show();

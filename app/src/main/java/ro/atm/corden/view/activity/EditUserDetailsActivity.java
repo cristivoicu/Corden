@@ -23,7 +23,7 @@ import java.util.Locale;
 import ro.atm.corden.R;
 import ro.atm.corden.databinding.ActivityEditUserDetailsBinding;
 import ro.atm.corden.model.user.User;
-import ro.atm.corden.util.constant.Constant;
+import ro.atm.corden.util.constant.AppConstants;
 import ro.atm.corden.util.exception.websocket.UserNotLoggedInException;
 import ro.atm.corden.util.websocket.SignallingClient;
 import ro.atm.corden.util.websocket.callback.UpdateUserListener;
@@ -66,7 +66,7 @@ public class EditUserDetailsActivity extends AppCompatActivity
                 .getInstance(this.getApplication())
                 .create(EditUserViewModel.class);
         binding.setViewModel(viewModel);
-        String username = getIntent().getStringExtra(Constant.GET_USERNAME);
+        String username = getIntent().getStringExtra(AppConstants.GET_USERNAME);
 
         binding.toolbar.setTitle("Edit user account");
         binding.toolbar.setSubtitle("For user: " + username);

@@ -52,13 +52,6 @@ public class LocationService extends Service {
     public void onCreate() {
         super.onCreate();
 
-        Notification notification = new NotificationCompat.Builder(this, App.LOCATION_CHANNEL_ID)
-                .setContentTitle("Sending live location")
-                .setContentText("You are sending live location to the application server")
-                .build();
-
-        startForeground(2, notification);
-
         mLocationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
         mLocationListener = new LocationListener() {
@@ -87,6 +80,15 @@ public class LocationService extends Service {
         Location location = getLastKnownLocation();
         if(location != null)
             saveUserLocation(location);
+
+        Notification notification = new NotificationCompat.Builder(this, App.LOCATION_CHANNEL_ID)
+                .setContentTitle("Sending live location")
+                .setContentText("You are sending live location to the application server")
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setAutoCancel(true)
+                .build();
+
+        startForeground(2, notification);
     }
 
     private Location getLastKnownLocation() {

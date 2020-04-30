@@ -8,6 +8,7 @@ import org.webrtc.EglBase;
 import org.webrtc.HardwareVideoEncoderFactory;
 import org.webrtc.IceCandidate;
 import org.webrtc.PeerConnectionFactory;
+import org.webrtc.SurfaceViewRenderer;
 import org.webrtc.VideoCapturer;
 import org.webrtc.VideoCodecInfo;
 import org.webrtc.VideoTrack;
@@ -35,8 +36,12 @@ public class Session {
         this.client = new PlaybackClient(mediaActivity, peerConnectionFactory);
     }
 
-    public void createLiveVideoClient() {
-        this.client = new LiveVideoClient(eglBase, context, mediaActivity, peerConnectionFactory);
+    public void createLiveVideoClient(CameraSelector.CameraType cameraType) {
+        this.client = new LiveVideoClient(eglBase,
+                context,
+                mediaActivity,
+                peerConnectionFactory,
+                cameraType);
     }
 
     public void createLiveWatcherClient() {

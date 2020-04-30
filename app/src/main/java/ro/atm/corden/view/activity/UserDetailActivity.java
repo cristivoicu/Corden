@@ -8,17 +8,16 @@ import androidx.lifecycle.ViewModelProvider;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
-
-import java.util.Locale;
 
 import ro.atm.corden.R;
 import ro.atm.corden.databinding.ActivityUserDetailBinding;
 import ro.atm.corden.model.user.Role;
 import ro.atm.corden.model.user.User;
-import ro.atm.corden.util.constant.Constant;
+import ro.atm.corden.util.constant.AppConstants;
+import ro.atm.corden.util.websocket.SignallingClient;
 import ro.atm.corden.viewmodel.UserDetailViewModel;
 
 public class UserDetailActivity extends AppCompatActivity {
@@ -49,7 +48,6 @@ public class UserDetailActivity extends AppCompatActivity {
         if(user != null){
             if(user.getRoles().equals(Role.ADMIN.name())){
                 binding.image.setImageResource(R.drawable.ic_boss);
-                binding.textUserType.setText("ADMIN");
             }
             viewModel.setData(user);
         }
@@ -57,33 +55,34 @@ public class UserDetailActivity extends AppCompatActivity {
 
     public void onListVideosClicked(View view) {
         Intent intent = new Intent(this, VideoListActivity.class);
-        intent.putExtra(Constant.GET_USERNAME, user.getUsername());
+        intent.putExtra(AppConstants.GET_USERNAME, user.getUsername());
         startActivity(intent);
     }
 
     public void onAssignJobClicked(View view) {
-        Intent intent = new Intent(this, UserJobsMapsActivity.class);
+        Intent intent = new Intent(this, AdminMapsActivity.class);
         startActivity(intent);
     }
 
     public void onTimelineButtonClicked(View view) {
         Intent intent = new Intent(this, UserTimelineActivity.class);
-        intent.putExtra(Constant.GET_USERNAME, user.getUsername());
+        intent.putExtra(AppConstants.GET_USERNAME, user.getUsername());
         startActivity(intent);
     }
 
     public void onEditUserButtonClicked(View view) {
+/*        BiometricAuthentication biometricAuthentication = new BiometricAuthentication(this);
+        biometricAuthentication.authenticate();*/
         Intent intent = new Intent(this, EditUserDetailsActivity.class);
-        intent.putExtra(Constant.GET_USERNAME, user.getUsername());
+        intent.putExtra(AppConstants.GET_USERNAME, user.getUsername());
         intent.putExtra(Intent.EXTRA_USER, user);
-        startActivityForResult(intent, Constant.USER_DETAIL_ACTIVITY);
+        startActivityForResult(intent, AppConstants.USER_DETAIL_ACTIVITY);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
-        if(requestCode == Constant.USER_DETAIL_ACTIVITY){
+        if(requestCode == AppConstants.USER_DETAIL_ACTIVITY){
             if(resultCode == Activity.RESULT_OK){
                 user = (User) data.getSerializableExtra(Intent.EXTRA_USER);
                 viewModel.setData(user);
@@ -106,5 +105,15 @@ public class UserDetailActivity extends AppCompatActivity {
 
     public void onRealTimeLocationButtonClicked(View view) {
 
+    }
+
+    public void onStartCameraButtonClicked(View view) {
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                SignallingClient.getInstance().sendStreamRequest(viewModel.getUsername());
+                return null;
+            }
+        }.execute();
     }
 }

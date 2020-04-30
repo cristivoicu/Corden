@@ -1,9 +1,11 @@
 package ro.atm.corden.view.activity;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 
+import android.Manifest;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -11,34 +13,39 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 
 import org.webrtc.CameraVideoCapturer;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Stream;
+
+import pub.devrel.easypermissions.AfterPermissionGranted;
+import pub.devrel.easypermissions.AppSettingsDialog;
+import pub.devrel.easypermissions.EasyPermissions;
 import ro.atm.corden.R;
 import ro.atm.corden.databinding.ActivityMainUserBinding;
 import ro.atm.corden.model.user.LoginUser;
+import ro.atm.corden.util.constant.AppConstants;
 import ro.atm.corden.util.services.LocationService;
 import ro.atm.corden.util.services.StreamingIntentService;
+import ro.atm.corden.util.webrtc.client.CameraSelector;
 import ro.atm.corden.util.websocket.SignallingClient;
 
-public class MainActivityUser extends AppCompatActivity {
+public class MainActivityUser extends AppCompatActivity implements EasyPermissions.PermissionCallbacks {
     private ActivityMainUserBinding binding;
-
-    private boolean isServiceStarted = false;
     private static final String ACTION_STREAM = "ActionStream";
-
     private StreamingIntentService mService;
     private boolean mBound = false;
-
     private boolean isShowVideoPressed = false;
-
     private ServiceConnection mConnection = new ServiceConnection() {
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            // TODO Auto-generated method stub
             StreamingIntentService.LocalBinder binder = (StreamingIntentService.LocalBinder) service;
             mService = binder.getService();
             mBound = true;
@@ -46,9 +53,7 @@ public class MainActivityUser extends AppCompatActivity {
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            // TODO Auto-generated method stub
             mBound = false;
-
         }
 
     };
@@ -57,16 +62,16 @@ public class MainActivityUser extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main_user);
+        binding.setLifecycleOwner(this);
+
         binding.frontCamera.setSelected(true);
         binding.showStream.setOnTouchListener((v, event) ->
         {
-            Log.d("T", "1");
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 isShowVideoPressed = !isShowVideoPressed;
-                Log.d("T", "2  " + isShowVideoPressed);
                 binding.showStream.setSelected(isShowVideoPressed);
                 binding.showStream.setPressed(isShowVideoPressed);
-                if (isServiceStarted) {
+                if (StreamingIntentService.isRunning()) {
                     if (isShowVideoPressed) {
                         mService.showVideo(binding.localView);
                         binding.localView.setVisibility(View.VISIBLE);
@@ -79,15 +84,14 @@ public class MainActivityUser extends AppCompatActivity {
             }
             return false;
         });
-
         binding.frontCamera.setOnTouchListener((v, event) -> {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 if (!binding.frontCamera.isSelected()) {
                     binding.frontCamera.setSelected(true);
                     binding.backCamera.setSelected(false);
                     binding.externalCamera.setSelected(false);
-                    if (isServiceStarted) {
-                       mService.switchCamera(binding.localView, true);
+                    if (StreamingIntentService.isRunning()) {
+                        mService.switchCamera(binding.localView, true);
                     }
                 }
                 return true;
@@ -100,9 +104,7 @@ public class MainActivityUser extends AppCompatActivity {
                     binding.frontCamera.setSelected(false);
                     binding.backCamera.setSelected(true);
                     binding.externalCamera.setSelected(false);
-                    if (isServiceStarted) {
-                        /*CameraVideoCapturer cameraVideoCapturer = (CameraVideoCapturer) mService.getLiveSession().getVideoCapturer();
-                        cameraVideoCapturer.switchCamera(null);*/
+                    if (StreamingIntentService.isRunning()) {
                         mService.switchCamera(binding.localView, false);
                     }
                 }
@@ -123,27 +125,95 @@ public class MainActivityUser extends AppCompatActivity {
         });
         Intent serviceIntent = new Intent(this, LocationService.class);
         ContextCompat.startForegroundService(this, serviceIntent);
-
-    }
-
-    public void startService(View view) {
-        Intent serviceIntent = new Intent(this, StreamingIntentService.class);
-        serviceIntent.setAction(ACTION_STREAM);
-
-        if (!isServiceStarted) {
-            ContextCompat.startForegroundService(this, serviceIntent);
+        if (StreamingIntentService.isRunning() && !mBound) {
             bindService(serviceIntent, mConnection, BIND_AUTO_CREATE);
             mBound = true;
-            isServiceStarted = true;
-        } else {
-            stopService(serviceIntent);
-            if (mBound) {
-                mBound = false;
-                unbindService(mConnection);
+        }
+
+        setSupportActionBar(binding.toolbar);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.admin_main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.itemLogout:
+                SignallingClient.getInstance().logout();
+                finish();
+                break;
+            case R.id.itemMyAccount:
+                Intent intent = new Intent(this, EditUserAccountActivity.class);
+                startActivity(intent);
+                break;
+            case R.id.itemSetting:
+                intent = new Intent(this, SettingsActivity.class);
+                startActivity(intent);
+                break;
+        }
+        return true;
+    }
+
+    @AfterPermissionGranted(AppConstants.WEBRTC_REQUEST_CODE)
+    private void checkPermission() {
+        if (!EasyPermissions.hasPermissions(this, AppConstants.webRtcPermissions)) {
+            EasyPermissions.requestPermissions(this,
+                    "You need to allow those permissions for the app to run correctly",
+                    AppConstants.WEBRTC_REQUEST_CODE,
+                    AppConstants.webRtcPermissions);
+        }
+    }
+
+    /***/
+    private CameraSelector.CameraType determineCamera(){
+        if(binding.frontCamera.isSelected() || binding.backCamera.isSelected()){
+            binding.externalCamera.setEnabled(false);
+            if(binding.frontCamera.isSelected()){
+                return CameraSelector.CameraType.FRONT;
             }
-            StopServiceAsyncTask stopServiceAsyncTask = new StopServiceAsyncTask();
-            stopServiceAsyncTask.execute();
-            isServiceStarted = false;
+            if(binding.backCamera.isSelected()){
+                return CameraSelector.CameraType.BACK;
+            }
+
+        }
+        if(binding.externalCamera.isSelected()){
+            binding.frontCamera.setEnabled(false);
+            binding.backCamera.setEnabled(false);
+            return CameraSelector.CameraType.EXTERNAL;
+        }
+        return null;
+    }
+
+    /***/
+    public void startService(View view) {
+        checkPermission();
+        if (EasyPermissions.hasPermissions(this, AppConstants.webRtcPermissions)) {
+            Intent serviceIntent = new Intent(this, StreamingIntentService.class);
+            serviceIntent.setAction(ACTION_STREAM);
+            serviceIntent.putExtra(AppConstants.EXTRA_CAMERA, determineCamera().name());
+            if (StreamingIntentService.isRunning() && !mBound) {
+                bindService(serviceIntent, mConnection, BIND_AUTO_CREATE);
+                mBound = true;
+                return;
+            }
+
+            if (!StreamingIntentService.isRunning()) {
+                ContextCompat.startForegroundService(this, serviceIntent);
+                bindService(serviceIntent, mConnection, BIND_AUTO_CREATE);
+                mBound = true;
+            } else {
+                stopService(serviceIntent);
+                if (mBound) {
+                    mBound = false;
+                    unbindService(mConnection);
+                }
+                StopServiceAsyncTask stopServiceAsyncTask = new StopServiceAsyncTask();
+                stopServiceAsyncTask.execute();
+            }
         }
     }
 
@@ -151,7 +221,7 @@ public class MainActivityUser extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         Intent serviceIntent = new Intent(this, StreamingIntentService.class);
-        if (isServiceStarted) {
+        if (StreamingIntentService.isRunning()) {
             stopService(serviceIntent);
             if (mBound) {
                 mBound = false;
@@ -163,9 +233,30 @@ public class MainActivityUser extends AppCompatActivity {
     }
 
     public void onChangeCameraClicked(View view) {
-        if (isServiceStarted) {
+        if (StreamingIntentService.isRunning()) {
             CameraVideoCapturer cameraVideoCapturer = (CameraVideoCapturer) mService.getLiveSession().getVideoCapturer();
             cameraVideoCapturer.switchCamera(null);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    @Override
+    public void onPermissionsGranted(int requestCode, @NonNull List<String> perms) {
+
+    }
+
+    @Override
+    public void onPermissionsDenied(int requestCode, @NonNull List<String> perms) {
+        if (EasyPermissions.somePermissionDenied(this, AppConstants.webRtcPermissions)) {
+            new AppSettingsDialog.Builder(this).build().show();
+        }
+        if( EasyPermissions.somePermissionPermanentlyDenied(this, Arrays.asList(AppConstants.webRtcPermissions))){
+            new AppSettingsDialog.Builder(this).build().show();
         }
     }
 

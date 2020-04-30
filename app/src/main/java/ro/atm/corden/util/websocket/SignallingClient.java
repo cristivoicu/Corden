@@ -36,6 +36,7 @@ import ro.atm.corden.util.websocket.callback.RemoveVideoListener;
 import ro.atm.corden.util.websocket.callback.UpdateUserListener;
 import ro.atm.corden.util.websocket.protocol.Message;
 import ro.atm.corden.util.websocket.protocol.events.MediaEventType;
+import ro.atm.corden.util.websocket.protocol.events.RequestEventTypes;
 import ro.atm.corden.util.websocket.protocol.events.SubscribeEventType;
 import ro.atm.corden.util.websocket.protocol.events.UnsubscribeEventType;
 import ro.atm.corden.util.websocket.protocol.events.UpdateEventType;
@@ -105,7 +106,7 @@ public class SignallingClient {
                 SSLContext sslContext = SSLContext.getInstance("TLS");
                 sslContext.init(null, tmf.getTrustManagers(), null);
 
-                webSocket = new WebSocket(uri);
+                webSocket = new WebSocket(uri, context.getApplicationContext());
                 webSocket.setConnectionLostTimeout(0);
                 webSocket.setSocketFactory(sslContext.getSocketFactory());
 
@@ -329,6 +330,20 @@ public class SignallingClient {
 
     }
 
+    /***/
+    public void sendStreamRequest(@NonNull String username){
+        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+            Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
+            throw new NetworkOnMainThreadException();
+        }
+        Message message = new Message.RequestMessageBuilder()
+                .addEvent(RequestEventTypes.REQUEST_START_STREAMING)
+                .addUser(username)
+                .build();
+        webSocket.send(message.toString());
+    }
+
+    /***/
     public void sendLiveLocation(Location location) {
 /*        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
             Log.e(TAG, "Main thread is used! in SignallingClient.logIn");

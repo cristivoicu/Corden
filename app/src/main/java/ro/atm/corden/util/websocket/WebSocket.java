@@ -1,7 +1,19 @@
 package ro.atm.corden.util.websocket;
 
+import android.app.AlertDialog;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.os.ConditionVariable;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
+import android.view.Window;
+import android.view.WindowManager;
+
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -22,12 +34,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Condition;
 
+import ro.atm.corden.R;
 import ro.atm.corden.model.user.Role;
 import ro.atm.corden.model.user.Action;
 import ro.atm.corden.model.user.Status;
 import ro.atm.corden.model.user.User;
 import ro.atm.corden.model.video.Video;
 import ro.atm.corden.model.video.VideoInfo;
+import ro.atm.corden.util.App;
+import ro.atm.corden.util.receiver.NotificationReceiver;
 import ro.atm.corden.util.websocket.callback.EnrollListener;
 import ro.atm.corden.util.websocket.callback.LoginListener;
 import ro.atm.corden.util.websocket.callback.MapItemsListener;
@@ -35,6 +50,7 @@ import ro.atm.corden.util.websocket.callback.MediaListener;
 import ro.atm.corden.util.websocket.callback.RemoveVideoListener;
 import ro.atm.corden.util.websocket.callback.UpdateUserListener;
 import ro.atm.corden.util.websocket.subscribers.UserSubscriber;
+import ro.atm.corden.view.activity.MainActivityUser;
 
 import static ro.atm.corden.util.constant.JsonConstants.USE_ICE_FOR_LIVE;
 import static ro.atm.corden.util.constant.JsonConstants.USE_ICE_FOR_PLAY;
@@ -54,6 +70,7 @@ import static ro.atm.corden.util.constant.JsonConstants.VIDEO_INFO_IS_SEEKABLE;
 final class WebSocket extends WebSocketClient {
     private static final String TAG = "WebSocket";
     private static final Gson gson = new GsonBuilder().setDateFormat("MMM dd, yyyy, h:mm:ss a").setPrettyPrinting().create();
+    private Context mApplicationContext;
 
     boolean isLoggedIn = false;
     // listeners
@@ -80,8 +97,9 @@ final class WebSocket extends WebSocketClient {
     UserSubscriber userSubscriber;
 
 
-    public WebSocket(URI serverUri) {
+    WebSocket(URI serverUri, Context applcationContext) {
         super(serverUri);
+        mApplicationContext = applcationContext;
     }
 
     @Override
@@ -195,6 +213,30 @@ final class WebSocket extends WebSocketClient {
     private void handleRequestMethodMessage(JsonObject receivedMessage) {
         JsonElement payload = receivedMessage.get("payload");
         switch (receivedMessage.get("event").getAsString()) {
+            case "requestLiveStreaming":
+                String from = receivedMessage.get("from").getAsString();
+/*                new Handler(Looper.getMainLooper())
+                        .post(() -> {*/
+                Intent intent = new Intent(mApplicationContext, MainActivityUser.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                PendingIntent pendingIntent = PendingIntent.getActivity(mApplicationContext, 0, intent, 0);
+
+                Intent startStreamIntent = new Intent(mApplicationContext, NotificationReceiver.class);
+                startStreamIntent.setAction("startStreaming");
+                PendingIntent startStreamPendingIntent = PendingIntent.getBroadcast(mApplicationContext, 0, startStreamIntent, 0);
+
+                NotificationCompat.Builder builder = new NotificationCompat.Builder(mApplicationContext, App.NOTIFICATION_CHANNEL_ID)
+                        .setSmallIcon(R.drawable.ic_ondemand_video_black_24dp)
+                        .setContentTitle("Admin demand")
+                        .setContentText(String.format("%s wants you to start video streaming.", from))
+                        .setContentIntent(pendingIntent)
+                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                        .addAction(R.drawable.ic_show_video, "Start stream", startStreamPendingIntent)
+                        .setAutoCancel(true);
+                NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(mApplicationContext);
+                notificationManagerCompat.notify(10, builder.build());
+                /*   });*/
+                break;
             case "requestTimeline":
                 Type actionsListType = new TypeToken<ArrayList<Action>>() {
                 }.getType();
@@ -227,7 +269,7 @@ final class WebSocket extends WebSocketClient {
                 break;
             case "requestUserData":
 
-                synchronized (users){
+                synchronized (users) {
                     users.clear();
                     users.add(User.fromJson(payload.getAsString()));
                     userDataConditionVariable.open();

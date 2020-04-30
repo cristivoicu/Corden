@@ -1,6 +1,8 @@
 package ro.atm.corden.view.activity;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.biometric.BiometricManager;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -12,13 +14,19 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.View;
 
-import com.google.android.gms.common.SignInButton;
+import java.util.Arrays;
+import java.util.List;
 
+import pub.devrel.easypermissions.AfterPermissionGranted;
+import pub.devrel.easypermissions.AppSettingsDialog;
+import pub.devrel.easypermissions.EasyPermissions;
 import ro.atm.corden.R;
 import ro.atm.corden.databinding.ActivityLoginBinding;
 import ro.atm.corden.model.user.LoginUser;
 import ro.atm.corden.model.user.Role;
+import ro.atm.corden.util.constant.AppConstants;
 import ro.atm.corden.util.exception.login.EmptyTextException;
 import ro.atm.corden.util.exception.login.LoginListenerNotInitialisedException;
 import ro.atm.corden.util.websocket.callback.LoginListener;
@@ -29,10 +37,32 @@ import static ro.atm.corden.util.constant.ExceptionCodes.EMPTY_FIELD_CODE;
 import static ro.atm.corden.util.constant.ExceptionCodes.LOGIN_LISTENER_NOT_INITIALISED_CODE;
 import static ro.atm.corden.util.constant.ExceptionCodes.OK_CODE;
 
-public class LoginActivity extends AppCompatActivity implements LoginListener {
+public class LoginActivity extends AppCompatActivity implements LoginListener,
+        EasyPermissions.PermissionCallbacks{
     private LoginViewModel viewModel;
     private static ActivityLoginBinding binding;
     private static Context context;
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
+    @Override
+    public void onPermissionsGranted(int requestCode, @NonNull List<String> perms) {
+
+    }
+
+    @Override
+    public void onPermissionsDenied(int requestCode, @NonNull List<String> perms) {
+        if (EasyPermissions.somePermissionDenied(this, AppConstants.locationPermissions)) {
+            new AppSettingsDialog.Builder(this).build().show();
+        }
+        if (EasyPermissions.somePermissionPermanentlyDenied(this, Arrays.asList(AppConstants.locationPermissions))) {
+            new AppSettingsDialog.Builder(this).build().show();
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,7 +87,22 @@ public class LoginActivity extends AppCompatActivity implements LoginListener {
             loginAsyncTask.execute(loginUser);
         });
 
+        requestPermissions();
+    }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
+    @AfterPermissionGranted(AppConstants.LOCATION_REQUEST_CODE)
+    private void requestPermissions() {
+        if (!EasyPermissions.hasPermissions(this, AppConstants.locationPermissions)) {
+            EasyPermissions.requestPermissions(this,
+                    "You need to accept the permission for the app runs correctly",
+                    AppConstants.LOCATION_REQUEST_CODE,
+                    AppConstants.locationPermissions);
+        }
     }
 
     @Override
@@ -72,12 +117,12 @@ public class LoginActivity extends AppCompatActivity implements LoginListener {
 
     @Override
     public void onLoginSuccess(Role role) {
-        if(role == Role.ADMIN){
+        if (role == Role.ADMIN) {
             Intent intent = new Intent(LoginActivity.this, MainActivityAdmin.class);
             startActivity(intent);
             return;
         }
-        if(role == Role.USER){
+        if (role == Role.USER) {
             Intent intent = new Intent(this, MainActivityUser.class);
             startActivity(intent);
             return;
@@ -85,9 +130,15 @@ public class LoginActivity extends AppCompatActivity implements LoginListener {
 
     }
 
+    public void onLoginButtonClicked(View view) {
+        requestPermissions();
+        if (EasyPermissions.hasPermissions(this, AppConstants.locationPermissions))
+            viewModel.onClick(view);
+    }
+
     private static class LoginAsyncTask extends AsyncTask<LoginUser, Void, Integer> {
 
-       ProgressDialog progressDialog;
+        ProgressDialog progressDialog;
 
         @Override
         protected Integer doInBackground(LoginUser... loginUsers) {
@@ -103,7 +154,7 @@ public class LoginActivity extends AppCompatActivity implements LoginListener {
 
         @Override
         protected void onPostExecute(Integer integer) {
-            if(integer == EMPTY_FIELD_CODE){
+            if (integer == EMPTY_FIELD_CODE) {
                 binding.textInputPassword.setError("Please enter some text here!");
                 binding.textInputUsername.setError("Please enter some text here!");
             }
