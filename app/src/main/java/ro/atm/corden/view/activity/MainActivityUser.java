@@ -144,6 +144,11 @@ public class MainActivityUser extends AppCompatActivity implements EasyPermissio
         switch (item.getItemId()){
             case R.id.itemLogout:
                 SignallingClient.getInstance().logout();
+                // stopping services
+                stopService(new Intent(MainActivityUser.this, LocationService.class));
+                if(StreamingIntentService.isRunning()){
+                    stopService(new Intent(MainActivityUser.this, StreamingIntentService.class));
+                }
                 finish();
                 break;
             case R.id.itemMyAccount:

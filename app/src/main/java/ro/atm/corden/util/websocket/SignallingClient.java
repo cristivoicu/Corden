@@ -56,6 +56,7 @@ public class SignallingClient {
     private static final String TAG = "SignallingClient";
 
     WebSocket webSocket = null;
+    private boolean isReconnect = false;
 
     public boolean isChannelReady = false;
     public boolean isInitiator = false;
@@ -145,7 +146,11 @@ public class SignallingClient {
         }
         webSocket.addHeader("username", username);
         webSocket.addHeader("password", password);
-        webSocket.connect();
+        if(!isReconnect) {
+            webSocket.connect();
+            isReconnect = true;
+        }else
+            webSocket.reconnect();
     }
 
     /**

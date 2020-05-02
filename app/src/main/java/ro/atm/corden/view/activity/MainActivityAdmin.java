@@ -118,6 +118,8 @@ public class MainActivityAdmin extends AppCompatActivity {
         switch (item.getItemId()){
             case R.id.itemLogout:
                 SignallingClient.getInstance().logout();
+                // stopping services
+                stopService(new Intent(MainActivityAdmin.this, LocationService.class));
                 finish();
                 break;
             case R.id.itemMyAccount:
