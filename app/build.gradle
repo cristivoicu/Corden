@@ -87,4 +87,7 @@ dependencies {
 
     // https://mvnrepository.com/artifact/com.serenegiant.uvccamera/libuvccameras
     implementation group: 'com.serenegiant.uvccamera', name: 'libuvccameras', version: '0.0.2'
+
+    implementation 'com.google.android.gms:play-services-location:17.0.0'
+    implementation "androidx.localbroadcastmanager:localbroadcastmanager:1.0.0"
 }

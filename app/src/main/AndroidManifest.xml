@@ -18,8 +18,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
-
-
+    <uses-permission android:name="com.google.android.gms.permission.ACTIVITY_RECOGNITION" />
 
     <application
         android:name=".util.App"
@@ -29,8 +28,16 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".view.activity.EditUserAccountActivity"></activity>
-        <activity android:name=".view.activity.SettingsActivity" /> <!-- Services -->
+        <service android:name=".util.services.DetectedActivitiesService"
+            android:stopWithTask="true"/>
+        <service
+            android:name=".util.services.ActivityDetectorIntentService"
+            android:exported="false"
+            android:stopWithTask="true"/>
+
+        <activity android:name=".view.activity.EditUserAccountActivity" />
+        <activity android:name=".view.activity.SettingsActivity" />
+        <!-- Services -->
         <service
             android:name=".util.services.LocationService"
             android:stopWithTask="true" />

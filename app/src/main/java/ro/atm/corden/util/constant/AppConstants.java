@@ -15,6 +15,8 @@ public class AppConstants {
 
     public static final int USER_DETAIL_ACTIVITY = 10000;
 
+    public static final String ACTION_BROADCAST_DETECTED_ACTIVITY = "action_detected_activity";
+
     // permissions
     public static final String[] locationPermissions = {Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION,

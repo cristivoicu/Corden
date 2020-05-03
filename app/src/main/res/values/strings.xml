@@ -27,4 +27,15 @@
     <string name="Permission_InternetLocationDesc">Allow application to use internet</string>
 
     <string name="Permission_InternetLocationLabel">Access internet</string>
+
+    <string name="track">Track Activity</string>
+    <string name="percentage">%1$d%%</string>
+    <string name="bicycle">On a bicycle</string>
+    <string name="foot">On foot</string>
+    <string name="running">Running</string>
+    <string name="still">Still</string>
+    <string name="tilting">Tilting</string>
+    <string name="unknown_activity">Unknown_activity</string>
+    <string name="vehicle">In a vehicle</string>
+    <string name="walking">Walking</string>
 </resources>

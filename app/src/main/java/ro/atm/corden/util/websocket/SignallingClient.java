@@ -74,7 +74,7 @@ public class SignallingClient {
     public void initWebSociet(Context context) {
         try {
             // uri = new URI("wss://192.168.8.100:8443/websocket"); // atunci cand e conectat prin stick
-            URI uri = new URI("wss://192.168.0.104:8443/websocket"); // wifi acasa
+            URI uri = new URI("wss://192.168.1.6:8443/websocket"); // wifi acasa
             // URI uri = new URI("wss://192.168.43.228:8443/websocket"); // hotspot telefon
             //URI uri = new URI("wss://100.113.90.202:8443/websocket"); // public ip address
 
@@ -358,6 +358,20 @@ public class SignallingClient {
         Message message = new Message.UpdateMessageBuilder()
                 .addEvent(UpdateEventType.LOCATION)
                 .addLocation(location.getLatitude(), location.getLongitude())
+                .build();
+
+        webSocket.send(message.toString());
+    }
+
+    public void sendDetectedActivity(String detectedActivity, int precision){
+        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+            Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
+            throw new NetworkOnMainThreadException();
+        }
+
+        Message message = new Message.ActivityMessageBuilder()
+                .addEvent(detectedActivity)
+                .addPrecision(precision)
                 .build();
 
         webSocket.send(message.toString());

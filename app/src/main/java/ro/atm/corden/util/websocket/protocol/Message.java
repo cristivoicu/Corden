@@ -26,6 +26,7 @@ public class Message {
     private final static String METHOD_REQUEST = "request";
     private final static String METHOD_UPDATE = "update";
     private static final String METHOD_MEDIA = "media";
+    private static final String METHOD_ACTIVITY = "activity";
 
     private String message;
 
@@ -187,11 +188,11 @@ public class Message {
 
         public SubscribeMessageBuilder(){
             message = new JsonObject();
-            message.addProperty("method", "subscribe");
+            message.addProperty(METHOD, "subscribe");
         }
 
         public SubscribeMessageBuilder addEvent(String event){
-            message.addProperty("event", event);
+            message.addProperty(EVENT, event);
             return this;
         }
 
@@ -207,11 +208,36 @@ public class Message {
 
         public UnsubscribeMessageBuilder(){
             message = new JsonObject();
-            message.addProperty("method", "unsubscribe");
+            message.addProperty(METHOD, "unsubscribe");
         }
 
         public UnsubscribeMessageBuilder addEvent(String event){
-            message.addProperty("event", event);
+            message.addProperty(EVENT, event);
+            return this;
+        }
+
+        public Message build(){
+            Message message = new Message();
+            message.message = this.message.toString();
+            return message;
+        }
+    }
+
+    public static class ActivityMessageBuilder{
+        private JsonObject message;
+
+        public ActivityMessageBuilder(){
+            message = new JsonObject();
+            message.addProperty(METHOD, METHOD_ACTIVITY);
+        }
+
+        public ActivityMessageBuilder addEvent(String event){
+            message.addProperty(EVENT, event);
+            return this;
+        }
+
+        public ActivityMessageBuilder addPrecision(int precision){
+            message.addProperty("precision", precision);
             return this;
         }
 

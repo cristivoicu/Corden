@@ -10,12 +10,10 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.util.Log;
-import android.view.SurfaceView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
 
 import com.google.gson.JsonObject;
 
@@ -23,16 +21,11 @@ import org.webrtc.CameraVideoCapturer;
 import org.webrtc.EglBase;
 import org.webrtc.IceCandidate;
 import org.webrtc.MediaStream;
-import org.webrtc.RendererCommon;
-import org.webrtc.SurfaceTextureHelper;
 import org.webrtc.SurfaceViewRenderer;
-import org.webrtc.VideoCapturer;
 
-import ro.atm.corden.R;
 import ro.atm.corden.util.App;
 import ro.atm.corden.util.constant.AppConstants;
 import ro.atm.corden.util.exception.websocket.UserNotLoggedInException;
-import ro.atm.corden.util.receiver.NotificationReceiver;
 import ro.atm.corden.util.webrtc.client.CameraSelector;
 import ro.atm.corden.util.webrtc.client.Session;
 import ro.atm.corden.util.webrtc.interfaces.MediaActivity;
@@ -57,7 +50,7 @@ public class StreamingIntentService extends IntentService implements MediaListen
     private CameraSelector.CameraType cameraType;
     private static boolean isRunning = false;
 
-    public static boolean isRunning(){
+    public static boolean isRunning() {
         return isRunning;
     }
 
@@ -67,7 +60,9 @@ public class StreamingIntentService extends IntentService implements MediaListen
 
     private Session liveSession;
 
-    /** used for surface view renderer*/
+    /**
+     * used for surface view renderer
+     */
     private boolean isInited = false;
 
     EglBase rootEglBase;
@@ -90,7 +85,7 @@ public class StreamingIntentService extends IntentService implements MediaListen
         Log.d(TAG, "onCreate");
 
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "SteamIntent:Wakelock");
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "StreamIntent:Wakelock");
         wakeLock.acquire(600000); //wake for maximum 10 minutes when user turns off the screen, bc it drain battery
 
         Intent intent = new Intent(this, MainActivityUser.class);
@@ -113,7 +108,7 @@ public class StreamingIntentService extends IntentService implements MediaListen
         Log.d(TAG, "onHandleIntent");
         if (intent != null) {
             final String action = intent.getAction();
-            cameraType = CameraSelector.CameraType.valueOf(intent.getStringExtra(AppConstants.EXTRA_CAMERA));
+            cameraType = intent.getStringExtra(AppConstants.EXTRA_CAMERA) == null ? CameraSelector.CameraType.BACK : CameraSelector.CameraType.valueOf(intent.getStringExtra(AppConstants.EXTRA_CAMERA));
             if (ACTION_STREAM.equals(action)) {
                 try {
                     isRunning = true;
@@ -138,6 +133,7 @@ public class StreamingIntentService extends IntentService implements MediaListen
         wakeLock.release();
         Log.d(TAG, "wakelock released");
 
+        assert liveSession != null;
         liveSession.leaveLiveSession();
     }
 
@@ -199,7 +195,7 @@ public class StreamingIntentService extends IntentService implements MediaListen
         liveSession.getVideoTrack().removeSink(localVideoView);
     }
 
-    public void switchCamera(SurfaceViewRenderer localVideoView, boolean isMirrored){
+    public void switchCamera(SurfaceViewRenderer localVideoView, boolean isMirrored) {
         CameraVideoCapturer cameraVideoCapturer = (CameraVideoCapturer) liveSession.getVideoCapturer();
         cameraVideoCapturer.switchCamera(null);
         localVideoView.setMirror(isMirrored);

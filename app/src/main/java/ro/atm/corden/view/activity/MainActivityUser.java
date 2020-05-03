@@ -31,6 +31,7 @@ import ro.atm.corden.R;
 import ro.atm.corden.databinding.ActivityMainUserBinding;
 import ro.atm.corden.model.user.LoginUser;
 import ro.atm.corden.util.constant.AppConstants;
+import ro.atm.corden.util.services.DetectedActivitiesService;
 import ro.atm.corden.util.services.LocationService;
 import ro.atm.corden.util.services.StreamingIntentService;
 import ro.atm.corden.util.webrtc.client.CameraSelector;
@@ -131,6 +132,9 @@ public class MainActivityUser extends AppCompatActivity implements EasyPermissio
         }
 
         setSupportActionBar(binding.toolbar);
+
+        Intent intent = new Intent(this, DetectedActivitiesService.class);
+        startService(intent);
     }
 
     @Override
@@ -146,6 +150,7 @@ public class MainActivityUser extends AppCompatActivity implements EasyPermissio
                 SignallingClient.getInstance().logout();
                 // stopping services
                 stopService(new Intent(MainActivityUser.this, LocationService.class));
+                stopService(new Intent(this, DetectedActivitiesService.class));
                 if(StreamingIntentService.isRunning()){
                     stopService(new Intent(MainActivityUser.this, StreamingIntentService.class));
                 }
@@ -197,7 +202,7 @@ public class MainActivityUser extends AppCompatActivity implements EasyPermissio
     public void startService(View view) {
         checkPermission();
         if (EasyPermissions.hasPermissions(this, AppConstants.webRtcPermissions)) {
-            Intent serviceIntent = new Intent(this, StreamingIntentService.class);
+            Intent serviceIntent = new Intent(this.getApplicationContext(), StreamingIntentService.class);
             serviceIntent.setAction(ACTION_STREAM);
             serviceIntent.putExtra(AppConstants.EXTRA_CAMERA, determineCamera().name());
             if (StreamingIntentService.isRunning() && !mBound) {
@@ -207,7 +212,7 @@ public class MainActivityUser extends AppCompatActivity implements EasyPermissio
             }
 
             if (!StreamingIntentService.isRunning()) {
-                ContextCompat.startForegroundService(this, serviceIntent);
+                ContextCompat.startForegroundService(this.getApplicationContext(), serviceIntent);
                 bindService(serviceIntent, mConnection, BIND_AUTO_CREATE);
                 mBound = true;
             } else {
@@ -234,13 +239,6 @@ public class MainActivityUser extends AppCompatActivity implements EasyPermissio
             }
             StopServiceAsyncTask stopServiceAsyncTask = new StopServiceAsyncTask();
             stopServiceAsyncTask.execute();
-        }
-    }
-
-    public void onChangeCameraClicked(View view) {
-        if (StreamingIntentService.isRunning()) {
-            CameraVideoCapturer cameraVideoCapturer = (CameraVideoCapturer) mService.getLiveSession().getVideoCapturer();
-            cameraVideoCapturer.switchCamera(null);
         }
     }
 

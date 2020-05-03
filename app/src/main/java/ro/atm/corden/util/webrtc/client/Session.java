@@ -7,6 +7,8 @@ import org.webrtc.DefaultVideoEncoderFactory;
 import org.webrtc.EglBase;
 import org.webrtc.HardwareVideoEncoderFactory;
 import org.webrtc.IceCandidate;
+import org.webrtc.NetworkMonitor;
+import org.webrtc.NetworkMonitorAutoDetect;
 import org.webrtc.PeerConnectionFactory;
 import org.webrtc.SurfaceViewRenderer;
 import org.webrtc.VideoCapturer;
@@ -52,6 +54,7 @@ public class Session {
         PeerConnectionFactory.InitializationOptions initializationOptions =
                 PeerConnectionFactory.InitializationOptions.builder(context)
                         .createInitializationOptions();
+
         PeerConnectionFactory.initialize(initializationOptions);
 
         //Create a new PeerConnectionFactory instance - using Hardware encoder and decoder.
