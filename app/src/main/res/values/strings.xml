@@ -38,4 +38,12 @@
     <string name="unknown_activity">Unknown_activity</string>
     <string name="vehicle">In a vehicle</string>
     <string name="walking">Walking</string>
+
+
+
+    <string name="settingSharedPreferences">SettingsSharedPreferences</string>
+    <string name="frontCameraWidth">frontCameraWidth</string>
+    <string name="frontCameraHeight">frontCameraHeight</string>
+    <string name="backCameraWidth">backCameraWidth</string>
+    <string name="backCameraHeight">backCameraHeight</string>
 </resources>

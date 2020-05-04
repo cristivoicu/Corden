@@ -1,5 +1,6 @@
 package ro.atm.corden.util.receiver;
 
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -20,7 +21,7 @@ public class NotificationReceiver extends BroadcastReceiver {
         }
         if(action.equals(ACTION_START_STREAMING)){
             Toast.makeText(context, "User pressed stop", Toast.LENGTH_LONG).show();
-            Intent serviceIntent = new Intent(context, StreamingIntentService.class);
+            Intent serviceIntent = new Intent(context.getApplicationContext(), StreamingIntentService.class);
             serviceIntent.setAction("ActionStream");
             ContextCompat.startForegroundService(context, serviceIntent);
         }

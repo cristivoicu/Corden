@@ -2,6 +2,7 @@ package ro.atm.corden.util.websocket;
 
 import android.content.Context;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Looper;
 import android.os.NetworkOnMainThreadException;
 import android.util.Log;
@@ -25,6 +26,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 
 import ro.atm.corden.R;
+import ro.atm.corden.model.user.LoginUser;
 import ro.atm.corden.model.user.Role;
 import ro.atm.corden.util.exception.login.LoginListenerNotInitialisedException;
 import ro.atm.corden.util.exception.websocket.UserNotLoggedInException;
@@ -74,9 +76,8 @@ public class SignallingClient {
     public void initWebSociet(Context context) {
         try {
             // uri = new URI("wss://192.168.8.100:8443/websocket"); // atunci cand e conectat prin stick
-            URI uri = new URI("wss://192.168.1.6:8443/websocket"); // wifi acasa
+            URI uri = new URI("wss://192.168.0.103:8443/websocket"); // wifi acasa
             // URI uri = new URI("wss://192.168.43.228:8443/websocket"); // hotspot telefon
-            //URI uri = new URI("wss://100.113.90.202:8443/websocket"); // public ip address
 
             try {
                 String keyStoreType = KeyStore.getDefaultType();
@@ -298,15 +299,8 @@ public class SignallingClient {
      * @throws NetworkOnMainThreadException
      */
     public void stopVideoStreaming(@NonNull String from) {
-        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
-            Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
-            throw new NetworkOnMainThreadException();
-        }
-        Message message = new Message.MediaMessageBuilder()
-                .addEvent(MediaEventType.STOP_LIVE_STREAM)
-                .build();
-
-        webSocket.send(message.toString());
+        StopServiceAsyncTask stopServiceAsyncTask = new StopServiceAsyncTask();
+        stopServiceAsyncTask.execute();
     }
 
     /**
@@ -534,4 +528,18 @@ public class SignallingClient {
     public void logout() {
         webSocket.close();
     }
+
+    //region Async Tasks
+    private static class StopServiceAsyncTask extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... voids) {
+            Message message = new Message.MediaMessageBuilder()
+                    .addEvent(MediaEventType.STOP_LIVE_STREAM)
+                    .build();
+
+            SignallingClient.getInstance().webSocket.send(message.toString());
+            return null;
+        }
+    }
+    //endregion
 }

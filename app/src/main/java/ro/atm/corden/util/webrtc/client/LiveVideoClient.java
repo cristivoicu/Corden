@@ -1,6 +1,7 @@
 package ro.atm.corden.util.webrtc.client;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import com.serenegiant.usb.UVCCamera;
@@ -20,6 +21,7 @@ import org.webrtc.VideoCapturer;
 import org.webrtc.VideoSource;
 import org.webrtc.VideoTrack;
 
+import ro.atm.corden.R;
 import ro.atm.corden.model.user.LoginUser;
 import ro.atm.corden.util.constant.JsonConstants;
 import ro.atm.corden.util.webrtc.interfaces.MediaActivity;
@@ -27,6 +29,9 @@ import ro.atm.corden.util.webrtc.observer.SimpleSdpObserver;
 import ro.atm.corden.util.webrtc.usb_camera.UsbCapturer;
 import ro.atm.corden.util.websocket.SignallingClient;
 
+/**
+ * WebRtc client which send live streaming to the Kurento Media Server
+ */
 public class LiveVideoClient extends Client {
     private MediaStream mediaStream;
     private VideoTrack videoTrack;
@@ -54,18 +59,25 @@ public class LiveVideoClient extends Client {
     private void captureFromCamera(Context context,
                                    EglBase eglBase,
                                    PeerConnectionFactory peerConnectionFactory,
-                                   CameraSelector.CameraType cameraType){
-
+                                   CameraSelector.CameraType cameraType) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(context.getString(R.string.settingSharedPreferences), Context.MODE_PRIVATE);
+        // setting default resolution
+        int width = 640;
+        int height = 480;
         //Now create a VideoCapturer instance.
-        switch (cameraType){
-            case  BACK:
-                    videoCapturer = CameraSelector.getBackCamera(new Camera2Enumerator(context));
+        switch (cameraType) {
+            case BACK:
+                videoCapturer = CameraSelector.getBackCamera(new Camera2Enumerator(context));
+                width = Integer.parseInt(sharedPreferences.getString(context.getString(R.string.backCameraWidth), "640"));
+                height = Integer.parseInt(sharedPreferences.getString(context.getString(R.string.backCameraHeight), "480"));
                 break;
             case FRONT:
-                    videoCapturer = CameraSelector.getFrontCamera(new Camera1Enumerator(true));
+                videoCapturer = CameraSelector.getFrontCamera(new Camera1Enumerator(true));
+                width = Integer.parseInt(sharedPreferences.getString(context.getString(R.string.frontCameraWidth), "640"));
+                height = Integer.parseInt(sharedPreferences.getString(context.getString(R.string.frontCameraHeight), "480"));
                 break;
             case EXTERNAL:
-                    videoCapturer = CameraSelector.getExternalCamera(context);
+                videoCapturer = CameraSelector.getExternalCamera(context);
                 break;
             default:
                 videoCapturer = CameraSelector.createCameraCapturer(new Camera1Enumerator(false));
@@ -75,14 +87,14 @@ public class LiveVideoClient extends Client {
         //Create MediaConstraints - Will be useful for specifying video and audio constraints.
         audioConstraints = new MediaConstraints();
         videoConstraints = new MediaConstraints();
-
+        Log.e("12345", "width: " + width + ", height: " + height);
         //Create a VideoSource instance
         if (videoCapturer != null) {
             surfaceTextureHelper = SurfaceTextureHelper.create("CaptureThread",
                     eglBase.getEglBaseContext());
             videoSource = peerConnectionFactory.createVideoSource(videoCapturer.isScreencast());
-            videoSource.adaptOutputFormat(UVCCamera.DEFAULT_PREVIEW_WIDTH, UVCCamera.DEFAULT_PREVIEW_HEIGHT, 30);
-            videoCapturer.initialize(surfaceTextureHelper, context , videoSource.getCapturerObserver());
+            videoSource.adaptOutputFormat(width, height, 30);
+            videoCapturer.initialize(surfaceTextureHelper, context, videoSource.getCapturerObserver());
         }
         videoTrack = peerConnectionFactory.createVideoTrack("100", videoSource);
 
@@ -98,14 +110,14 @@ public class LiveVideoClient extends Client {
         }
     }
 
-    private void addStreamToLocalPeer(PeerConnectionFactory peerConnectionFactory){
+    private void addStreamToLocalPeer(PeerConnectionFactory peerConnectionFactory) {
         MediaStream stream = peerConnectionFactory.createLocalMediaStream("102");
         stream.addTrack(audioTrack);
         stream.addTrack(videoTrack);
         localPeer.addStream(stream);
     }
 
-    void createOffer(){
+    void createOffer() {
         sdpConstraints = new MediaConstraints();
         sdpConstraints.mandatory.add(
                 new MediaConstraints.KeyValuePair("OfferToReceiveAudio", "true"));
@@ -123,22 +135,22 @@ public class LiveVideoClient extends Client {
         }, sdpConstraints);
     }
 
-    VideoTrack getVideoTrack(){
+    VideoTrack getVideoTrack() {
         return videoTrack;
     }
 
-    VideoCapturer getVideoCapturer(){
+    VideoCapturer getVideoCapturer() {
         return videoCapturer;
     }
 
     @Override
     public void dispose() {
         super.dispose();
-        if(videoTrack != null){
+        if (videoTrack != null) {
             videoCapturer.dispose();
             videoCapturer = null;
         }
-        if(surfaceTextureHelper != null){
+        if (surfaceTextureHelper != null) {
             surfaceTextureHelper.dispose();
             surfaceTextureHelper = null;
         }

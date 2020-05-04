@@ -14,7 +14,9 @@ import com.google.android.gms.location.DetectedActivity;
 
 import java.util.ArrayList;
 
+import ro.atm.corden.MotionListener;
 import ro.atm.corden.R;
+import ro.atm.corden.model.user.LoginUser;
 import ro.atm.corden.util.constant.AppConstants;
 import ro.atm.corden.util.websocket.SignallingClient;
 import ro.atm.corden.util.websocket.protocol.events.ActivityEventType;
@@ -27,6 +29,8 @@ public class ActivityDetectorIntentService extends IntentService {
     }
 
     private String lastKnownActivity = ActivityEventType.UNKNOWN;
+
+    public static MotionListener motionListener;
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
@@ -88,20 +92,22 @@ public class ActivityDetectorIntentService extends IntentService {
             if(!lastKnownActivity.equals(label)) {
                 lastKnownActivity = label;
                 if(label.equals(ActivityEventType.RUNNING)) {
-                    SignallingClient.getInstance().sendDetectedActivity(label, confidence);
+                    motionListener.onMotion();
+                    /*SignallingClient.getInstance().sendDetectedActivity(label, confidence);
                     Intent streamService = new Intent(this.getApplicationContext(), StreamingIntentService.class);
-                    ContextCompat.startForegroundService(this.getApplicationContext(), streamService);
+                    ContextCompat.startForegroundService(this.getApplicationContext(), streamService);*/
                 }
                 if(label.equals(ActivityEventType.WALKING) || label.equals(ActivityEventType.ON_FOOT)){
-                    Intent streamService = new Intent(this.getApplicationContext(), StreamingIntentService.class);
+                    motionListener.onMotion();
+                    /*Intent streamService = new Intent(this.getApplicationContext(), StreamingIntentService.class);
                     streamService.setAction("ActionStream");
-                    ContextCompat.startForegroundService(this.getApplicationContext(), streamService);
+                    ContextCompat.startForegroundService(this.getApplicationContext(), streamService);*/
                 }
                 if(label.equals(ActivityEventType.STILL)){
                     if(lastKnownActivity.equals(ActivityEventType.RUNNING) || lastKnownActivity.equals(ActivityEventType.WALKING)){
                         SignallingClient.getInstance().sendDetectedActivity(label, confidence);
+                        SignallingClient.getInstance().stopVideoStreaming(LoginUser.username);
                         Intent streamService = new Intent(this.getApplicationContext(), StreamingIntentService.class);
-                        streamService.setAction("ActionStream");
                         stopService(streamService);
                     }
                 }

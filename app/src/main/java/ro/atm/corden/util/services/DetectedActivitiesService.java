@@ -1,5 +1,6 @@
 package ro.atm.corden.util.services;
 
+import android.app.IntentService;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
@@ -8,13 +9,14 @@ import android.os.IBinder;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.google.android.gms.location.ActivityRecognitionClient;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
-public class DetectedActivitiesService extends Service {
+public class DetectedActivitiesService extends IntentService {
     private static final String TAG = DetectedActivitiesService.class.getSimpleName();
 
     private Intent mIntentService;
@@ -29,12 +31,20 @@ public class DetectedActivitiesService extends Service {
         }
     }
 
-    public DetectedActivitiesService() {
+    public DetectedActivitiesService()
+    {
+        super("DetectedActivitiesService");
     }
 
     @Override
     public IBinder onBind(Intent intent) {
         return mBinder;
+    }
+
+    @Override
+    protected void onHandleIntent(@Nullable Intent intent) {
+        while(true){}
+
     }
 
     @Override

@@ -27,17 +27,19 @@ import java.util.stream.Stream;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;
+import ro.atm.corden.MotionListener;
 import ro.atm.corden.R;
 import ro.atm.corden.databinding.ActivityMainUserBinding;
 import ro.atm.corden.model.user.LoginUser;
 import ro.atm.corden.util.constant.AppConstants;
+import ro.atm.corden.util.services.ActivityDetectorIntentService;
 import ro.atm.corden.util.services.DetectedActivitiesService;
 import ro.atm.corden.util.services.LocationService;
 import ro.atm.corden.util.services.StreamingIntentService;
 import ro.atm.corden.util.webrtc.client.CameraSelector;
 import ro.atm.corden.util.websocket.SignallingClient;
 
-public class MainActivityUser extends AppCompatActivity implements EasyPermissions.PermissionCallbacks {
+public class MainActivityUser extends AppCompatActivity implements EasyPermissions.PermissionCallbacks, MotionListener {
     private ActivityMainUserBinding binding;
     private static final String ACTION_STREAM = "ActionStream";
     private StreamingIntentService mService;
@@ -134,7 +136,14 @@ public class MainActivityUser extends AppCompatActivity implements EasyPermissio
         setSupportActionBar(binding.toolbar);
 
         Intent intent = new Intent(this, DetectedActivitiesService.class);
+
         startService(intent);
+    }
+
+    @Override
+    protected void onStart() {
+        ActivityDetectorIntentService.motionListener = this;
+        super.onStart();
     }
 
     @Override
@@ -205,6 +214,7 @@ public class MainActivityUser extends AppCompatActivity implements EasyPermissio
             Intent serviceIntent = new Intent(this.getApplicationContext(), StreamingIntentService.class);
             serviceIntent.setAction(ACTION_STREAM);
             serviceIntent.putExtra(AppConstants.EXTRA_CAMERA, determineCamera().name());
+            //Log.e("MAINUA", StreamingIntentService.isRunning() + ", " + mBound);
             if (StreamingIntentService.isRunning() && !mBound) {
                 bindService(serviceIntent, mConnection, BIND_AUTO_CREATE);
                 mBound = true;
@@ -214,15 +224,21 @@ public class MainActivityUser extends AppCompatActivity implements EasyPermissio
             if (!StreamingIntentService.isRunning()) {
                 ContextCompat.startForegroundService(this.getApplicationContext(), serviceIntent);
                 bindService(serviceIntent, mConnection, BIND_AUTO_CREATE);
+                runOnUiThread(() -> binding.streamStatus.setText("Stop streaming service"));
                 mBound = true;
             } else {
                 stopService(serviceIntent);
+                runOnUiThread(() -> {
+                    binding.streamStatus.setText("Start streaming service");
+                    binding.frontCamera.setEnabled(true);
+                    binding.backCamera.setEnabled(true);
+                    binding.externalCamera.setEnabled(true);
+                });
                 if (mBound) {
                     mBound = false;
                     unbindService(mConnection);
                 }
-                StopServiceAsyncTask stopServiceAsyncTask = new StopServiceAsyncTask();
-                stopServiceAsyncTask.execute();
+                SignallingClient.getInstance().stopVideoStreaming(LoginUser.username);
             }
         }
     }
@@ -237,8 +253,7 @@ public class MainActivityUser extends AppCompatActivity implements EasyPermissio
                 mBound = false;
                 unbindService(mConnection);
             }
-            StopServiceAsyncTask stopServiceAsyncTask = new StopServiceAsyncTask();
-            stopServiceAsyncTask.execute();
+            SignallingClient.getInstance().sendStopVideoRequest();
         }
     }
 
@@ -263,13 +278,9 @@ public class MainActivityUser extends AppCompatActivity implements EasyPermissio
         }
     }
 
-
-    private static class StopServiceAsyncTask extends AsyncTask<Void, Void, Void> {
-        @Override
-        protected Void doInBackground(Void... voids) {
-            SignallingClient.getInstance().stopVideoStreaming(LoginUser.username);
-            return null;
-        }
+    @Override
+    public void onMotion() {
+        startService(new View(this));
     }
 
     @Override

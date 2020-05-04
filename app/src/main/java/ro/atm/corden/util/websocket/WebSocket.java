@@ -43,6 +43,7 @@ import ro.atm.corden.model.video.Video;
 import ro.atm.corden.model.video.VideoInfo;
 import ro.atm.corden.util.App;
 import ro.atm.corden.util.receiver.NotificationReceiver;
+import ro.atm.corden.util.services.StreamingIntentService;
 import ro.atm.corden.util.websocket.callback.EnrollListener;
 import ro.atm.corden.util.websocket.callback.LoginListener;
 import ro.atm.corden.util.websocket.callback.MapItemsListener;
@@ -221,9 +222,9 @@ final class WebSocket extends WebSocketClient {
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 PendingIntent pendingIntent = PendingIntent.getActivity(mApplicationContext, 0, intent, 0);
 
-                Intent startStreamIntent = new Intent(mApplicationContext, NotificationReceiver.class);
-                startStreamIntent.setAction("startStreaming");
-                PendingIntent startStreamPendingIntent = PendingIntent.getBroadcast(mApplicationContext, 0, startStreamIntent, 0);
+                Intent startStreamIntent = new Intent(mApplicationContext, StreamingIntentService.class);
+                startStreamIntent.setAction("ActionStream");
+                PendingIntent startStreamPendingIntent = PendingIntent.getService(mApplicationContext, 0, startStreamIntent, 0);
 
                 NotificationCompat.Builder builder = new NotificationCompat.Builder(mApplicationContext, App.NOTIFICATION_CHANNEL_ID)
                         .setSmallIcon(R.drawable.ic_ondemand_video_black_24dp)
@@ -232,7 +233,8 @@ final class WebSocket extends WebSocketClient {
                         .setContentIntent(pendingIntent)
                         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                         .addAction(R.drawable.ic_show_video, "Start stream", startStreamPendingIntent)
-                        .setAutoCancel(true);
+                        .setAutoCancel(true)
+                        .setOngoing(true);
                 NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(mApplicationContext);
                 notificationManagerCompat.notify(10, builder.build());
                 /*   });*/
