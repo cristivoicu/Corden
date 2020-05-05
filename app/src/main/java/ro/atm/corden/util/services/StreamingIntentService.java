@@ -69,7 +69,7 @@ public class StreamingIntentService extends IntentService implements MediaListen
 
     public StreamingIntentService() {
         super("StreamingIntentService");
-        setIntentRedelivery(true);
+        //setIntentRedelivery(true);
     }
 
 
@@ -96,6 +96,7 @@ public class StreamingIntentService extends IntentService implements MediaListen
                 .setContentTitle("Streaming is live!")
                 .setContentText("You are sending video stream to the media server")
                 .setContentIntent(pendingIntent)
+                .setOngoing(true)
                 .build();
 
         startForeground(15, notification);
@@ -135,6 +136,10 @@ public class StreamingIntentService extends IntentService implements MediaListen
 
         assert liveSession != null;
         liveSession.leaveLiveSession();
+
+        SignallingClient.getInstance().isInitiator = false;
+        SignallingClient.getInstance().isChannelReady = false;
+        SignallingClient.getInstance().isStarted = false;
     }
 
     @Override

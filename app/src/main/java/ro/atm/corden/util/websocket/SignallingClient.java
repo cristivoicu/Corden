@@ -42,6 +42,7 @@ import ro.atm.corden.util.websocket.protocol.events.RequestEventTypes;
 import ro.atm.corden.util.websocket.protocol.events.SubscribeEventType;
 import ro.atm.corden.util.websocket.protocol.events.UnsubscribeEventType;
 import ro.atm.corden.util.websocket.protocol.events.UpdateEventType;
+import ro.atm.corden.util.websocket.subscribers.LiveStreamerSubscriber;
 import ro.atm.corden.util.websocket.subscribers.UserSubscriber;
 
 
@@ -76,7 +77,7 @@ public class SignallingClient {
     public void initWebSociet(Context context) {
         try {
             // uri = new URI("wss://192.168.8.100:8443/websocket"); // atunci cand e conectat prin stick
-            URI uri = new URI("wss://192.168.0.103:8443/websocket"); // wifi acasa
+            URI uri = new URI("wss://192.168.0.104:8443/websocket"); // wifi acasa
             // URI uri = new URI("wss://192.168.43.228:8443/websocket"); // hotspot telefon
 
             try {
@@ -147,10 +148,10 @@ public class SignallingClient {
         }
         webSocket.addHeader("username", username);
         webSocket.addHeader("password", password);
-        if(!isReconnect) {
+        if (!isReconnect) {
             webSocket.connect();
             isReconnect = true;
-        }else
+        } else
             webSocket.reconnect();
     }
 
@@ -330,7 +331,7 @@ public class SignallingClient {
     }
 
     /***/
-    public void sendStreamRequest(@NonNull String username){
+    public void sendStreamRequest(@NonNull String username) {
         if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
             Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
             throw new NetworkOnMainThreadException();
@@ -357,7 +358,7 @@ public class SignallingClient {
         webSocket.send(message.toString());
     }
 
-    public void sendDetectedActivity(String detectedActivity, int precision){
+    public void sendDetectedActivity(String detectedActivity, int precision) {
         if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
             Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
             throw new NetworkOnMainThreadException();
@@ -493,7 +494,54 @@ public class SignallingClient {
         webSocket.send(message.toString());
     }
 
-    /***/
+    /**
+     * Subscribe client to the server events.
+     * <p> Client will receive message about user streaming status.</p>
+     */
+    public void sendMessageToSubscribeToLiveStreamersEvents(LiveStreamerSubscriber liveStreamerSubscriber) {
+        /*if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+            Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
+            throw new NetworkOnMainThreadException();
+        }*/
+        webSocket.liveStreamerSubscriber = liveStreamerSubscriber;
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                Message message = new Message.SubscribeMessageBuilder()
+                        .addEvent(SubscribeEventType.LIVE_STREAMERS)
+                        .build();
+
+                webSocket.send(message.toString());
+                return null;
+            }
+        }.execute();
+
+    }
+
+    /**
+     * Unsubscribe from live server events about user streaming status.
+     */
+    public void sendMessageToUnsubscribeFromLiveStreamersEvents() {
+        /*if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+            Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
+            throw new NetworkOnMainThreadException();
+        }*/
+        webSocket.liveStreamerSubscriber = null;
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                Message message = new Message.UnsubscribeMessageBuilder()
+                        .addEvent(UnsubscribeEventType.UNSUBSCRIBE_LIVE_STREAMERS)
+                        .build();
+
+                webSocket.send(message.toString());
+                return null;
+            }
+        }.execute();
+
+    }
+
+
     public void sendMessageToSubscribeToMapItems() {
         if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
             Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
@@ -517,11 +565,11 @@ public class SignallingClient {
         webSocket.send(message.toString());
     }
 
-    public void setMapItemListener(MapItemsListener mapItemListener){
+    public void setMapItemListener(MapItemsListener mapItemListener) {
         webSocket.mapItemsListener = mapItemListener;
     }
 
-    public void unSetMapItemListener(){
+    public void unSetMapItemListener() {
         webSocket.mapItemsListener = null;
     }
 

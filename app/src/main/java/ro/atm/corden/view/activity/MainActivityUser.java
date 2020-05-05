@@ -214,7 +214,7 @@ public class MainActivityUser extends AppCompatActivity implements EasyPermissio
             Intent serviceIntent = new Intent(this.getApplicationContext(), StreamingIntentService.class);
             serviceIntent.setAction(ACTION_STREAM);
             serviceIntent.putExtra(AppConstants.EXTRA_CAMERA, determineCamera().name());
-            //Log.e("MAINUA", StreamingIntentService.isRunning() + ", " + mBound);
+            Log.e("StreamIntentService", "start service: " + StreamingIntentService.isRunning() + ", " + mBound);
             if (StreamingIntentService.isRunning() && !mBound) {
                 bindService(serviceIntent, mConnection, BIND_AUTO_CREATE);
                 mBound = true;

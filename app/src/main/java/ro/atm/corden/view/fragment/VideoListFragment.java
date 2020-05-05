@@ -107,22 +107,19 @@ public class VideoListFragment extends Fragment {
             }
         });
 
-        videoAdapter.setOnItemClickListener(new VideoAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(Video video) {
+        videoAdapter.setOnItemClickListener(video -> {
 
-                FragmentManager fragmentManager = getParentFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                PlayerFragment playerFragment = new PlayerFragment();
-                Bundle videoBundle = new Bundle();;
-                videoBundle.putSerializable(AppConstants.GET_VIDEO, video);
-                playerFragment.setArguments(videoBundle);
-                fragmentTransaction.addToBackStack("videoList");
-                fragmentTransaction.hide(VideoListFragment.this);
-                fragmentTransaction.add(R.id.frameLayout, playerFragment);
-                fragmentTransaction.commit();
+            FragmentManager fragmentManager = getParentFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            PlayerFragment playerFragment = new PlayerFragment();
+            Bundle videoBundle = new Bundle();;
+            videoBundle.putSerializable(AppConstants.GET_VIDEO, video);
+            playerFragment.setArguments(videoBundle);
+            fragmentTransaction.addToBackStack("videoList");
+            fragmentTransaction.hide(VideoListFragment.this);
+            fragmentTransaction.add(R.id.frameLayout, playerFragment);
+            fragmentTransaction.commit();
 
-            }
         });
 
         return binding.getRoot();

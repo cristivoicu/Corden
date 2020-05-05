@@ -35,9 +35,9 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoHolder>
 
     @Override
     public void onBindViewHolder(@NonNull VideoHolder holder, int position) {
-        Video curentVideo = videos.get(position);
-        holder.date.setText(dateFormat.format(curentVideo.getDate()));
-        holder.duration.setText(String.format("at %s", timeFormat.format(curentVideo.getDate())));
+        Video currentVideo = videos.get(position);
+        holder.date.setText(dateFormat.format(currentVideo.getDate()));
+        holder.duration.setText(String.format("at %s", timeFormat.format(currentVideo.getDate())));
     }
 
     @Override

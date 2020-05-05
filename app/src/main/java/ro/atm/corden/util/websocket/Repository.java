@@ -12,6 +12,7 @@ import java.util.concurrent.ExecutionException;
 
 import ro.atm.corden.model.map.MapItem;
 import ro.atm.corden.model.user.Action;
+import ro.atm.corden.model.user.LiveStreamer;
 import ro.atm.corden.model.user.User;
 import ro.atm.corden.model.video.Video;
 import ro.atm.corden.util.exception.websocket.TransportException;
@@ -61,6 +62,16 @@ public class Repository {
         RequestUsersAsyncTask requestUsersAsyncTask = new RequestUsersAsyncTask();
         try {
             return requestUsersAsyncTask.execute().get();
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public List<LiveStreamer> requestLiveStreamers(){
+        RequestLiveStreamerAsyncTask requestLiveStreamerAsyncTask = new RequestLiveStreamerAsyncTask();
+        try {
+            return requestLiveStreamerAsyncTask.execute().get();
         } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
             return null;
@@ -151,6 +162,21 @@ public class Repository {
             signallingClient.webSocket.userDataConditionVariable = new ConditionVariable(false);
             signallingClient.webSocket.userDataConditionVariable.block();
             return signallingClient.webSocket.users.get(0);
+        }
+    }
+
+    private static class RequestLiveStreamerAsyncTask extends AsyncTask<Void, Void, List<LiveStreamer>>{
+
+        @Override
+        protected List<LiveStreamer> doInBackground(Void... voids) {
+            Message message = new Message.RequestMessageBuilder()
+                    .addEvent(RequestEventTypes.REQUEST_LIVE_STREAMER)
+                    .build();
+            signallingClient.webSocket.send(message.toString());
+
+            signallingClient.webSocket.userDataConditionVariable = new ConditionVariable(false);
+            signallingClient.webSocket.userDataConditionVariable.block();
+            return signallingClient.webSocket.liveStreamers;
         }
     }
 

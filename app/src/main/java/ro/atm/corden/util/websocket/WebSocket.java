@@ -1,16 +1,10 @@
 package ro.atm.corden.util.websocket;
 
-import android.app.AlertDialog;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.ConditionVariable;
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
-import android.view.Window;
-import android.view.WindowManager;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -31,10 +25,9 @@ import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.locks.Condition;
 
 import ro.atm.corden.R;
+import ro.atm.corden.model.user.LiveStreamer;
 import ro.atm.corden.model.user.Role;
 import ro.atm.corden.model.user.Action;
 import ro.atm.corden.model.user.Status;
@@ -50,6 +43,7 @@ import ro.atm.corden.util.websocket.callback.MapItemsListener;
 import ro.atm.corden.util.websocket.callback.MediaListener;
 import ro.atm.corden.util.websocket.callback.RemoveVideoListener;
 import ro.atm.corden.util.websocket.callback.UpdateUserListener;
+import ro.atm.corden.util.websocket.subscribers.LiveStreamerSubscriber;
 import ro.atm.corden.util.websocket.subscribers.UserSubscriber;
 import ro.atm.corden.view.activity.MainActivityUser;
 
@@ -93,10 +87,11 @@ final class WebSocket extends WebSocketClient {
 
     final List<Video> videos = new ArrayList<>();
     final List<User> users = new ArrayList<>();
+    final List<LiveStreamer> liveStreamers = new ArrayList<>();
     final List<Action> actions = new ArrayList<>();
 
     UserSubscriber userSubscriber;
-
+    LiveStreamerSubscriber liveStreamerSubscriber;
 
     WebSocket(URI serverUri, Context applcationContext) {
         super(serverUri);
@@ -286,6 +281,17 @@ final class WebSocket extends WebSocketClient {
                     usersConditionVariable.open();
                 }
                 break;
+            case "requestLiveStreamers":
+                Type liveStreamersListType = new TypeToken<ArrayList<LiveStreamer>>() {
+                }.getType();
+                synchronized (liveStreamers){
+                    liveStreamers.clear();
+                    if(!payload.getAsString().equals("[]"))
+                        liveStreamers.addAll(gson.fromJson(payload.getAsString(), liveStreamersListType));
+
+                    userDataConditionVariable.open();
+                }
+                break;
             case "requestOnlineUsers":
 
                 break;
@@ -380,6 +386,16 @@ final class WebSocket extends WebSocketClient {
                 String status = receivedMessage.get("status").getAsString();
                 String username = receivedMessage.get("username").getAsString();
                 userSubscriber.onUserStatusChanged(username, Status.valueOf(status));
+                break;
+            case "liveStreamers":
+                String dataJson = receivedMessage.get("payload").getAsString();
+                status = receivedMessage.get("status").getAsString();
+                if(status.equals("started")) {
+                    liveStreamerSubscriber.onNewSubscriber(LiveStreamer.fromJson(dataJson));
+                }
+                if(status.equals("stopped")){
+                    liveStreamerSubscriber.onSubscribeStop(LiveStreamer.fromJson(dataJson));
+                }
                 break;
             case "mapItemLocation":
                 username = receivedMessage.getAsJsonObject("payload")
