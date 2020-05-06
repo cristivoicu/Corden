@@ -32,10 +32,24 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserHolder> {
         notifyDataSetChanged();
     }
 
-    public void updateStatus(String username, Status status) {
+    public void updateStatus(String username, Status newStatus) {
         for (User user : users) {
             if (user.getUsername().equals(username)) {
-                user.setStatus(status.name());
+                user.setStatus(newStatus.name());
+                break;
+            }
+        }
+        notifyDataSetChanged();
+    }
+
+    public void updateStatusOnOnlineActivity(String username, Status newStatus) {
+        for (User user : users) {
+            if (user.getUsername().equals(username)) {
+                if(newStatus.equals(Status.OFFLINE))
+                    users.remove(user);
+                if(newStatus.equals(Status.OFFLINE)){
+                    users.add(user);
+                }
                 break;
             }
         }
@@ -43,14 +57,18 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserHolder> {
     }
 
     public void updateUserData(User modifiedUser) {
+        boolean found = false;
         for (User user : users) {
             if (user.getUsername().equals(modifiedUser.getUsername())) {
+                found = true;
                 users.remove(user);
                 break;
             }
         }
-        users.add(modifiedUser);
-        notifyDataSetChanged();
+        if (found) {
+            users.add(modifiedUser);
+            notifyDataSetChanged();
+        }
     }
 
     @NonNull

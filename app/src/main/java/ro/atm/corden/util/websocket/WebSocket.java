@@ -276,6 +276,7 @@ final class WebSocket extends WebSocketClient {
                     userDataConditionVariable.open();
                 }
                 break;
+            case "requestOnlineUsers":
             case "requestAllUsers":
                 Type userListType = new TypeToken<ArrayList<User>>() {
                 }.getType();
@@ -295,9 +296,6 @@ final class WebSocket extends WebSocketClient {
 
                     userDataConditionVariable.open();
                 }
-                break;
-            case "requestOnlineUsers":
-
                 break;
             case "userLocations":
                 JsonArray payloadArray = payload.getAsJsonArray();

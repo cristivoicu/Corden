@@ -32,6 +32,7 @@ public class UsersActivity extends AppCompatActivity
 
     private ActivityUsersBinding binding;
     private UsersViewModel viewModel;
+    private boolean isOnlineUsers = false;
 
     UserAdapter userAdapter;
 
@@ -53,12 +54,6 @@ public class UsersActivity extends AppCompatActivity
 
         binding.usersList.setLayoutManager(new LinearLayoutManager(this));
         binding.usersList.setHasFixedSize(true);
-
-        String getType = getIntent().getStringExtra(AppConstants.GET_USERS_TYPE);
-        if (getType.equals(AppConstants.GET_USERS_ALL)) {
-            viewModel.setAllUsers();
-        }
-
 
         userAdapter = new UserAdapter();
         binding.usersList.setAdapter(userAdapter);
@@ -87,7 +82,14 @@ public class UsersActivity extends AppCompatActivity
         super.onStart();
 
         SignallingClient.getInstance().subscribeUserListListener(this);
-        viewModel.setAllUsers();
+        String getType = getIntent().getStringExtra(AppConstants.GET_USERS_TYPE);
+        if (getType.equals(AppConstants.GET_USERS_ALL)) {
+            viewModel.setAllUsers();
+        }
+        if (getType.equals(AppConstants.GET_USERS_ONLINE)) {
+            isOnlineUsers = true;
+            viewModel.setOnlineUsers();
+        }
 
         new AsyncTask<Void, Void, Void>() {
             @Override
@@ -144,7 +146,12 @@ public class UsersActivity extends AppCompatActivity
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
-                userAdapter.updateStatus(username, status);
+                if (isOnlineUsers) {
+                    userAdapter.updateStatusOnOnlineActivity(username, status);
+                } else {
+                    userAdapter.updateStatus(username, status);
+                }
+
                 Toast.makeText(UsersActivity.this,
                         String.format("User %s is now %s", username, status.name()),
                         Toast.LENGTH_SHORT)
@@ -157,9 +164,9 @@ public class UsersActivity extends AppCompatActivity
     public boolean onContextItemSelected(@NonNull MenuItem item) {
         final User user = userAdapter.getUser();
 
-        if(user == null)
+        if (user == null)
             return super.onContextItemSelected(item);
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.ctx_editUser:
                 Intent intent = new Intent(this, EditUserDetailsActivity.class);
                 intent.putExtra(AppConstants.GET_USERNAME, user.getUsername());

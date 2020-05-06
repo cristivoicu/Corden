@@ -115,7 +115,7 @@ public class MainActivityAdmin extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.itemLogout:
                 SignallingClient.getInstance().logout();
                 // stopping services
@@ -142,6 +142,12 @@ public class MainActivityAdmin extends AppCompatActivity {
     public void onShowAllUsersClicked(View view) {
         Intent intent = new Intent(this, UsersActivity.class);
         intent.putExtra(AppConstants.GET_USERS_TYPE, AppConstants.GET_USERS_ALL);
+        startActivity(intent);
+    }
+
+    public void onShowOnlineUsersClicked(View view) {
+        Intent intent = new Intent(this, UsersActivity.class);
+        intent.putExtra(AppConstants.GET_USERS_TYPE, AppConstants.GET_USERS_ONLINE);
         startActivity(intent);
     }
 

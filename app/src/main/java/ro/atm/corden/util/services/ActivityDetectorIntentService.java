@@ -92,16 +92,16 @@ public class ActivityDetectorIntentService extends IntentService {
             if(!lastKnownActivity.equals(label)) {
                 lastKnownActivity = label;
                 if(label.equals(ActivityEventType.RUNNING)) {
-                    motionListener.onMotion();
-                    /*SignallingClient.getInstance().sendDetectedActivity(label, confidence);
+                    //motionListener.onMotion();
+                    SignallingClient.getInstance().sendDetectedActivity(label, confidence);
                     Intent streamService = new Intent(this.getApplicationContext(), StreamingIntentService.class);
-                    ContextCompat.startForegroundService(this.getApplicationContext(), streamService);*/
+                    ContextCompat.startForegroundService(this.getApplicationContext(), streamService);
                 }
                 if(label.equals(ActivityEventType.WALKING) || label.equals(ActivityEventType.ON_FOOT)){
-                    motionListener.onMotion();
-                    /*Intent streamService = new Intent(this.getApplicationContext(), StreamingIntentService.class);
+                    //motionListener.onMotion();
+                    Intent streamService = new Intent(this.getApplicationContext(), StreamingIntentService.class);
                     streamService.setAction("ActionStream");
-                    ContextCompat.startForegroundService(this.getApplicationContext(), streamService);*/
+                    ContextCompat.startForegroundService(this.getApplicationContext(), streamService);
                 }
                 if(label.equals(ActivityEventType.STILL)){
                     if(lastKnownActivity.equals(ActivityEventType.RUNNING) || lastKnownActivity.equals(ActivityEventType.WALKING)){

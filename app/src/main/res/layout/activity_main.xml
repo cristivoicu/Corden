@@ -74,6 +74,7 @@
                 <androidx.cardview.widget.CardView
                     android:id="@+id/cardViewActiveUsers"
                     style="@style/cardView_dashBoard"
+                    android:onClick="onShowOnlineUsersClicked"
                     app:cardBackgroundColor="@color/color2"
                     app:layout_constraintBottom_toTopOf="@+id/guideline2"
                     app:layout_constraintEnd_toStartOf="@+id/guideline"
@@ -317,9 +318,9 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@color/bottomSheetBackground"
+            android:elevation="12dp"
             app:behavior_hideable="true"
             app:behavior_peekHeight="35dp"
-            android:elevation="12dp"
             app:layout_behavior="@string/bottom_sheet_behavior">
 
             <androidx.constraintlayout.widget.ConstraintLayout
@@ -373,7 +374,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/date"
-                    tools:listitem="@layout/list_item_timeline"/>
+                    tools:listitem="@layout/list_item_timeline" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.core.widget.NestedScrollView>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>

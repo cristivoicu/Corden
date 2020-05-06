@@ -43,12 +43,12 @@ public class Repository {
         updateUserAsyncTask.execute(user);
     }
 
-    public void disableUser(String username){
+    public void disableUser(String username) {
         MessageToDisableUserAsyncTask messageToDisableUserAsyncTask = new MessageToDisableUserAsyncTask();
         messageToDisableUserAsyncTask.execute(username);
     }
 
-    public User requestUserData(String username){
+    public User requestUserData(String username) {
         RequestUserAsyncTask requestUserAsyncTask = new RequestUserAsyncTask();
         try {
             return requestUserAsyncTask.execute(username).get();
@@ -68,7 +68,17 @@ public class Repository {
         }
     }
 
-    public List<LiveStreamer> requestLiveStreamers(){
+    public List<User> requestOnlineUsers() {
+        RequestUsersOnlineAsyncTask requestUsersOnlineAsyncTask = new RequestUsersOnlineAsyncTask();
+        try {
+            return requestUsersOnlineAsyncTask.execute().get();
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public List<LiveStreamer> requestLiveStreamers() {
         RequestLiveStreamerAsyncTask requestLiveStreamerAsyncTask = new RequestLiveStreamerAsyncTask();
         try {
             return requestLiveStreamerAsyncTask.execute().get();
@@ -98,7 +108,7 @@ public class Repository {
         }
     }
 
-    public List<Action> requestServerLogOnDate(String date){
+    public List<Action> requestServerLogOnDate(String date) {
         RequestServerLogAsyncTask requestServerLogAsyncTask = new RequestServerLogAsyncTask();
         try {
             return requestServerLogAsyncTask.execute(date).get();
@@ -108,7 +118,7 @@ public class Repository {
         }
     }
 
-    public void enrollUser(User user){
+    public void enrollUser(User user) {
         EnrollUserAsyncTask enrollUserAsyncTask = new EnrollUserAsyncTask();
         enrollUserAsyncTask.execute(user);
     }
@@ -118,12 +128,12 @@ public class Repository {
         sendMapItemsToServerAsyncTask.execute(items);
     }
 
-    public void subscribeToMapItemsChanges(){
+    public void subscribeToMapItemsChanges() {
         SubscribeToMapChangesAsyncTask subscribeToMapChangesAsyncTask = new SubscribeToMapChangesAsyncTask();
         subscribeToMapChangesAsyncTask.execute();
     }
 
-    public void unsubscribeToMapItemsChanges(){
+    public void unsubscribeToMapItemsChanges() {
         UnsubscribeToMapChangesAsyncTask unsubscribeToMapChangesAsyncTask = new UnsubscribeToMapChangesAsyncTask();
         unsubscribeToMapChangesAsyncTask.execute();
     }
@@ -148,7 +158,27 @@ public class Repository {
         }
     }
 
-    private static class RequestUserAsyncTask extends AsyncTask<String, Void, User>{
+    private static class RequestUsersOnlineAsyncTask extends AsyncTask<Void, Void, List<User>> {
+
+        @Override
+        protected List<User> doInBackground(Void... voids) {
+            Message message = new Message.RequestMessageBuilder()
+                    .addEvent(RequestEventTypes.USERS_ONLINE)
+                    .build();
+
+            signallingClient.webSocket.send(message.toString());
+
+            signallingClient.webSocket.usersConditionVariable = new ConditionVariable(false);
+            signallingClient.webSocket.usersConditionVariable.block();
+
+            if (signallingClient.webSocket.users != null) {
+                return signallingClient.webSocket.users;
+            }
+            return null;
+        }
+    }
+
+    private static class RequestUserAsyncTask extends AsyncTask<String, Void, User> {
 
         @Override
         protected User doInBackground(String... strings) {
@@ -165,7 +195,7 @@ public class Repository {
         }
     }
 
-    private static class RequestLiveStreamerAsyncTask extends AsyncTask<Void, Void, List<LiveStreamer>>{
+    private static class RequestLiveStreamerAsyncTask extends AsyncTask<Void, Void, List<LiveStreamer>> {
 
         @Override
         protected List<LiveStreamer> doInBackground(Void... voids) {
@@ -231,7 +261,7 @@ public class Repository {
         }
     }
 
-    private static class RequestServerLogAsyncTask extends AsyncTask<String, Void, List<Action>>{
+    private static class RequestServerLogAsyncTask extends AsyncTask<String, Void, List<Action>> {
         @Override
         protected List<Action> doInBackground(String... strings) {
             Message message = new Message.RequestMessageBuilder()
@@ -280,7 +310,7 @@ public class Repository {
         }
     }
 
-    private static class EnrollUserAsyncTask extends AsyncTask<User, Void, Void>{
+    private static class EnrollUserAsyncTask extends AsyncTask<User, Void, Void> {
 
         @Override
         protected Void doInBackground(User... users) {
@@ -300,7 +330,7 @@ public class Repository {
         }
     }
 
-    private static class MessageToDisableUserAsyncTask extends AsyncTask<String, Void, Void>{
+    private static class MessageToDisableUserAsyncTask extends AsyncTask<String, Void, Void> {
 
         @Override
         protected Void doInBackground(String... strings) {
@@ -314,7 +344,7 @@ public class Repository {
         }
     }
 
-    private static class SubscribeToMapChangesAsyncTask extends AsyncTask<Void, Void, Void>{
+    private static class SubscribeToMapChangesAsyncTask extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected Void doInBackground(Void... voids) {
@@ -323,7 +353,7 @@ public class Repository {
         }
     }
 
-    private static class UnsubscribeToMapChangesAsyncTask extends AsyncTask<Void, Void, Void>{
+    private static class UnsubscribeToMapChangesAsyncTask extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected Void doInBackground(Void... voids) {

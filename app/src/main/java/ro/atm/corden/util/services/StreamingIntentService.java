@@ -112,6 +112,7 @@ public class StreamingIntentService extends IntentService implements MediaListen
             cameraType = intent.getStringExtra(AppConstants.EXTRA_CAMERA) == null ? CameraSelector.CameraType.BACK : CameraSelector.CameraType.valueOf(intent.getStringExtra(AppConstants.EXTRA_CAMERA));
             if (ACTION_STREAM.equals(action)) {
                 try {
+                    Log.d(TAG, "onActionStream");
                     isRunning = true;
                     start();
                     while (true) {
@@ -161,10 +162,12 @@ public class StreamingIntentService extends IntentService implements MediaListen
     @Override
     public void gotRemoteStream(MediaStream mediaStream) {
         // never receive remote stream
-        stopSelf();
+        Log.d(TAG, "gotRemoteStream");
+        //stopSelf();
     }
 
     private void start() throws UserNotLoggedInException {
+        Log.d(TAG, "onStartWebRyc");
         SignallingClient.getInstance().subscribeMediaListenerRecord(this);
 
         liveSession = new Session(this.getApplicationContext(), rootEglBase, this);
@@ -174,6 +177,7 @@ public class StreamingIntentService extends IntentService implements MediaListen
     }
 
     private void onTryToStart() {
+        Log.d(TAG, "onTryToStart");
         if (!SignallingClient.getInstance().isStarted && liveSession.getVideoTrack() != null && SignallingClient.getInstance().isChannelReady) {
             SignallingClient.getInstance().isStarted = true;
             liveSession.createLiveOffer();

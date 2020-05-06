@@ -88,11 +88,11 @@ public class LoginActivity extends AppCompatActivity implements LoginListener,
             loginAsyncTask.execute(loginUser);
         });
 
-        binding.textInputUsername.setOnClickListener(v -> {
+        binding.textInputUsername.getEditText().setOnClickListener(v -> {
             binding.textInputUsername.setError(null);
             binding.textInputPassword.setError(null);
         });
-        binding.textInputPassword.setOnClickListener(v -> {
+        binding.textInputPassword.getEditText().setOnClickListener(v -> {
             binding.textInputUsername.setError(null);
             binding.textInputPassword.setError(null);
         });
@@ -144,8 +144,8 @@ public class LoginActivity extends AppCompatActivity implements LoginListener,
     public void onLoginError() {
         // because it comes from another thread (different from UI thread)
         new Handler(Looper.getMainLooper()).post(() -> {
-            binding.textInputPassword.setError("Invalid");
-            binding.textInputUsername.setError("Invalid");
+            binding.textInputPassword.setError("Password might be wrong ...");
+            binding.textInputUsername.setError("Username might be incorrect ...");
         });
 
     }
