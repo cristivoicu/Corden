@@ -9,6 +9,7 @@ import com.serenegiant.usb.UVCCamera;
 import org.webrtc.AudioSource;
 import org.webrtc.AudioTrack;
 import org.webrtc.Camera1Enumerator;
+import org.webrtc.Camera2Capturer;
 import org.webrtc.Camera2Enumerator;
 import org.webrtc.EglBase;
 import org.webrtc.MediaConstraints;
@@ -72,7 +73,7 @@ public class LiveVideoClient extends Client {
                 height = Integer.parseInt(sharedPreferences.getString(context.getString(R.string.backCameraHeight), "480"));
                 break;
             case FRONT:
-                videoCapturer = CameraSelector.getFrontCamera(new Camera1Enumerator(true));
+                videoCapturer = CameraSelector.getFrontCamera(new Camera2Enumerator(context));
                 width = Integer.parseInt(sharedPreferences.getString(context.getString(R.string.frontCameraWidth), "640"));
                 height = Integer.parseInt(sharedPreferences.getString(context.getString(R.string.frontCameraHeight), "480"));
                 break;
@@ -87,7 +88,7 @@ public class LiveVideoClient extends Client {
         //Create MediaConstraints - Will be useful for specifying video and audio constraints.
         audioConstraints = new MediaConstraints();
         videoConstraints = new MediaConstraints();
-        Log.e("12345", "width: " + width + ", height: " + height);
+
         //Create a VideoSource instance
         if (videoCapturer != null) {
             surfaceTextureHelper = SurfaceTextureHelper.create("CaptureThread",
@@ -96,11 +97,11 @@ public class LiveVideoClient extends Client {
             videoSource.adaptOutputFormat(width, height, 30);
             videoCapturer.initialize(surfaceTextureHelper, context, videoSource.getCapturerObserver());
         }
-        videoTrack = peerConnectionFactory.createVideoTrack("100", videoSource);
+        videoTrack = peerConnectionFactory.createVideoTrack("ARDv0", videoSource);
 
         //create an AudioSource instance
         audioSource = peerConnectionFactory.createAudioSource(audioConstraints);
-        audioTrack = peerConnectionFactory.createAudioTrack("101", audioSource);
+        audioTrack = peerConnectionFactory.createAudioTrack("ARDa0", audioSource);
         audioTrack.setEnabled(true);
         audioTrack.setVolume(1000);
 

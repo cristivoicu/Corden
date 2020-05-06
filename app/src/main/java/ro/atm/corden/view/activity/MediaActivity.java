@@ -42,7 +42,9 @@ public class MediaActivity extends AppCompatActivity {
         binding = DataBindingUtil.setContentView(this, R.layout.activity_media);
 
         setSupportActionBar(binding.toolbar);
-        getSupportActionBar().setTitle("Recorded videos");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
 
         if(binding.frameLayout != null){
             if(savedInstanceState != null)

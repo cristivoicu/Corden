@@ -7,15 +7,6 @@ android {
         enabled = true
     }
     defaultConfig {
-
-        ndk {
-            abiFilters "armeabi-v7a", "x86"
-        }
-
-        packagingOptions {
-            exclude "lib/arm64-v8a/librealm-jni.so"
-        }
-
         applicationId "ro.atm.corden"
         minSdkVersion 23
         targetSdkVersion 29
@@ -85,8 +76,8 @@ dependencies {
     implementation 'com.google.android.material:material:1.1.0'
     implementation 'androidx.biometric:biometric:1.0.1'
 
-    // https://mvnrepository.com/artifact/com.serenegiant.uvccamera/libuvccameras
-    implementation group: 'com.serenegiant.uvccamera', name: 'libuvccameras', version: '0.0.2'
+    // usb camera library
+    implementation 'com.github.jiangdongguo:AndroidUSBCamera:2.3.4'
 
     implementation 'com.google.android.gms:play-services-location:17.0.0'
     implementation "androidx.localbroadcastmanager:localbroadcastmanager:1.0.0"

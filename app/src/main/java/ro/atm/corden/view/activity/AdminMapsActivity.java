@@ -105,6 +105,10 @@ public class AdminMapsActivity extends AppCompatActivity
         mapFragment.getMapAsync(this);
 
         setSupportActionBar(binding.toolbar);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
     }
 
     @Override

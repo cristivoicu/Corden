@@ -21,13 +21,17 @@
             android:id="@+id/noOneStreams"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="No one is streaming live now"
+            android:layout_marginStart="32dp"
+            android:layout_marginEnd="32dp"
+            android:text="No one is streaming live righ now ...\n
+You can notify a user to start live streaming from user detail activity."
             android:textColor="@color/colorWhiteDirty"
+            android:textSize="22sp"
             app:layout_constraintBottom_toBottomOf="@+id/liveStreamers"
             app:layout_constraintEnd_toEndOf="@+id/liveStreamers"
             app:layout_constraintStart_toStartOf="@+id/liveStreamers"
             app:layout_constraintTop_toTopOf="parent"
-            android:textSize="22sp"
+            android:padding="20dp"
             android:visibility="gone"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

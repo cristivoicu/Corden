@@ -1,9 +1,12 @@
 package ro.atm.corden.util.websocket;
 
+import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.ConditionVariable;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
@@ -45,6 +48,7 @@ import ro.atm.corden.util.websocket.callback.RemoveVideoListener;
 import ro.atm.corden.util.websocket.callback.UpdateUserListener;
 import ro.atm.corden.util.websocket.subscribers.LiveStreamerSubscriber;
 import ro.atm.corden.util.websocket.subscribers.UserSubscriber;
+import ro.atm.corden.view.activity.LoginActivity;
 import ro.atm.corden.view.activity.MainActivityUser;
 
 import static ro.atm.corden.util.constant.JsonConstants.USE_ICE_FOR_LIVE;
@@ -284,9 +288,9 @@ final class WebSocket extends WebSocketClient {
             case "requestLiveStreamers":
                 Type liveStreamersListType = new TypeToken<ArrayList<LiveStreamer>>() {
                 }.getType();
-                synchronized (liveStreamers){
+                synchronized (liveStreamers) {
                     liveStreamers.clear();
-                    if(!payload.getAsString().equals("[]"))
+                    if (!payload.getAsString().equals("[]"))
                         liveStreamers.addAll(gson.fromJson(payload.getAsString(), liveStreamersListType));
 
                     userDataConditionVariable.open();
@@ -390,10 +394,10 @@ final class WebSocket extends WebSocketClient {
             case "liveStreamers":
                 String dataJson = receivedMessage.get("payload").getAsString();
                 status = receivedMessage.get("status").getAsString();
-                if(status.equals("started")) {
+                if (status.equals("started")) {
                     liveStreamerSubscriber.onNewSubscriber(LiveStreamer.fromJson(dataJson));
                 }
-                if(status.equals("stopped")){
+                if (status.equals("stopped")) {
                     liveStreamerSubscriber.onSubscribeStop(LiveStreamer.fromJson(dataJson));
                 }
                 break;
@@ -451,7 +455,23 @@ final class WebSocket extends WebSocketClient {
         if (code == 1002) {
             Log.d(TAG, "onClose");
             loginListener.onLoginError();
+            return;
         }
+        if (code == 4999) {// account was disabled
+            logOutUser(code);
+            return;
+        }
+        logOutUser(code);
+    }
+
+    private void logOutUser(final int code){
+        new Handler(Looper.getMainLooper())
+                .post(() -> {
+                    Intent intent = new Intent(mApplicationContext, LoginActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.putExtra("onClose", code);
+                    mApplicationContext.startActivity(intent);
+                });
     }
 
     @Override

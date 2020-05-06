@@ -34,6 +34,10 @@ public class VideoListActivity extends AppCompatActivity {
         setSupportActionBar(binding.toolbar);
         getSupportActionBar().setTitle("Recorded videos");
 
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+
         if(binding.frameLayout != null){
             if(savedInstanceState != null){
                 return;

@@ -116,6 +116,12 @@ public class RegisterUserActivity extends AppCompatActivity
         binding.userPassword.setStartIconOnClickListener(v ->{
             binding.infoLayout.setVisibility(View.VISIBLE);
         });
+
+        setSupportActionBar(binding.toolbar);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
     }
 
     @Override

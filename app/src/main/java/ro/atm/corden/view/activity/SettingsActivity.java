@@ -33,6 +33,11 @@ public class SettingsActivity extends AppCompatActivity {
         setAdapterForSpinner();
         setListenerForSpinner();
 
+        setSupportActionBar(mBinding.toolbar);
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
     }
 
     /**

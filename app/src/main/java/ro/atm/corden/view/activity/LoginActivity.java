@@ -6,6 +6,7 @@ import androidx.biometric.BiometricManager;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -87,11 +88,45 @@ public class LoginActivity extends AppCompatActivity implements LoginListener,
             loginAsyncTask.execute(loginUser);
         });
 
+        binding.textInputUsername.setOnClickListener(v -> {
+            binding.textInputUsername.setError(null);
+            binding.textInputPassword.setError(null);
+        });
+        binding.textInputPassword.setOnClickListener(v -> {
+            binding.textInputUsername.setError(null);
+            binding.textInputPassword.setError(null);
+        });
+
         requestPermissions();
     }
 
     @Override
     protected void onStart() {
+        Log.e("login", "onstart: " + getIntent().getFlags());
+        if(getIntent().hasExtra("onClose")){
+            String message = "";
+            try {
+                switch (getIntent().getStringExtra("onClose")){
+                    case "4999":
+                        message = "Your account was disable by admin ...";
+                        break;
+                    case "1002":
+                        message = "Access denied!";
+                        break;
+                    default:
+                        message = "Logout by unknown event ...";
+                }
+            } catch (NullPointerException e) {
+                message = "Logout by unknown event ...";
+            }
+            Log.e("login", "onstartFLAG");
+            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+            dialogBuilder.setTitle("Information")
+                    .setMessage(message)
+                    .setPositiveButton("OK", null);
+            AlertDialog alertDialog = dialogBuilder.create();
+            alertDialog.show();
+        }
         super.onStart();
     }
 

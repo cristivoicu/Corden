@@ -2,12 +2,15 @@ package ro.atm.corden.util.webrtc.usb_camera;
 
 import android.content.Context;
 import android.hardware.usb.UsbDevice;
+import android.os.Handler;
+import android.os.Looper;
 
 import com.serenegiant.usb.IFrameCallback;
 import com.serenegiant.usb.USBMonitor;
 import com.serenegiant.usb.UVCCamera;
 
 import org.webrtc.CapturerObserver;
+import org.webrtc.EglBase;
 import org.webrtc.NV21Buffer;
 import org.webrtc.SurfaceTextureHelper;
 import org.webrtc.SurfaceViewRenderer;
@@ -41,9 +44,16 @@ public class UsbCapturer implements VideoCapturer, USBMonitor.OnDeviceConnectLis
         });
     }
 
-    public UsbCapturer(final Context context){
-        this.context = null;
-        this.svVideoRender = null;
+    public UsbCapturer(final Context context) {
+        this.context = context;
+        this.svVideoRender = new SurfaceViewRenderer(context);
+        new Handler(Looper.getMainLooper())
+                .post(() -> {
+                    EglBase eglBase = EglBase.create();
+                    svVideoRender.init(eglBase.getEglBaseContext(), null);
+                    svVideoRender.setEnableHardwareScaler(true);
+                });
+
         executor.execute(new Runnable() {
             @Override
             public void run() {
@@ -66,7 +76,7 @@ public class UsbCapturer implements VideoCapturer, USBMonitor.OnDeviceConnectLis
 
     @Override
     public void stopCapture() throws InterruptedException {
-        if(camera != null){
+        if (camera != null) {
             camera.stopPreview();
             camera.close();
             camera.destroy();
@@ -75,7 +85,7 @@ public class UsbCapturer implements VideoCapturer, USBMonitor.OnDeviceConnectLis
 
     @Override
     public void changeCaptureFormat(int i, int i1, int i2) {
-
+        camera.setPreviewSize(i, i1, i2);
     }
 
     @Override
@@ -97,13 +107,12 @@ public class UsbCapturer implements VideoCapturer, USBMonitor.OnDeviceConnectLis
 
     @Override
     public void onDettach(UsbDevice device) {
-
     }
 
     UVCCamera camera;
 
     @Override
-    public void onConnect(UsbDevice device,final USBMonitor.UsbControlBlock ctrlBlock, boolean createNew) {
+    public void onConnect(UsbDevice device, final USBMonitor.UsbControlBlock ctrlBlock, boolean createNew) {
         executor.execute(new Runnable() {
             @Override
             public void run() {
@@ -119,7 +128,7 @@ public class UsbCapturer implements VideoCapturer, USBMonitor.OnDeviceConnectLis
                         camera = null;
                     }
                 }
-                camera.setPreviewDisplay(svVideoRender.getHolder());
+                camera.setPreviewDisplay(svVideoRender.getHolder().getSurface());
                 camera.setFrameCallback(UsbCapturer.this, UVCCamera.PIXEL_FORMAT_NV21);
                 camera.startPreview();
             }
@@ -139,11 +148,6 @@ public class UsbCapturer implements VideoCapturer, USBMonitor.OnDeviceConnectLis
         executor.execute(new Runnable() {
             @Override
             public void run() {
-                /*byte[] imageArray = new byte[frame.remaining()];
-                frame.get(imageArray);
-                Long imageTime = System.currentTimeMillis();
-                capturerObserver.onByteBufferFrameCaptured(imageArray, UVCCamera.DEFAULT_PREVIEW_WIDTH, UVCCamera.DEFAULT_PREVIEW_HEIGHT, 0, imageTime);*/
-
                 byte[] imageArray = new byte[frame.remaining()];
                 frame.get(imageArray); //without this line only a green image was transferred
                 long timestampNS = System.nanoTime();

@@ -31,7 +31,7 @@ import ro.atm.corden.util.constant.AppConstants;
 import ro.atm.corden.viewmodel.VideoListViewModel;
 
 /**
-
+ *
  */
 public class VideoListFragment extends Fragment {
     private FragmentVideoListBinding binding;
@@ -56,7 +56,7 @@ public class VideoListFragment extends Fragment {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.selectDate:
                 final Calendar cldr = Calendar.getInstance();
                 int day = cldr.get(Calendar.DAY_OF_MONTH);
@@ -93,17 +93,19 @@ public class VideoListFragment extends Fragment {
         binding.videosList.setHasFixedSize(true);
 
         String getUsername = getArguments().getString(AppConstants.GET_USERNAME);
-        if(getUsername != null){
+        if (getUsername != null) {
             viewModel.setVideos(getUsername);
         }
 
         final VideoAdapter videoAdapter = new VideoAdapter();
         binding.videosList.setAdapter(videoAdapter);
 
-        viewModel.getVideos().observe(getViewLifecycleOwner(), new Observer<List<Video>>() {
-            @Override
-            public void onChanged(List<Video> videos) {
-                videoAdapter.setVideos(videos);
+        viewModel.getVideos().observe(getViewLifecycleOwner(), videos -> {
+            videoAdapter.setVideos(videos);
+            if(viewModel.isDataSetEmpty()){
+                binding.hasNoData.setVisibility(View.VISIBLE);
+            }else{
+                binding.hasNoData.setVisibility(View.GONE);
             }
         });
 
@@ -112,7 +114,8 @@ public class VideoListFragment extends Fragment {
             FragmentManager fragmentManager = getParentFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
             PlayerFragment playerFragment = new PlayerFragment();
-            Bundle videoBundle = new Bundle();;
+            Bundle videoBundle = new Bundle();
+            ;
             videoBundle.putSerializable(AppConstants.GET_VIDEO, video);
             playerFragment.setArguments(videoBundle);
             fragmentTransaction.addToBackStack("videoList");

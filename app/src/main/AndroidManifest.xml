@@ -28,16 +28,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <service android:name=".util.services.DetectedActivitiesService"
-            android:stopWithTask="true"/>
+
+        <!-- Services -->
+        <service
+            android:name=".util.services.DetectedActivitiesIntentService"
+            android:stopWithTask="true" />
         <service
             android:name=".util.services.ActivityDetectorIntentService"
             android:exported="false"
-            android:stopWithTask="true"/>
-
-        <activity android:name=".view.activity.EditUserAccountActivity" />
-        <activity android:name=".view.activity.SettingsActivity" />
-        <!-- Services -->
+            android:stopWithTask="true" />
         <service
             android:name=".util.services.LocationService"
             android:stopWithTask="true" />
@@ -45,8 +44,6 @@
             android:name=".util.services.StreamingIntentService"
             android:exported="false"
             android:stopWithTask="true" />
-
-        <activity android:name=".view.activity.EditUserDetailsActivity" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -65,12 +62,15 @@
         <activity
             android:name=".view.activity.AdminMapsActivity"
             android:parentActivityName=".view.activity.UserDetailActivity" />
-        <activity android:name=".view.activity.VideoListActivity" />
+        <activity
+            android:name=".view.activity.VideoListActivity"
+            android:parentActivityName=".view.activity.UserDetailActivity" />
         <activity
             android:name=".view.activity.UserDetailActivity"
             android:launchMode="singleTop"
             android:parentActivityName=".view.activity.MainActivityUser" />
-        <activity android:name=".view.activity.MediaActivity" />
+        <activity android:name=".view.activity.MediaActivity"
+            android:parentActivityName=".view.activity.MainActivityAdmin"/>
         <activity
             android:name=".view.activity.MainActivityUser"
             android:launchMode="singleTop" />
@@ -93,6 +93,12 @@
         <activity
             android:name=".view.activity.MainActivityAdmin"
             android:launchMode="singleTop" />
+
+        <activity
+            android:name=".view.activity.EditUserDetailsActivity"
+            android:parentActivityName=".view.activity.UserDetailActivity" />
+        <activity android:name=".view.activity.EditUserAccountActivity" />
+        <activity android:name=".view.activity.SettingsActivity" />
 
         <receiver android:name=".util.receiver.NotificationReceiver" />
 

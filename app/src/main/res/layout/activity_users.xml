@@ -22,19 +22,9 @@
             app:layout_constraintTop_toTopOf="parent"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-            app:titleTextColor="@color/colorWhile">
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:fontFamily="@font/lato"
-                android:gravity="center"
-                android:text="ALL USERS"
-                android:textColor="@color/colorWhile"
-                android:textSize="28sp"
-                android:textStyle="bold"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="15dp"/>
-        </androidx.appcompat.widget.Toolbar>
+            app:titleTextColor="@color/colorWhile"
+            app:title="All users"
+            app:titleMarginStart="30dp"/>
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"

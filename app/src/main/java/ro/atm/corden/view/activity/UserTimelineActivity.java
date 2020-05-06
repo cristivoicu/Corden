@@ -11,6 +11,7 @@ import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.DatePicker;
 
 import java.text.SimpleDateFormat;
@@ -39,7 +40,7 @@ public class UserTimelineActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.selectDate:
                 final Calendar cldr = Calendar.getInstance();
                 int day = cldr.get(Calendar.DAY_OF_MONTH);
@@ -84,17 +85,19 @@ public class UserTimelineActivity extends AppCompatActivity {
 
         username = getIntent().getStringExtra(AppConstants.GET_USERNAME);
 
-        if(username != null){
+        if (username != null) {
             viewModel.setActions(username, new SimpleDateFormat("YYYY-MM-dd").format(new Date()));
         }
 
         final TimelineAdapter timelineAdapter = new TimelineAdapter();
         binding.timeline.setAdapter(timelineAdapter);
 
-        viewModel.getActions().observe(this, new Observer<List<Action>>() {
-            @Override
-            public void onChanged(List<Action> actions) {
-                timelineAdapter.setActions(actions);
+        viewModel.getActions().observe(this, actions -> {
+            timelineAdapter.setActions(actions);
+            if (viewModel.isListEmpty()) {
+                binding.noDataTextView.setVisibility(View.VISIBLE);
+            } else {
+                binding.noDataTextView.setVisibility(View.GONE);
             }
         });
     }

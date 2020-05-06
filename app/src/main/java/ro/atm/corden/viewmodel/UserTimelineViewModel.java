@@ -26,4 +26,8 @@ public class UserTimelineViewModel extends AndroidViewModel {
     public void setActions(String username, String date) {
         this.actions.setValue(Repository.getInstance().requestTimelineForUserOnDate(username, date));
     }
+
+    public boolean isListEmpty(){
+        return actions.getValue().isEmpty();
+    }
 }

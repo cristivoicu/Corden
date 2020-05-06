@@ -122,6 +122,7 @@ public class EditUserDetailsActivity extends AppCompatActivity
     public void onBackPressed() {
         setResult(Activity.RESULT_CANCELED);
         finish();
+        super.onBackPressed();
     }
 
     @Override

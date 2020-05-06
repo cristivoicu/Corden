@@ -72,6 +72,11 @@ implements LiveStreamerSubscriber {
 
         mViewModel.getLiveStreamers().observe(getViewLifecycleOwner(), liveStreamers -> {
             mAdpater.setStreamers(liveStreamers);
+            if(mViewModel.isListEmpty()){
+                mBinding.noOneStreams.setVisibility(View.VISIBLE);
+            }else {
+                mBinding.noOneStreams.setVisibility(View.GONE);
+            }
         });
 
         if(mViewModel.isListEmpty()){

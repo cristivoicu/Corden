@@ -1,5 +1,6 @@
 package ro.atm.corden.view.activity;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.Observer;
@@ -11,6 +12,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import java.util.List;
@@ -46,6 +48,9 @@ public class UsersActivity extends AppCompatActivity
 
         setSupportActionBar(binding.toolbar);
 
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
         binding.usersList.setLayoutManager(new LinearLayoutManager(this));
         binding.usersList.setHasFixedSize(true);
 
@@ -73,6 +78,8 @@ public class UsersActivity extends AppCompatActivity
                 startActivity(intent);
             }
         });
+
+        registerForContextMenu(binding.usersList);
     }
 
     @Override
@@ -144,5 +151,31 @@ public class UsersActivity extends AppCompatActivity
                         .show();
             }
         });
+    }
+
+    @Override
+    public boolean onContextItemSelected(@NonNull MenuItem item) {
+        final User user = userAdapter.getUser();
+
+        if(user == null)
+            return super.onContextItemSelected(item);
+        switch (item.getItemId()){
+            case R.id.ctx_editUser:
+                Intent intent = new Intent(this, EditUserDetailsActivity.class);
+                intent.putExtra(AppConstants.GET_USERNAME, user.getUsername());
+                intent.putExtra(Intent.EXTRA_USER, user);
+                startActivityForResult(intent, AppConstants.USER_DETAIL_ACTIVITY);
+                break;
+            case R.id.ctx_notifyStream:
+                new AsyncTask<Void, Void, Void>() {
+                    @Override
+                    protected Void doInBackground(Void... voids) {
+                        SignallingClient.getInstance().sendStreamRequest(user.getUsername());
+                        return null;
+                    }
+                }.execute();
+                break;
+        }
+        return super.onContextItemSelected(item);
     }
 }

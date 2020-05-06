@@ -2,36 +2,32 @@ package ro.atm.corden.util.services;
 
 import android.app.IntentService;
 import android.app.PendingIntent;
-import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.google.android.gms.location.ActivityRecognitionClient;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
-public class DetectedActivitiesService extends IntentService {
-    private static final String TAG = DetectedActivitiesService.class.getSimpleName();
+public class DetectedActivitiesIntentService extends IntentService {
+    private static final String TAG = DetectedActivitiesIntentService.class.getSimpleName();
 
     private Intent mIntentService;
     private PendingIntent mPendingIntent;
     private ActivityRecognitionClient mActivityRecognitionClient;
 
-    IBinder mBinder = new DetectedActivitiesService.LocalBinder();
+    IBinder mBinder = new DetectedActivitiesIntentService.LocalBinder();
 
     public class LocalBinder extends Binder {
-        public DetectedActivitiesService getServerInstance() {
-            return DetectedActivitiesService.this;
+        public DetectedActivitiesIntentService getServerInstance() {
+            return DetectedActivitiesIntentService.this;
         }
     }
 
-    public DetectedActivitiesService()
+    public DetectedActivitiesIntentService()
     {
         super("DetectedActivitiesService");
     }

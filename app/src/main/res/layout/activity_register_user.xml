@@ -20,6 +20,16 @@
             android:background="@color/activityBackground"
             tools:context=".view.activity.RegisterUserActivity">
 
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+                app:layout_constraintTop_toTopOf="parent"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                app:titleTextColor="@color/colorWhile"
+                app:title="Enroll user"/>
+
             <LinearLayout
                 android:id="@+id/infoLayout"
                 android:layout_width="match_parent"
@@ -77,7 +87,7 @@
                 app:cardElevation="15dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+                app:layout_constraintTop_toBottomOf="@+id/toolbar">
 
                 <LinearLayout
                     android:layout_width="match_parent"

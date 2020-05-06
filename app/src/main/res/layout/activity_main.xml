@@ -255,6 +255,15 @@
                             app:layout_constraintBottom_toTopOf="@+id/guideline9"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent" />
+
+                        <ImageView
+                            android:layout_width="35dp"
+                            android:layout_height="35dp"
+                            android:layout_marginTop="8dp"
+                            android:src="@drawable/ic_live"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="@+id/guideline9" />
                     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
@@ -291,7 +300,7 @@
                             android:layout_width="35dp"
                             android:layout_height="35dp"
                             android:layout_marginTop="8dp"
-                            android:src="@drawable/ic_location"
+                            android:src="@drawable/ic_map"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="@+id/guideline10" />
@@ -317,18 +326,30 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
+                <TextView
+                    android:id="@+id/tvServerLog"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Server log"
+                    android:textColor="@color/colorWhiteDirty"
+                    android:textSize="12sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
                 <androidx.cardview.widget.CardView
                     android:id="@+id/bar"
                     android:layout_width="100dp"
                     android:layout_height="6dp"
                     android:layout_marginStart="306dp"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="2dp"
                     android:layout_marginEnd="311dp"
                     app:cardBackgroundColor="@color/colorWhiteDirty"
                     app:cardCornerRadius="5dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toBottomOf="@+id/tvServerLog" />
 
                 <TextView
                     android:id="@+id/date"
@@ -351,7 +372,7 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/name"
+                    app:layout_constraintTop_toBottomOf="@+id/date"
                     tools:listitem="@layout/list_item_timeline"/>
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.core.widget.NestedScrollView>

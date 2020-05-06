@@ -5,11 +5,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 
-import android.Manifest;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -18,11 +16,8 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 
-import org.webrtc.CameraVideoCapturer;
-
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.AppSettingsDialog;
@@ -33,7 +28,7 @@ import ro.atm.corden.databinding.ActivityMainUserBinding;
 import ro.atm.corden.model.user.LoginUser;
 import ro.atm.corden.util.constant.AppConstants;
 import ro.atm.corden.util.services.ActivityDetectorIntentService;
-import ro.atm.corden.util.services.DetectedActivitiesService;
+import ro.atm.corden.util.services.DetectedActivitiesIntentService;
 import ro.atm.corden.util.services.LocationService;
 import ro.atm.corden.util.services.StreamingIntentService;
 import ro.atm.corden.util.webrtc.client.CameraSelector;
@@ -135,7 +130,7 @@ public class MainActivityUser extends AppCompatActivity implements EasyPermissio
 
         setSupportActionBar(binding.toolbar);
 
-        Intent intent = new Intent(this, DetectedActivitiesService.class);
+        Intent intent = new Intent(this, DetectedActivitiesIntentService.class);
 
         startService(intent);
     }
@@ -159,7 +154,7 @@ public class MainActivityUser extends AppCompatActivity implements EasyPermissio
                 SignallingClient.getInstance().logout();
                 // stopping services
                 stopService(new Intent(MainActivityUser.this, LocationService.class));
-                stopService(new Intent(this, DetectedActivitiesService.class));
+                stopService(new Intent(this, DetectedActivitiesIntentService.class));
                 if(StreamingIntentService.isRunning()){
                     stopService(new Intent(MainActivityUser.this, StreamingIntentService.class));
                 }

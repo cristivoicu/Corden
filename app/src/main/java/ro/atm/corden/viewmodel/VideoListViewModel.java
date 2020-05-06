@@ -26,4 +26,8 @@ public class VideoListViewModel extends AndroidViewModel {
     public MutableLiveData<List<Video>> getVideos() {
         return videos;
     }
+
+    public boolean isDataSetEmpty(){
+        return videos.getValue().isEmpty();
+    }
 }
