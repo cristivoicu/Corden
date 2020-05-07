@@ -99,6 +99,9 @@ public class EditUserDetailsActivity extends AppCompatActivity
             e.printStackTrace();
             finish();
         }
+        String[] time = viewModel.getStartHour().split(":");
+        this.hour = Integer.parseInt(time[0].trim());
+        this.minute = Integer.parseInt(time[1].trim());
     }
 
     @Override

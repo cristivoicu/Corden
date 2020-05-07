@@ -47,9 +47,6 @@ public class ActivityDetectorIntentService extends IntentService {
     }
 
     private void broadcastDetectedActivity(DetectedActivity detectedActivity) {
-       /* Intent intent = new Intent(AppConstants.ACTION_BROADCAST_DETECTED_ACTIVITY);
-        intent.putExtra("type", detectedActivity.getType());
-        intent.putExtra("confidence", detectedActivity.getConfidence());*/
         String label = ActivityEventType.UNKNOWN;
         int confidence = detectedActivity.getConfidence();
 
@@ -113,6 +110,5 @@ public class ActivityDetectorIntentService extends IntentService {
                 }
             }
         }
-        //LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
     }
 }
