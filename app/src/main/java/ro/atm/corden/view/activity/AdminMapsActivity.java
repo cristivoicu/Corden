@@ -220,6 +220,8 @@ public class AdminMapsActivity extends AppCompatActivity
             }
 
         });
+
+        Repository.getInstance().requestLiveLocation();
     }
 
     public void onZoneButtonClicked(View view) {

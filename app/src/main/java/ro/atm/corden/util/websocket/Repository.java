@@ -4,9 +4,12 @@ import android.os.AsyncTask;
 import android.os.ConditionVariable;
 import android.util.Log;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.lang.ref.ReferenceQueue;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -67,6 +70,12 @@ public class Repository {
             return null;
         }
     }
+
+    public void requestLiveLocation(){
+        RequestLiveLocationsAsyncTask requestLiveLocationsAsyncTask = new RequestLiveLocationsAsyncTask();
+        requestLiveLocationsAsyncTask.execute();
+    }
+
 
     public List<User> requestOnlineUsers() {
         RequestUsersOnlineAsyncTask requestUsersOnlineAsyncTask = new RequestUsersOnlineAsyncTask();
@@ -339,6 +348,18 @@ public class Repository {
                     .addPayload(strings[0])
                     .build();
 
+            signallingClient.webSocket.send(message.toString());
+            return null;
+        }
+    }
+
+    private static class RequestLiveLocationsAsyncTask extends AsyncTask<Void, Void, Void>{
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            Message message = new Message.RequestMessageBuilder()
+                    .addEvent(RequestEventTypes.REQUEST_LIVE_LOCATION)
+                    .build();
             signallingClient.webSocket.send(message.toString());
             return null;
         }

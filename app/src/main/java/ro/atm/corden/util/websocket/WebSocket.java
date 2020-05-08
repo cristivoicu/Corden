@@ -84,6 +84,7 @@ final class WebSocket extends WebSocketClient {
     MapItemsListener mapItemsListener;
     RemoveVideoListener removeVideoListener;
 
+    ConditionVariable conditionVariable = null;
     ConditionVariable videosConditionVariable = null;
     ConditionVariable userDataConditionVariable = null;
     ConditionVariable usersConditionVariable = null;
@@ -268,15 +269,14 @@ final class WebSocket extends WebSocketClient {
                     videosConditionVariable.open();
                 }
                 break;
-            case "requestUserData":
-
+            case "requestUserData": // request one user at a time
                 synchronized (users) {
                     users.clear();
                     users.add(User.fromJson(payload.getAsString()));
                     userDataConditionVariable.open();
                 }
                 break;
-            case "requestOnlineUsers":
+            case "requestOnlineUsers": // request a list of users at a time
             case "requestAllUsers":
                 Type userListType = new TypeToken<ArrayList<User>>() {
                 }.getType();

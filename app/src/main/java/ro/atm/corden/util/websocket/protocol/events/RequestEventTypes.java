@@ -9,4 +9,5 @@ public class RequestEventTypes {
     public static final String USERS_ONLINE = "requestOnlineUsers";
     public static final String REQUEST_START_STREAMING = "requestStartStreaming";
     public static final String REQUEST_LIVE_STREAMER = "requestLiveStreamers";
+    public static final String REQUEST_LIVE_LOCATION = "requestUserLocations";
 }
