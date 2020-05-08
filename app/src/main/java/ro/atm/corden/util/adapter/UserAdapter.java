@@ -20,15 +20,16 @@ import ro.atm.corden.R;
 import ro.atm.corden.model.user.Role;
 import ro.atm.corden.model.user.Status;
 import ro.atm.corden.model.user.User;
+import ro.atm.corden.util.websocket.Repository;
 
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserHolder> {
-    private List<User> users = new ArrayList<>();
+    final private List<User> users = new ArrayList<>();
     private OnItemClickListener listener;
 
     private int mPosition;
 
     public void setUsers(List<User> users) {
-        this.users = users;
+        this.users.addAll(users);
         notifyDataSetChanged();
     }
 
@@ -43,13 +44,16 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserHolder> {
     }
 
     public void updateStatusOnOnlineActivity(String username, Status newStatus) {
-        for (User user : users) {
+        if(newStatus.equals(Status.ONLINE)){
+            User newUser = Repository.getInstance().requestUserData(username);
+            this.users.add(newUser);
+            notifyDataSetChanged();
+            return;
+        }
+        for (User user : this.users) {
             if (user.getUsername().equals(username)) {
                 if(newStatus.equals(Status.OFFLINE))
-                    users.remove(user);
-                if(newStatus.equals(Status.OFFLINE)){
-                    users.add(user);
-                }
+                    this.users.remove(user);
                 break;
             }
         }

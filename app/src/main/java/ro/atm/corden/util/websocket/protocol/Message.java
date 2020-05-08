@@ -87,10 +87,11 @@ public class Message {
             return this;
         }
 
-        public UpdateMessageBuilder addLocation(double lat, double lng){
+        public UpdateMessageBuilder addLocation(double lat, double lng, double accuracy){
             JsonObject location = new JsonObject();
             location.addProperty("lat", lat);
             location.addProperty("lng", lng);
+            location.addProperty("accuracy", accuracy);
             message.add("payload", location);
             return this;
         }

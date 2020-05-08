@@ -352,7 +352,7 @@ public class SignallingClient {
 
         Message message = new Message.UpdateMessageBuilder()
                 .addEvent(UpdateEventType.LOCATION)
-                .addLocation(location.getLatitude(), location.getLongitude())
+                .addLocation(location.getLatitude(), location.getLongitude(), location.getAccuracy())
                 .build();
 
         webSocket.send(message.toString());
