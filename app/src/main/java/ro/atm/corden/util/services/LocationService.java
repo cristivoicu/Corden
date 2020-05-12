@@ -93,7 +93,7 @@ public class LocationService extends Service {
 
     private Location getLastKnownLocation() {
         mLocationManager = (LocationManager)getApplicationContext().getSystemService(LOCATION_SERVICE);
-        List<String> providers = mLocationManager.getProviders(true);
+         List<String> providers = mLocationManager.getProviders(true);
         Location bestLocation = null;
         for (String provider : providers) {
             @SuppressLint("MissingPermission")

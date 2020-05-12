@@ -20,7 +20,11 @@ public class VideoListViewModel extends AndroidViewModel {
     }
 
     public void setVideos(String username){
-        videos.setValue(Repository.getInstance().requestVideosForUsername(username));
+        videos.setValue(Repository.getInstance().requestVideosForUsername(username, null));
+    }
+
+    public void setVideosByDate(String username, String date){
+        videos.setValue(Repository.getInstance().requestVideosForUsername(username, date));
     }
 
     public MutableLiveData<List<Video>> getVideos() {

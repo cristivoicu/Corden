@@ -37,6 +37,8 @@ public class VideoListFragment extends Fragment {
     private FragmentVideoListBinding binding;
     private VideoListViewModel viewModel;
 
+    private String mUsername;
+
     public VideoListFragment() {
         // Required empty public constructor
     }
@@ -67,8 +69,7 @@ public class VideoListFragment extends Fragment {
                             @Override
                             public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
                                 String date = String.format("%s-%s-%s", year, monthOfYear + 1, dayOfMonth);
-/*                                binding.toolbar.setSubtitle("On " + date);
-                                viewModel.setActions(username, date);*/
+                                viewModel.setVideosByDate(mUsername, date);
                             }
                         }, year, month, day);
                 picker.show();
@@ -92,9 +93,9 @@ public class VideoListFragment extends Fragment {
         binding.videosList.setLayoutManager(new LinearLayoutManager(this.getContext()));
         binding.videosList.setHasFixedSize(true);
 
-        String getUsername = getArguments().getString(AppConstants.GET_USERNAME);
-        if (getUsername != null) {
-            viewModel.setVideos(getUsername);
+        mUsername = getArguments().getString(AppConstants.GET_USERNAME);
+        if (mUsername != null) {
+            viewModel.setVideos(mUsername);
         }
 
         final VideoAdapter videoAdapter = new VideoAdapter();

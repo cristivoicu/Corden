@@ -16,6 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -29,6 +30,7 @@ import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -40,14 +42,17 @@ import ro.atm.corden.model.map.MapItem;
 import ro.atm.corden.model.map.Mark;
 import ro.atm.corden.model.map.Path;
 import ro.atm.corden.model.map.Zone;
+import ro.atm.corden.util.helper.ColorHelper;
 import ro.atm.corden.util.websocket.Repository;
 import ro.atm.corden.util.websocket.SignallingClient;
 import ro.atm.corden.util.websocket.callback.MapItemsListener;
+import ro.atm.corden.view.dialog.EditMapItemDialog;
 import ro.atm.corden.view.dialog.SaveMapItemDialog;
 
 public class AdminMapsActivity extends AppCompatActivity
         implements OnMapReadyCallback,
         SaveMapItemDialog.SaveMapDialogListener,
+        EditMapItemDialog.EditMapDialogListener,
         GoogleMap.OnPolygonClickListener,
         GoogleMap.OnPolylineClickListener,
         MapItemsListener {
@@ -71,6 +76,7 @@ public class AdminMapsActivity extends AppCompatActivity
     private MarkerOptions markerOptions;
 
     private List<MapItem> mapItems = new LinkedList<>();
+    final private HashMap<String, MapItem> mapItemHashMap = new HashMap<>();
     private Map<String, Marker> liveLocations = new ConcurrentHashMap<>();
 
     @Override
@@ -280,10 +286,6 @@ public class AdminMapsActivity extends AppCompatActivity
             for (LatLng latLng : currentPolyline.getPoints()) {
                 polygonOptions.add(latLng);
             }
-            /*currentPolyline.remove();
-            polylineOptions = new PolylineOptions();
-            currentPolygon = mMap.addPolygon(polygonOptions);
-            polygonOptions = new PolygonOptions();*/
             return;
         }
     }
@@ -294,77 +296,20 @@ public class AdminMapsActivity extends AppCompatActivity
     }
 
     @Override
-    public void saveMap(String name, String description, int color) {
-        if (isPath) {
-            isPath = !isPath;
-            currentPolyline.setColor(color);
-            currentPolyline.setTag(name);
-            currentPolyline.setWidth(10);
-            currentPolyline.setClickable(true);
-
-            mapItems.add(new Path(name, description, color, currentPolyline.getPoints()));
-        } else {
-            if (isZone) {
-                isZone = !isZone;
-                currentPolygon.setFillColor(adjustColor(color, (float) 0.6));
-                currentPolygon.setTag(name);
-                currentPolygon.setStrokeColor(color);
-                currentPolygon.setClickable(true);
-                mapItems.add(new Zone(name, description, color, currentPolygon.getPoints()));
-            } else {
-                if (isLocation) {
-                    isLocation = !isLocation;
-                    markerOptions.title(name)
-                            .snippet(description)
-                            .alpha(0.6f);
-                    currentMarker.remove();
-                    currentMarker = mMap.addMarker(markerOptions);
-
-                    mapItems.add(new Mark(name, description, color, currentMarker.getPosition()));
-                    currentMarker = null;
-                    markerOptions = new MarkerOptions();
-                }
-            }
-        }
-
-    }
-
-    @Override
-    public void cancel() {
-        if (isPath) {
-            isPath = !isPath;
-            currentPolyline.remove();
-        } else {
-            if (isZone) {
-                isZone = !isZone;
-                currentPolygon.remove();
-            } else {
-                if (isLocation) {
-                    isLocation = !isLocation;
-                    currentMarker.remove();
-                    currentMarker = null;
-                }
-            }
-        }
-    }
-
-    @ColorInt
-    private int adjustColor(@ColorInt int color, float factor) {
-        int alpha = Math.round(Color.alpha(color) * factor);
-        int red = Color.red(color);
-        int green = Color.green(color);
-        int blue = Color.blue(color);
-        return Color.argb(alpha, red, green, blue);
-    }
-
-    @Override
     public void onPolygonClick(Polygon polygon) {
         Toast.makeText(this, "Clicked polygon TAG: " + polygon.getTag().toString(), Toast.LENGTH_SHORT).show();
+        MapItem current = mapItemHashMap.get(polygon.getId());
+        EditMapItemDialog editMapItemDialog = new EditMapItemDialog(current, polygon.getId());
+        editMapItemDialog.show(getSupportFragmentManager(), "Edit map dialog");
     }
 
     @Override
     public void onPolylineClick(Polyline polyline) {
         Toast.makeText(this, "Clicked polyline TAG: " + polyline.getTag().toString(), Toast.LENGTH_SHORT).show();
+
+        MapItem current = mapItemHashMap.get(polyline.getId());
+        EditMapItemDialog editMapItemDialog = new EditMapItemDialog(current, current.getId());
+        editMapItemDialog.show(getSupportFragmentManager(), "Edit map dialog");
     }
 
     @Override
@@ -416,4 +361,79 @@ public class AdminMapsActivity extends AppCompatActivity
         });
     }
 
+    @Override
+    public void editedMap(String id, MapItem mapItem) {
+        mapItemHashMap.remove(id);
+        mapItemHashMap.put(id, mapItem);
+        if(mapItem instanceof Zone){
+            ((Zone) mapItem).getPolygon().setFillColor(ColorHelper.adjustPolygonBackground(mapItem.getColor()));
+            ((Zone) mapItem).getPolygon().setStrokeColor(mapItem.getColor());
+        }
+        if(mapItem instanceof  Path){
+            ((Path) mapItem).getPolyline().setColor(mapItem.getColor());
+        }
+    }
+
+    @Override
+    public void cancelEdit() {
+
+    }
+
+    @Override
+    public void saveMap(String name, String description, int color) {
+        if (isPath) {
+            isPath = !isPath;
+            currentPolyline.setColor(color);
+            currentPolyline.setTag(name);
+            currentPolyline.setWidth(10);
+            currentPolyline.setClickable(true);
+
+            //mapItems.add(new Path(name, description, color, currentPolyline.getPoints()));
+            mapItemHashMap.put(currentPolyline.getId(), new Path(currentPolyline, name, description, color, currentPolyline.getPoints()));
+        } else {
+            if (isZone) {
+                isZone = !isZone;
+                currentPolygon.setFillColor(ColorHelper.adjustColor(color, 0.6f));
+                currentPolygon.setTag(name);
+                currentPolygon.setStrokeColor(color);
+                currentPolygon.setClickable(true);
+                //mapItems.add(new Zone(name, description, color, currentPolygon.getPoints()));
+                mapItemHashMap.put(currentPolygon.getId(), new Zone(currentPolygon, name, description, color, currentPolygon.getPoints()));
+            } else {
+                if (isLocation) {
+                    isLocation = !isLocation;
+                    markerOptions.title(name)
+                            .snippet(description)
+                            .alpha(0.6f);
+                    currentMarker.remove();
+                    currentMarker = mMap.addMarker(markerOptions);
+
+                    //mapItems.add(new Mark(name, description, color, currentMarker.getPosition()));
+                    mapItemHashMap.put(currentMarker.getId(), new Mark(currentMarker, name, description, color, currentMarker.getPosition()));
+                    currentMarker = null;
+                    markerOptions = new MarkerOptions();
+                }
+            }
+        }
+
+    }
+
+    @Override
+    public void cancel() {
+        if (isPath) {
+            isPath = !isPath;
+            currentPolyline.remove();
+        } else {
+            if (isZone) {
+                isZone = !isZone;
+                currentPolygon.remove();
+            } else {
+                if (isLocation) {
+                    isLocation = !isLocation;
+                    currentMarker.remove();
+                    currentMarker = null;
+                }
+            }
+        }
+    }
 }

@@ -37,7 +37,6 @@ public class VideoListActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-
         if(binding.frameLayout != null){
             if(savedInstanceState != null){
                 return;

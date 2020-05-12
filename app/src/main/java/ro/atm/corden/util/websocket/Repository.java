@@ -97,10 +97,10 @@ public class Repository {
         }
     }
 
-    public List<Video> requestVideosForUsername(String username) {
+    public List<Video> requestVideosForUsername(String username, String date) {
         RequestVideosAsyncTask requestVideosAsyncTask = new RequestVideosAsyncTask();
         try {
-            return requestVideosAsyncTask.execute(username).get();
+            return requestVideosAsyncTask.execute(username, date).get();
         } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
             return null;
@@ -222,14 +222,16 @@ public class Repository {
     private static class RequestVideosAsyncTask extends AsyncTask<String, Void, List<Video>> {
 
         @Override
-        protected List<Video> doInBackground(String... usernames) {
+        protected List<Video> doInBackground(String... data) {
             try {
-                Message message = new Message.RequestMessageBuilder()
+                Message.RequestMessageBuilder message = new Message.RequestMessageBuilder()
                         .addEvent(RequestEventTypes.RECORDED_VIDEOS)
-                        .addUser(usernames[0])
-                        .build();
+                        .addUser(data[0]);
+                if(data[1] != null) {
+                    message.addDate(data[1]);
+                }
 
-                signallingClient.webSocket.send(message.toString());
+                signallingClient.webSocket.send(message.build().toString());
 
                 signallingClient.webSocket.videosConditionVariable = new ConditionVariable(false);
                 signallingClient.webSocket.videosConditionVariable.block();
