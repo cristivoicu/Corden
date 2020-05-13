@@ -10,6 +10,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.ref.ReferenceQueue;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -97,6 +98,16 @@ public class Repository {
         }
     }
 
+    public List<MapItem> requestMapItems(){
+        RequestMapItemsAsyncTask requestMapItemsAsyncTask = new RequestMapItemsAsyncTask();
+        try {
+            return requestMapItemsAsyncTask.execute().get();
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public List<Video> requestVideosForUsername(String username, String date) {
         RequestVideosAsyncTask requestVideosAsyncTask = new RequestVideosAsyncTask();
         try {
@@ -132,7 +143,7 @@ public class Repository {
         enrollUserAsyncTask.execute(user);
     }
 
-    public void saveMapItems(List<MapItem> items) {
+    public void saveMapItems(HashMap<String, MapItem> items) {
         SendMapItemsToServerAsyncTask sendMapItemsToServerAsyncTask = new SendMapItemsToServerAsyncTask();
         sendMapItemsToServerAsyncTask.execute(items);
     }
@@ -305,10 +316,10 @@ public class Repository {
         }
     }
 
-    private static class SendMapItemsToServerAsyncTask extends AsyncTask<List<MapItem>, Void, Void> {
+    private static class SendMapItemsToServerAsyncTask extends AsyncTask<HashMap<String, MapItem>, Void, Void> {
 
         @Override
-        protected Void doInBackground(List<MapItem>... lists) {
+        protected Void doInBackground(HashMap<String, MapItem>... lists) {
             Log.i(TAG, "Sending map items to the server.");
 
             Message message = new Message.UpdateMessageBuilder()
@@ -317,6 +328,29 @@ public class Repository {
                     .build();
 
             signallingClient.webSocket.send(message.toString());
+            return null;
+        }
+    }
+
+    private static class RequestMapItemsAsyncTask extends AsyncTask<Void, Void, List<MapItem>>{
+
+        @Override
+        protected List<MapItem> doInBackground(Void... voids) {
+            Log.i(TAG, "Sending request for map items...");
+
+            Message message = new Message.RequestMessageBuilder()
+                    .addEvent(RequestEventTypes.REQUEST_MAP_ITEMS)
+                    .build();
+
+            signallingClient.webSocket.send(message.toString());
+
+            signallingClient.webSocket.conditionVariable = new ConditionVariable(false);
+            signallingClient.webSocket.conditionVariable.block();
+
+            if(signallingClient.webSocket.mapItems != null){
+                return signallingClient.webSocket.mapItems;
+            }
+
             return null;
         }
     }

@@ -27,9 +27,11 @@ import org.java_websocket.handshake.ServerHandshake;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import ro.atm.corden.R;
+import ro.atm.corden.model.map.MapItem;
 import ro.atm.corden.model.user.LiveStreamer;
 import ro.atm.corden.model.user.Role;
 import ro.atm.corden.model.user.Action;
@@ -93,6 +95,7 @@ final class WebSocket extends WebSocketClient {
     final List<Video> videos = new ArrayList<>();
     final List<User> users = new ArrayList<>();
     final List<LiveStreamer> liveStreamers = new ArrayList<>();
+    final List<MapItem> mapItems = new LinkedList<>();
     final List<Action> actions = new ArrayList<>();
 
     UserSubscriber userSubscriber;
@@ -307,6 +310,16 @@ final class WebSocket extends WebSocketClient {
                     mapItemsListener.onUserLocationUpdated(username, lat, lng);
                 }
                 break;
+            case "requestMapItems":
+                Type mapItemsListType = new TypeToken<ArrayList<MapItem>>() {
+                }.getType();
+                synchronized (mapItems){
+                    mapItems.clear();
+                    mapItems.addAll(gson.fromJson(payload.getAsString(), mapItemsListType));
+
+                    conditionVariable.open();
+                }
+                break;
             default:
                 Log.e(TAG, "Json request error");
         }
@@ -462,7 +475,7 @@ final class WebSocket extends WebSocketClient {
         logOutUser(code);
     }
 
-    private void logOutUser(final int code){
+    private void logOutUser(final int code) {
         new Handler(Looper.getMainLooper())
                 .post(() -> {
                     Intent intent = new Intent(mApplicationContext, LoginActivity.class);

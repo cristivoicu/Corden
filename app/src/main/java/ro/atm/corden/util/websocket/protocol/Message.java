@@ -8,6 +8,7 @@ import com.google.gson.JsonObject;
 import org.webrtc.IceCandidate;
 import org.webrtc.SessionDescription;
 
+import java.util.HashMap;
 import java.util.List;
 
 import ro.atm.corden.model.map.MapItem;
@@ -96,12 +97,30 @@ public class Message {
             return this;
         }
 
-        public UpdateMessageBuilder addPayload(List<MapItem> mapItems){
+        public UpdateMessageBuilder addPayload(HashMap<String, MapItem> mapItems){
             JsonArray marks = new JsonArray();
             JsonArray paths = new JsonArray();
             JsonArray zones = new JsonArray();
 
-            for (MapItem mapItem : mapItems){
+            for(String key : mapItems.keySet()){
+                MapItem currentItem = mapItems.get(key);
+                String json = "";
+                if(currentItem instanceof Mark){
+                    //json = ((Mark)currentItem).toJson();
+                    json = currentItem.toJson();
+                    marks.add(json);
+                }
+                if(currentItem instanceof Zone){
+                    json = currentItem.toJson();
+                    zones.add(json);
+                }
+                if(currentItem instanceof Path){
+                    json = currentItem.toJson();
+                    paths.add(json);
+                }
+            }
+
+            /*for (MapItem mapItem : mapItems){
                 String json = "";
                 if(mapItem instanceof Mark){
                     json = mapItem.toJson();
@@ -115,7 +134,7 @@ public class Message {
                     json = mapItem.toJson();
                     zones.add(json);
                 }
-            }
+            }*/
             message.add("marks", marks);
             message.add("paths", paths);
             message.add("zones", zones);

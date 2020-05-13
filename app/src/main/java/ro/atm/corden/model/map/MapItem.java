@@ -4,11 +4,12 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.annotations.Expose;
 
 import java.io.Serializable;
+import java.util.LinkedList;
 import java.util.List;
 
 import ro.atm.corden.util.interfaces.Jsonable;
 
-public abstract class MapItem implements Jsonable, Serializable {
+public class MapItem implements Jsonable, Serializable {
     @Expose(serialize = false, deserialize = false)
     private String id;
     @Expose
@@ -19,6 +20,8 @@ public abstract class MapItem implements Jsonable, Serializable {
     private int color;
     @Expose
     private List<LatLng> coordinates;
+    @Expose(deserialize = true, serialize = false)
+    private String type;
 
     public MapItem(String id, String name, String description, int color, List<LatLng> coordinates) {
         this.name = name;
@@ -27,12 +30,17 @@ public abstract class MapItem implements Jsonable, Serializable {
         this.coordinates = coordinates;
     }
 
-    public MapItem(String id, String name, String description, int color) {
+    public MapItem(String id, String name, String description, int color, LatLng coordinates) {
         this.name = name;
         this.description = description;
         this.color = color;
+        this.coordinates = new LinkedList<>();
+        this.coordinates.add(coordinates);
     }
 
+    protected MapItem(){
+
+    }
 
     //region Getters and setters
 
@@ -70,6 +78,14 @@ public abstract class MapItem implements Jsonable, Serializable {
 
     public String getId() {
         return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getType() {
+        return type;
     }
 
     //endregion

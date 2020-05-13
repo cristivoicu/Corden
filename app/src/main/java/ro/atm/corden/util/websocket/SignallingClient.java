@@ -112,6 +112,7 @@ public class SignallingClient {
 
                 webSocket = new WebSocket(uri, context.getApplicationContext());
                 webSocket.setConnectionLostTimeout(0);
+
                 webSocket.setSocketFactory(sslContext.getSocketFactory());
 
             } catch (NoSuchAlgorithmException | /*UnrecoverableKeyException |*/ IOException | CertificateException | KeyStoreException | KeyManagementException e) {

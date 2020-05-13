@@ -75,7 +75,6 @@ public class AdminMapsActivity extends AppCompatActivity
     private Marker currentMarker = null;
     private MarkerOptions markerOptions;
 
-    private List<MapItem> mapItems = new LinkedList<>();
     final private HashMap<String, MapItem> mapItemHashMap = new HashMap<>();
     private Map<String, Marker> liveLocations = new ConcurrentHashMap<>();
 
@@ -228,6 +227,40 @@ public class AdminMapsActivity extends AppCompatActivity
         });
 
         Repository.getInstance().requestLiveLocation();
+        populateMap(Repository.getInstance().requestMapItems());
+    }
+
+    private void populateMap(List<MapItem> mapItems){
+        for(MapItem mapItem : mapItems){
+            switch (mapItem.getType()){
+                case "MARKER":
+                    MarkerOptions markerOptions = new MarkerOptions();
+                    markerOptions.position(new LatLng(mapItem.getCoordinates().get(0).latitude, mapItem.getCoordinates().get(0).longitude));
+                    markerOptions.title(mapItem.getName());
+                    markerOptions.snippet(mapItem.getDescription());
+                    Marker marker = mMap.addMarker(markerOptions);
+                    mapItemHashMap.put(marker.getId(), new Mark(marker, marker.getTitle(), marker.getSnippet(), mapItem.getColor(), marker.getPosition()));
+                    break;
+                case "ZONE":
+                    PolygonOptions polygonOptions = new PolygonOptions();
+                    polygonOptions.addAll(mapItem.getCoordinates());
+                    polygonOptions.fillColor(ColorHelper.adjustPolygonBackground(mapItem.getColor()));
+                    polygonOptions.strokeColor(mapItem.getColor());
+                    Polygon polygon = mMap.addPolygon(polygonOptions);
+                    polygon.setClickable(true);
+                    mapItemHashMap.put(polygon.getId(), new Zone(polygon, mapItem.getName(), mapItem.getDescription(), mapItem.getColor(), mapItem.getCoordinates()));
+                    break;
+                case "PATH":
+                    PolylineOptions polylineOptions = new PolylineOptions();
+                    polylineOptions.addAll(mapItem.getCoordinates());
+                    polylineOptions.color(mapItem.getColor());
+                    polylineOptions.width(20);
+                    Polyline polyline = mMap.addPolyline(polylineOptions);
+                    polyline.setClickable(true);
+                    mapItemHashMap.put(polyline.getId(), new Path(polyline, mapItem.getName(), mapItem.getDescription(), mapItem.getColor(), mapItem.getCoordinates()));
+                    break;
+            }
+        }
     }
 
     public void onZoneButtonClicked(View view) {
@@ -297,7 +330,7 @@ public class AdminMapsActivity extends AppCompatActivity
 
     @Override
     public void onPolygonClick(Polygon polygon) {
-        Toast.makeText(this, "Clicked polygon TAG: " + polygon.getTag().toString(), Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "Clicked polygon TAG: " + polygon.getTag().toString(), Toast.LENGTH_SHORT).show();
         MapItem current = mapItemHashMap.get(polygon.getId());
         EditMapItemDialog editMapItemDialog = new EditMapItemDialog(current, polygon.getId());
         editMapItemDialog.show(getSupportFragmentManager(), "Edit map dialog");
@@ -305,7 +338,7 @@ public class AdminMapsActivity extends AppCompatActivity
 
     @Override
     public void onPolylineClick(Polyline polyline) {
-        Toast.makeText(this, "Clicked polyline TAG: " + polyline.getTag().toString(), Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "Clicked polyline TAG: " + polyline.getTag().toString(), Toast.LENGTH_SHORT).show();
 
         MapItem current = mapItemHashMap.get(polyline.getId());
         EditMapItemDialog editMapItemDialog = new EditMapItemDialog(current, current.getId());
@@ -321,7 +354,7 @@ public class AdminMapsActivity extends AppCompatActivity
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         AdminMapsActivity.super.onBackPressed();
-                        Repository.getInstance().saveMapItems(mapItems);
+                        Repository.getInstance().saveMapItems(mapItemHashMap);
                     }
                 })
                 .setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -385,7 +418,7 @@ public class AdminMapsActivity extends AppCompatActivity
             isPath = !isPath;
             currentPolyline.setColor(color);
             currentPolyline.setTag(name);
-            currentPolyline.setWidth(10);
+            currentPolyline.setWidth(20);
             currentPolyline.setClickable(true);
 
             //mapItems.add(new Path(name, description, color, currentPolyline.getPoints()));

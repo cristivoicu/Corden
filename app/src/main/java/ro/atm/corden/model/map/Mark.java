@@ -6,24 +6,23 @@ import com.google.gson.annotations.Expose;
 
 import java.util.List;
 
-public class Mark extends MapItem {
-    @Expose
-    private LatLng coordinates;
+import ro.atm.corden.util.interfaces.Jsonable;
 
+public class Mark extends MapItem {
     @Expose(serialize = false, deserialize = false)
     private Marker mMarker;
 
-    public Mark(Marker marker, String name, String description, int color, LatLng coordinates){
-        super(marker.getId(), name, description, color);
-        this.coordinates = coordinates;
+    public Mark(Marker marker, String name, String description, int color, LatLng coordinates) {
+        super(marker.getId(), name, description, color, coordinates);
         mMarker = marker;
-    }
-
-    public LatLng getCoordinate() {
-        return coordinates;
     }
 
     public Marker getMarker() {
         return mMarker;
     }
+
+/*    @Override
+    public String toJson() {
+        return gson.toJson(this, Mark.class);
+    }*/
 }

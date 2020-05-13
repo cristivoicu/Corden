@@ -10,4 +10,5 @@ public class RequestEventTypes {
     public static final String REQUEST_START_STREAMING = "requestStartStreaming";
     public static final String REQUEST_LIVE_STREAMER = "requestLiveStreamers";
     public static final String REQUEST_LIVE_LOCATION = "requestUserLocations";
+    public static final String REQUEST_MAP_ITEMS = "requestMapItems";
 }
