@@ -158,6 +158,7 @@ public class MainActivityAdmin extends AppCompatActivity {
 
     public void onLocationCardClicked(View view) {
         Intent intent = new Intent(this, AdminMapsActivity.class);
+        intent.setAction(AppConstants.ACTION_CURRENT_LOCATION);
         startActivity(intent);
     }
 

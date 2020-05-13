@@ -104,7 +104,10 @@ public class UserDetailActivity extends AppCompatActivity {
     }
 
     public void onRealTimeLocationButtonClicked(View view) {
-
+        Intent intent = new Intent(this, AdminMapsActivity.class);
+        intent.setAction(AppConstants.ACTION_USER_LOCATION);
+        intent.putExtra(Intent.EXTRA_USER, viewModel.getUsername());
+        startActivity(intent);
     }
 
     public void onStartCameraButtonClicked(View view) {

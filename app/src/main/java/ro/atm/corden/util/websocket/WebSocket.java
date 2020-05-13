@@ -12,6 +12,7 @@ import android.util.Log;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
+import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -92,6 +93,7 @@ final class WebSocket extends WebSocketClient {
     ConditionVariable usersConditionVariable = null;
     ConditionVariable timelineConditionVariable = null;
 
+    LatLng latLng = new LatLng(0.0, 0.0);
     final List<Video> videos = new ArrayList<>();
     final List<User> users = new ArrayList<>();
     final List<LiveStreamer> liveStreamers = new ArrayList<>();
@@ -310,10 +312,23 @@ final class WebSocket extends WebSocketClient {
                     mapItemsListener.onUserLocationUpdated(username, lat, lng);
                 }
                 break;
+            case "userLocation":
+                try {
+                    JsonObject object = payload.getAsJsonObject();
+
+                    Double latitude = object.get("lat").getAsDouble();
+                    Double longitude = object.get("lng").getAsDouble();
+                    this.latLng = new LatLng(latitude, longitude);
+                    conditionVariable.open();
+                } catch (Exception e) {
+                    this.latLng = null;
+                    conditionVariable.open();
+                }
+                break;
             case "requestMapItems":
                 Type mapItemsListType = new TypeToken<ArrayList<MapItem>>() {
                 }.getType();
-                synchronized (mapItems){
+                synchronized (mapItems) {
                     mapItems.clear();
                     mapItems.addAll(gson.fromJson(payload.getAsString(), mapItemsListType));
 

@@ -77,6 +77,17 @@ public class Repository {
         requestLiveLocationsAsyncTask.execute();
     }
 
+    public LatLng requestUserLocation(String username){
+        RequestLiveLocationAsyncTask requestLiveLocationAsyncTask = new RequestLiveLocationAsyncTask();
+
+        try {
+            return requestLiveLocationAsyncTask.execute(username).get();
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 
     public List<User> requestOnlineUsers() {
         RequestUsersOnlineAsyncTask requestUsersOnlineAsyncTask = new RequestUsersOnlineAsyncTask();
@@ -398,6 +409,25 @@ public class Repository {
                     .build();
             signallingClient.webSocket.send(message.toString());
             return null;
+        }
+    }
+
+    private static class RequestLiveLocationAsyncTask extends AsyncTask<String, Void, LatLng>{
+
+        @Override
+        protected LatLng doInBackground(String... username) {
+            Message message = new Message.RequestMessageBuilder()
+                    .addEvent(RequestEventTypes.REQUEST_LIVE_LOCATION_FOR_USER)
+                    .addUser(username[0])
+                    .build();
+
+            signallingClient.webSocket.send(message.toString());
+
+            signallingClient.webSocket.conditionVariable = new ConditionVariable(false);
+            signallingClient.webSocket.conditionVariable.block();
+
+
+            return signallingClient.webSocket.latLng;
         }
     }
 

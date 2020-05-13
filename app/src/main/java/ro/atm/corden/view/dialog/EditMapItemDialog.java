@@ -58,13 +58,13 @@ public class EditMapItemDialog extends AppCompatDialogFragment {
 
         builder.setView(view)
                 .setTitle("Save map detail")
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                .setNegativeButton("Delete", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        listener.cancelEdit();
+                        listener.onDelete(mID, mMapItem);
                     }
                 })
-                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                .setPositiveButton("Modify", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         String name = mInputTextLayoutName.getEditText().getText().toString();
@@ -130,6 +130,6 @@ public class EditMapItemDialog extends AppCompatDialogFragment {
 
     public interface EditMapDialogListener {
         void editedMap(String id, MapItem mapItem);
-        void cancelEdit();
+        void onDelete(String id, MapItem mapItem);
     }
 }

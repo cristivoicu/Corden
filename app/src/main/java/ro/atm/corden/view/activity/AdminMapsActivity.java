@@ -5,9 +5,15 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -22,6 +28,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -42,6 +49,7 @@ import ro.atm.corden.model.map.MapItem;
 import ro.atm.corden.model.map.Mark;
 import ro.atm.corden.model.map.Path;
 import ro.atm.corden.model.map.Zone;
+import ro.atm.corden.util.constant.AppConstants;
 import ro.atm.corden.util.helper.ColorHelper;
 import ro.atm.corden.util.websocket.Repository;
 import ro.atm.corden.util.websocket.SignallingClient;
@@ -64,6 +72,8 @@ public class AdminMapsActivity extends AppCompatActivity
     private boolean isZone = false;
     private boolean isPath = false;
     private boolean isLocation = false;
+
+    private boolean isModified = false;
 
     private Polyline currentPolyline;
     private PolylineOptions polylineOptions;
@@ -188,10 +198,7 @@ public class AdminMapsActivity extends AppCompatActivity
 
         markerOptions = new MarkerOptions();
 
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        setMapZoomLocation();
 
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
@@ -215,7 +222,7 @@ public class AdminMapsActivity extends AppCompatActivity
                     points.add(latLng);
                     polygonOptions = new PolygonOptions();
                     polygonOptions.addAll(points);
-                    if(currentPolygon != null)
+                    if (currentPolygon != null)
                         currentPolygon.remove();
                     currentPolygon = googleMap.addPolygon(polygonOptions);
 
@@ -230,9 +237,57 @@ public class AdminMapsActivity extends AppCompatActivity
         populateMap(Repository.getInstance().requestMapItems());
     }
 
-    private void populateMap(List<MapItem> mapItems){
-        for(MapItem mapItem : mapItems){
-            switch (mapItem.getType()){
+    private void setMapZoomLocation() {
+        String action = getIntent().getAction();
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        Criteria criteria = new Criteria();
+        switch (action) {
+
+            case AppConstants.ACTION_CURRENT_LOCATION:
+                @SuppressLint("MissingPermission")
+                Location location = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
+                if (location != null) {
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 13));
+
+                    CameraPosition cameraPosition = new CameraPosition.Builder()
+                            .target(new LatLng(location.getLatitude(), location.getLongitude()))      // Sets the center of the map to location user
+                            .zoom(17)                   // Sets the zoom
+                            .build();                   // Creates a CameraPosition from the builder
+                    mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                }
+                break;
+            case AppConstants.ACTION_USER_LOCATION:
+                String username = getIntent().getStringExtra(Intent.EXTRA_USER);
+
+                LatLng coordinates = Repository.getInstance().requestUserLocation(username);
+                location = new Location(locationManager.getBestProvider(criteria, false));
+
+                if (coordinates != null) {
+                    location.setLatitude(coordinates.latitude);
+                    location.setLongitude(coordinates.longitude);
+                }else{
+                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+                    dialogBuilder.setTitle("No data")
+                            .setMessage("Don't have data about this user ...")
+                            .setIcon(android.R.drawable.ic_dialog_info)
+                            .setPositiveButton("OK", null);
+                    AlertDialog alertDialog = dialogBuilder.create();
+                    alertDialog.show();
+                }
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 13));
+
+                CameraPosition cameraPosition = new CameraPosition.Builder()
+                        .target(new LatLng(location.getLatitude(), location.getLongitude()))      // Sets the center of the map to location user
+                        .zoom(17)                   // Sets the zoom
+                        .build();                   // Creates a CameraPosition from the builder
+                mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                break;
+        }
+    }
+
+    private void populateMap(List<MapItem> mapItems) {
+        for (MapItem mapItem : mapItems) {
+            switch (mapItem.getType()) {
                 case "MARKER":
                     MarkerOptions markerOptions = new MarkerOptions();
                     markerOptions.position(new LatLng(mapItem.getCoordinates().get(0).latitude, mapItem.getCoordinates().get(0).longitude));
@@ -302,7 +357,9 @@ public class AdminMapsActivity extends AppCompatActivity
         }
     }
 
-    /** saving*/
+    /**
+     * saving
+     */
     public void onTextViewClicked(View view) {
         binding.buttonLayout.setVisibility(View.VISIBLE);
         binding.currentTaskTextView.setVisibility(View.GONE);
@@ -347,6 +404,8 @@ public class AdminMapsActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
+        if(!isModified)
+            super.onBackPressed();
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("You are about to exit!")
                 .setMessage("Do you want to save the modified map?")
@@ -396,24 +455,36 @@ public class AdminMapsActivity extends AppCompatActivity
 
     @Override
     public void editedMap(String id, MapItem mapItem) {
+        isModified = true;
         mapItemHashMap.remove(id);
         mapItemHashMap.put(id, mapItem);
-        if(mapItem instanceof Zone){
+        if (mapItem instanceof Zone) {
             ((Zone) mapItem).getPolygon().setFillColor(ColorHelper.adjustPolygonBackground(mapItem.getColor()));
             ((Zone) mapItem).getPolygon().setStrokeColor(mapItem.getColor());
         }
-        if(mapItem instanceof  Path){
+        if (mapItem instanceof Path) {
             ((Path) mapItem).getPolyline().setColor(mapItem.getColor());
         }
     }
 
     @Override
-    public void cancelEdit() {
-
+    public void  onDelete(String id, MapItem mapItem) {
+        isModified = true;
+        mapItemHashMap.remove(id);
+        if(mapItem instanceof Zone){
+            ((Zone) mapItem).getPolygon().remove();
+        }
+        if(mapItem instanceof Path){
+            ((Path) mapItem).getPolyline().remove();
+        }
+        if(mapItem instanceof Mark){
+            ((Mark) mapItem).getMarker().remove();
+        }
     }
 
     @Override
     public void saveMap(String name, String description, int color) {
+        isModified = true;
         if (isPath) {
             isPath = !isPath;
             currentPolyline.setColor(color);
