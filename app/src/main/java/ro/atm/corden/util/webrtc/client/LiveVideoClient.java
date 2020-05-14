@@ -84,7 +84,7 @@ public class LiveVideoClient extends Client {
                 videoCapturer = CameraSelector.createCameraCapturer(new Camera1Enumerator(false));
                 Log.e(TAG, "UNKNOWN CAMERA TYPE!");
         }
-
+        Log.e("TATAG", String.format("width %s; height %s", width, height));
         //Create MediaConstraints - Will be useful for specifying video and audio constraints.
         audioConstraints = new MediaConstraints();
         videoConstraints = new MediaConstraints();

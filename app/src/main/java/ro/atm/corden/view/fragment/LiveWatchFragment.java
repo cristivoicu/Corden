@@ -71,6 +71,12 @@ public class LiveWatchFragment extends Fragment
         }
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+        mWatchSession.leaveLiveSession();
+    }
+
     private void initVideos() {
         mEglBase = EglBase.create();
         mBinding.localView.init(mEglBase.getEglBaseContext(), null);

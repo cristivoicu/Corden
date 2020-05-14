@@ -12,6 +12,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -115,13 +116,17 @@ public class VideoListFragment extends Fragment {
             FragmentManager fragmentManager = getParentFragmentManager();
             FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
             PlayerFragment playerFragment = new PlayerFragment();
+
             Bundle videoBundle = new Bundle();
-            ;
+
             videoBundle.putSerializable(AppConstants.GET_VIDEO, video);
             playerFragment.setArguments(videoBundle);
             fragmentTransaction.addToBackStack("videoList");
             fragmentTransaction.hide(VideoListFragment.this);
             fragmentTransaction.add(R.id.frameLayout, playerFragment);
+
+
+
             fragmentTransaction.commit();
 
         });

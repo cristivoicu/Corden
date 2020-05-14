@@ -121,6 +121,12 @@ public class PlayerFragment extends Fragment implements MediaListener.PlaybackLi
         }
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+        playbackSession.leavePlaybackSession();
+    }
+
     private void initVideos() {
         rootEglBase = EglBase.create();
         binding.remoteView.init(rootEglBase.getEglBaseContext(), null);

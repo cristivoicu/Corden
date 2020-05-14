@@ -20,8 +20,10 @@ import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 
+import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 
@@ -91,7 +93,7 @@ public class SignallingClient {
                 trustStore.load(caCert, "parola".toCharArray());
 
                 /*TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-                trustManagerFactory.init(trustStore);
+                trustManagerFactory.init(trustStore);*/
 
                 InputStream clientCert = context.getResources().openRawResource(R.raw.androidclient);
                 KeyStore keyStore = KeyStore.getInstance(keyStoreType);
@@ -100,7 +102,7 @@ public class SignallingClient {
                 // initialize key manager factory with the read client certificate
                 KeyManagerFactory keyManagerFactory = null;
                 keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-                keyManagerFactory.init(keyStore, "parola".toCharArray());*/
+                keyManagerFactory.init(keyStore, "parola".toCharArray());
 
                 // Create a TrustManager that trusts the CAs in our KeyStore
                 String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
@@ -108,14 +110,15 @@ public class SignallingClient {
                 tmf.init(trustStore);
 
                 SSLContext sslContext = SSLContext.getInstance("TLS");
-                sslContext.init(null, tmf.getTrustManagers(), null);
+                sslContext.init(keyManagerFactory.getKeyManagers(), tmf.getTrustManagers(), null);
+
 
                 webSocket = new WebSocket(uri, context.getApplicationContext());
                 webSocket.setConnectionLostTimeout(0);
 
                 webSocket.setSocketFactory(sslContext.getSocketFactory());
 
-            } catch (NoSuchAlgorithmException | /*UnrecoverableKeyException |*/ IOException | CertificateException | KeyStoreException | KeyManagementException e) {
+            } catch (NoSuchAlgorithmException | UnrecoverableKeyException | IOException | CertificateException | KeyStoreException | KeyManagementException e) {
                 e.printStackTrace();
             }
 
