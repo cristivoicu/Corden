@@ -72,12 +72,12 @@ public class Repository {
         }
     }
 
-    public void requestLiveLocation(){
+    public void requestLiveLocation() {
         RequestLiveLocationsAsyncTask requestLiveLocationsAsyncTask = new RequestLiveLocationsAsyncTask();
         requestLiveLocationsAsyncTask.execute();
     }
 
-    public LatLng requestUserLocation(String username){
+    public LatLng requestUserLocation(String username) {
         RequestLiveLocationAsyncTask requestLiveLocationAsyncTask = new RequestLiveLocationAsyncTask();
 
         try {
@@ -109,7 +109,7 @@ public class Repository {
         }
     }
 
-    public List<MapItem> requestMapItems(){
+    public List<MapItem> requestMapItems() {
         RequestMapItemsAsyncTask requestMapItemsAsyncTask = new RequestMapItemsAsyncTask();
         try {
             return requestMapItemsAsyncTask.execute().get();
@@ -247,9 +247,10 @@ public class Repository {
         protected List<Video> doInBackground(String... data) {
             try {
                 Message.RequestMessageBuilder message = new Message.RequestMessageBuilder()
-                        .addEvent(RequestEventTypes.RECORDED_VIDEOS)
-                        .addUser(data[0]);
-                if(data[1] != null) {
+                        .addEvent(RequestEventTypes.RECORDED_VIDEOS);
+                if (data[0] != null)
+                    message.addUser(data[0]);
+                if (data[1] != null) {
                     message.addDate(data[1]);
                 }
 
@@ -343,7 +344,7 @@ public class Repository {
         }
     }
 
-    private static class RequestMapItemsAsyncTask extends AsyncTask<Void, Void, List<MapItem>>{
+    private static class RequestMapItemsAsyncTask extends AsyncTask<Void, Void, List<MapItem>> {
 
         @Override
         protected List<MapItem> doInBackground(Void... voids) {
@@ -358,7 +359,7 @@ public class Repository {
             signallingClient.webSocket.conditionVariable = new ConditionVariable(false);
             signallingClient.webSocket.conditionVariable.block();
 
-            if(signallingClient.webSocket.mapItems != null){
+            if (signallingClient.webSocket.mapItems != null) {
                 return signallingClient.webSocket.mapItems;
             }
 
@@ -400,7 +401,7 @@ public class Repository {
         }
     }
 
-    private static class RequestLiveLocationsAsyncTask extends AsyncTask<Void, Void, Void>{
+    private static class RequestLiveLocationsAsyncTask extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected Void doInBackground(Void... voids) {
@@ -412,7 +413,7 @@ public class Repository {
         }
     }
 
-    private static class RequestLiveLocationAsyncTask extends AsyncTask<String, Void, LatLng>{
+    private static class RequestLiveLocationAsyncTask extends AsyncTask<String, Void, LatLng> {
 
         @Override
         protected LatLng doInBackground(String... username) {

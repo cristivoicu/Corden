@@ -6,6 +6,8 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -14,6 +16,7 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import ro.atm.corden.R;
@@ -22,8 +25,10 @@ import ro.atm.corden.model.user.Status;
 import ro.atm.corden.model.user.User;
 import ro.atm.corden.util.websocket.Repository;
 
-public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserHolder> {
-    final private List<User> users = new ArrayList<>();
+public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserHolder>
+        implements Filterable {
+    final private List<User> users = new LinkedList<>();
+    private List<User> allUsers;
     private OnItemClickListener listener;
 
     private int mPosition;
@@ -31,6 +36,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserHolder> {
     public void setUsers(List<User> users) {
         this.users.clear();
         this.users.addAll(users);
+        allUsers = new LinkedList<>(users);
         notifyDataSetChanged();
     }
 
@@ -41,20 +47,29 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserHolder> {
                 break;
             }
         }
+        for (User user : allUsers) {
+            if (user.getUsername().equals(username)) {
+                user.setStatus(newStatus.name());
+                break;
+            }
+        }
         notifyDataSetChanged();
     }
 
     public void updateStatusOnOnlineActivity(String username, Status newStatus) {
-        if(newStatus.equals(Status.ONLINE)){
+        if (newStatus.equals(Status.ONLINE)) {
             User newUser = Repository.getInstance().requestUserData(username);
             this.users.add(newUser);
+            this.allUsers.add(newUser);
             notifyDataSetChanged();
             return;
         }
         for (User user : this.users) {
             if (user.getUsername().equals(username)) {
-                if(newStatus.equals(Status.OFFLINE))
+                if (newStatus.equals(Status.OFFLINE)) {
                     this.users.remove(user);
+                    this.allUsers.remove(user);
+                }
                 break;
             }
         }
@@ -67,6 +82,12 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserHolder> {
             if (user.getUsername().equals(modifiedUser.getUsername())) {
                 found = true;
                 users.remove(user);
+                break;
+            }
+        }
+        for (User user : allUsers) {
+            if (user.getUsername().equals(modifiedUser.getUsername())) {
+                allUsers.remove(user);
                 break;
             }
         }
@@ -129,6 +150,38 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserHolder> {
         this.mPosition = mPosition;
     }
 
+    @Override
+    public Filter getFilter() {
+        return userFilter;
+    }
+
+    private Filter userFilter = new Filter() {
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            List<User> filtredList = new ArrayList<>();
+            if (constraint == null || constraint.length() == 0) {
+                filtredList.addAll(allUsers);
+            } else {
+                String filterPattern = constraint.toString().toLowerCase().trim();
+                for (User user : allUsers) {
+                    if (user.getName().toLowerCase().contains(filterPattern)) {
+                        filtredList.add(user);
+                    }
+                }
+            }
+            FilterResults results = new FilterResults();
+            results.values = filtredList;
+            return results;
+        }
+
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            users.clear();
+            users.addAll((List) results.values);
+            notifyDataSetChanged();
+        }
+    };
+
     class UserHolder extends RecyclerView.ViewHolder implements View.OnCreateContextMenuListener {
         private TextView name;
         private TextView username;
@@ -160,6 +213,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserHolder> {
             menu.add(Menu.NONE, R.id.ctx_notifyStream, Menu.NONE, "Notify to start stream");
         }
     }
+
 
     public interface OnItemClickListener {
         void onItemClick(User user);

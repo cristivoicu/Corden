@@ -50,8 +50,8 @@ public class UserTimelineActivity extends AppCompatActivity {
                         new DatePickerDialog.OnDateSetListener() {
                             @Override
                             public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                                String date = String.format("%s-%s-%s", year, monthOfYear + 1, dayOfMonth);
-                                getSupportActionBar().setSubtitle("On " + date);
+                                String date = String.format("%s-%s-%s", dayOfMonth, monthOfYear + 1, year);
+                                binding.selectedDate.setText(String.format("On %s", date));
                                 viewModel.setActions(username, date);
                             }
                         }, year, month, day);
@@ -79,7 +79,7 @@ public class UserTimelineActivity extends AppCompatActivity {
 
         setSupportActionBar(binding.toolbar);
         getSupportActionBar().setTitle("User timeline");
-        getSupportActionBar().setSubtitle("On " + new SimpleDateFormat("YYYY-MM-dd").format(new Date()));
+        binding.selectedDate.setText(String.format("On %s", new SimpleDateFormat("dd-MM-YYYY").format(new Date())));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 

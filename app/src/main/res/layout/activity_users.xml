@@ -25,6 +25,7 @@
             app:titleTextColor="@color/colorWhile"
             app:title="All users"
             app:titleMarginStart="30dp"/>
+
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/swipeRefreshLayout"
             android:layout_width="match_parent"

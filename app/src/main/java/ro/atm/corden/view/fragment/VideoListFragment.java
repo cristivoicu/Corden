@@ -97,11 +97,9 @@ public class VideoListFragment extends Fragment implements SwipeRefreshLayout.On
         binding.videosList.setHasFixedSize(true);
 
         mUsername = getArguments().getString(AppConstants.GET_USERNAME);
-        if (mUsername != null) {
-            viewModel.setVideos(mUsername);
-        }
+        viewModel.setVideos(mUsername);
 
-        final VideoAdapter videoAdapter = new VideoAdapter();
+        final VideoAdapter videoAdapter = new VideoAdapter(mUsername == null);
         binding.videosList.setAdapter(videoAdapter);
 
         viewModel.getVideos().observe(getViewLifecycleOwner(), videos -> {

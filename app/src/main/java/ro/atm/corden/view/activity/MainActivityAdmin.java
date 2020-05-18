@@ -82,17 +82,17 @@ public class MainActivityAdmin extends AppCompatActivity {
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
                 switch (newState) {
                     case BottomSheetBehavior.STATE_COLLAPSED:
-                        Log.d("bottomsheet","Collapsed");
+                        Log.d("bottomsheet", "Collapsed");
                         break;
                     case BottomSheetBehavior.STATE_DRAGGING:
-                        Log.d("bottomsheet","Dragging...");
+                        Log.d("bottomsheet", "Dragging...");
                         break;
                     case BottomSheetBehavior.STATE_EXPANDED:
-                        Log.d("bottomsheet","Expanded");
+                        Log.d("bottomsheet", "Expanded");
 
                         break;
                     case BottomSheetBehavior.STATE_HIDDEN:
-                        Log.d("bottomsheet","Hidden");
+                        Log.d("bottomsheet", "Hidden");
                         break;
                     case BottomSheetBehavior.STATE_SETTLING:
                         Log.d("bottomsheet", "Settling...");
@@ -180,8 +180,14 @@ public class MainActivityAdmin extends AppCompatActivity {
         picker.show();
     }
 
+    public void onRecordedVideosClicked(View view) {
+        Intent intent = new Intent(this, VideoListActivity.class);
+        startActivity(intent);
+    }
+
     @Override
     public void onBackPressed() {
 
     }
+
 }

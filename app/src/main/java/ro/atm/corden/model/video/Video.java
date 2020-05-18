@@ -9,9 +9,10 @@ public class Video implements Serializable {
 
     }
 
-    public Video(String name, Date date) {
+    public Video(String name, Date date, String username) {
         this.name = name;
         this.date = date;
+        this.username = username;
     }
     //endregion
 
@@ -19,6 +20,7 @@ public class Video implements Serializable {
     private Long id;
     private String name;
     private Date date;
+    private String username;
     //endregion
     // region Getters and setters
     public Long getId() {
@@ -40,5 +42,14 @@ public class Video implements Serializable {
     public void setDate(Date date) {
         this.date = date;
     }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
     //endregion
 }

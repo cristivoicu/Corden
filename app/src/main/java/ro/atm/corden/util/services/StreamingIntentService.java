@@ -36,6 +36,7 @@ import ro.atm.corden.util.websocket.callback.MediaListener;
 import ro.atm.corden.view.activity.MainActivityUser;
 
 import static org.webrtc.RendererCommon.ScalingType.SCALE_ASPECT_FILL;
+import static org.webrtc.RendererCommon.ScalingType.SCALE_ASPECT_FIT;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -69,11 +70,22 @@ public class StreamingIntentService extends IntentService implements MediaListen
 
     EglBase rootEglBase;
 
+    private SurfaceViewRenderer mSurfaceView = null;
+
     public StreamingIntentService() {
         super("StreamingIntentService");
         //setIntentRedelivery(true);
     }
 
+    public StreamingIntentService(SurfaceViewRenderer surfaceViewRenderer){
+        super("StreamingIntentService");
+        mSurfaceView = surfaceViewRenderer;
+        mSurfaceView.init(rootEglBase.getEglBaseContext(), null);
+        mSurfaceView.setZOrderMediaOverlay(true);
+        mSurfaceView.setMirror(true);
+        mSurfaceView.setScalingType(SCALE_ASPECT_FIT);
+        isInited = true;
+    }
 
     @Nullable
     @Override
@@ -196,7 +208,7 @@ public class StreamingIntentService extends IntentService implements MediaListen
             localVideoView.init(rootEglBase.getEglBaseContext(), null);
             localVideoView.setZOrderMediaOverlay(true);
             localVideoView.setMirror(true);
-            localVideoView.setScalingType(SCALE_ASPECT_FILL);
+            localVideoView.setScalingType(SCALE_ASPECT_FIT);
             isInited = true;
         }
 

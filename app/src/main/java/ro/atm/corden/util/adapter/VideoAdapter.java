@@ -21,6 +21,12 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoHolder>
     private List<Video> videos = new ArrayList<>();
     private OnItemClickListener listener;
 
+    private boolean isAllUsers;
+
+    public VideoAdapter(boolean isAllUsers) {
+        this.isAllUsers = isAllUsers;
+    }
+
     public void setVideos(List<Video> videos){
         this.videos = videos;
         notifyDataSetChanged();
@@ -38,6 +44,10 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoHolder>
         Video currentVideo = videos.get(position);
         holder.date.setText(dateFormat.format(currentVideo.getDate()));
         holder.duration.setText(String.format("at %s", timeFormat.format(currentVideo.getDate())));
+        if(isAllUsers) {
+            holder.username.setVisibility(View.VISIBLE);
+            holder.username.setText(currentVideo.getUsername());
+        }
     }
 
     @Override
@@ -48,12 +58,13 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.VideoHolder>
     class VideoHolder extends RecyclerView.ViewHolder{
         private TextView date;
         private TextView duration;
-        private TextView location;
+        private TextView username;
 
         public VideoHolder(@NonNull View itemView) {
             super(itemView);
             date = itemView.findViewById(R.id.date);
             duration = itemView.findViewById(R.id.duration);
+            username = itemView.findViewById(R.id.username);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
