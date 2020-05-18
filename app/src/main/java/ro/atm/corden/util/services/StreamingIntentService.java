@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.PowerManager;
+import android.renderscript.RenderScript;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -23,6 +24,7 @@ import org.webrtc.IceCandidate;
 import org.webrtc.MediaStream;
 import org.webrtc.SurfaceViewRenderer;
 
+import ro.atm.corden.R;
 import ro.atm.corden.util.App;
 import ro.atm.corden.util.constant.AppConstants;
 import ro.atm.corden.util.exception.websocket.UserNotLoggedInException;
@@ -89,14 +91,15 @@ public class StreamingIntentService extends IntentService implements MediaListen
         wakeLock.acquire(600000); //wake for maximum 10 minutes when user turns off the screen, bc it drain battery
 
         Intent intent = new Intent(this, MainActivityUser.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        //intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
 
         Notification notification = new NotificationCompat.Builder(this, App.STREAM_CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_videocam)
                 .setContentTitle("Streaming is live!")
                 .setContentText("You are sending video stream to the media server")
                 .setContentIntent(pendingIntent)
-                .setOngoing(true)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .build();
 
         startForeground(15, notification);

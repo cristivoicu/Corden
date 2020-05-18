@@ -84,7 +84,7 @@ public class LiveVideoClient extends Client {
                 videoCapturer = CameraSelector.createCameraCapturer(new Camera1Enumerator(false));
                 Log.e(TAG, "UNKNOWN CAMERA TYPE!");
         }
-        Log.e("TATAG", String.format("width %s; height %s", width, height));
+
         //Create MediaConstraints - Will be useful for specifying video and audio constraints.
         audioConstraints = new MediaConstraints();
         videoConstraints = new MediaConstraints();
@@ -107,7 +107,7 @@ public class LiveVideoClient extends Client {
 
         if (videoCapturer != null) {
             // videoCapturer.startCapture(1280, 720, 30);
-            videoCapturer.startCapture(UVCCamera.DEFAULT_PREVIEW_WIDTH, UVCCamera.DEFAULT_PREVIEW_HEIGHT, 30); // by default, max in full hd
+            videoCapturer.startCapture(width, height, 30);
         }
     }
 

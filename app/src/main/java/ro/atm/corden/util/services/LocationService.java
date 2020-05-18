@@ -82,10 +82,10 @@ public class LocationService extends Service {
             saveUserLocation(location);
 
         Notification notification = new NotificationCompat.Builder(this, App.LOCATION_CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_location)
                 .setContentTitle("Sending live location")
                 .setContentText("You are sending live location to the application server")
                 .setPriority(NotificationCompat.PRIORITY_LOW)
-                .setAutoCancel(true)
                 .build();
 
         startForeground(2, notification);
