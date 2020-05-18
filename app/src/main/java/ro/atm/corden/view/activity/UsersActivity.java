@@ -6,6 +6,7 @@ import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -28,7 +29,7 @@ import ro.atm.corden.util.websocket.subscribers.UserSubscriber;
 import ro.atm.corden.viewmodel.UsersViewModel;
 
 public class UsersActivity extends AppCompatActivity
-        implements UserSubscriber {
+        implements UserSubscriber, SwipeRefreshLayout.OnRefreshListener {
 
     private ActivityUsersBinding binding;
     private UsersViewModel viewModel;
@@ -73,7 +74,7 @@ public class UsersActivity extends AppCompatActivity
                 startActivity(intent);
             }
         });
-
+        binding.swipeRefreshLayout.setOnRefreshListener(this);
         registerForContextMenu(binding.usersList);
     }
 
@@ -184,5 +185,16 @@ public class UsersActivity extends AppCompatActivity
                 break;
         }
         return super.onContextItemSelected(item);
+    }
+
+    @Override
+    public void onRefresh() {
+        viewModel.setAllUsers();
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                binding.swipeRefreshLayout.setRefreshing(false);
+            }
+        }, 2000);
     }
 }

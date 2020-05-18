@@ -11,7 +11,9 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.os.Handler;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -34,7 +36,7 @@ import ro.atm.corden.viewmodel.VideoListViewModel;
 /**
  *
  */
-public class VideoListFragment extends Fragment {
+public class VideoListFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
     private FragmentVideoListBinding binding;
     private VideoListViewModel viewModel;
 
@@ -111,6 +113,8 @@ public class VideoListFragment extends Fragment {
             }
         });
 
+        binding.swipeRefreshLayout.setOnRefreshListener(this);
+
         videoAdapter.setOnItemClickListener(video -> {
 
             FragmentManager fragmentManager = getParentFragmentManager();
@@ -132,5 +136,16 @@ public class VideoListFragment extends Fragment {
         });
 
         return binding.getRoot();
+    }
+
+    @Override
+    public void onRefresh() {
+        viewModel.setVideos(mUsername);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                binding.swipeRefreshLayout.setRefreshing(false);
+            }
+        }, 2000);
     }
 }
