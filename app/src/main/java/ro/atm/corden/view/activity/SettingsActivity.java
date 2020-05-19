@@ -22,8 +22,6 @@ import ro.atm.corden.databinding.ActivitySettingsBinding;
 
 public class SettingsActivity extends AppCompatActivity {
     private ActivitySettingsBinding mBinding;
-    private List<CameraEnumerationAndroid.CaptureFormat> mFrontCameraFormats;
-    private List<CameraEnumerationAndroid.CaptureFormat> mBackCameraFormats;
 
     List<String> adapterFrontSpinner;
     List<String> adapterBackSpinner;
@@ -50,33 +48,11 @@ public class SettingsActivity extends AppCompatActivity {
     private void setAdapterForSpinner() {
         // find resolution list for build in camera
         Camera2Enumerator enumerator = new Camera2Enumerator(this);
-        mFrontCameraFormats = enumerator.getSupportedFormats("0");
-        mBackCameraFormats = enumerator.getSupportedFormats("1");
 
         adapterFrontSpinner = new ArrayList<>();
         adapterBackSpinner = new ArrayList<>();
 
         SharedPreferences sharedPreferences = this.getSharedPreferences(getString(R.string.settingSharedPreferences), Context.MODE_PRIVATE);
-        /*int heightFront = Integer.parseInt(sharedPreferences.getString(getString(R.string.frontCameraHeight), "0"));
-        int widthFront = Integer.parseInt(sharedPreferences.getString(getString(R.string.frontCameraWidth), "0"));
-        int positionFront = -1;
-
-        int heightBack = Integer.parseInt(sharedPreferences.getString(getString(R.string.backCameraHeight), "0"));
-        int widthBack = Integer.parseInt(sharedPreferences.getString(getString(R.string.backCameraWidth), "0"));
-        int positionBack = -1;
-
-        for (CameraEnumerationAndroid.CaptureFormat captureFormat : mFrontCameraFormats) {
-            adapterFrontSpinner.add(String.format("%s x %s", captureFormat.width, captureFormat.height));
-            if(captureFormat.width == widthFront && captureFormat.height == heightFront){
-                positionFront = mFrontCameraFormats.indexOf(captureFormat);
-            }
-        }
-        for (CameraEnumerationAndroid.CaptureFormat captureFormat : mBackCameraFormats) {
-            adapterBackSpinner.add(String.format("%s x %s", captureFormat.width, captureFormat.height));
-            if(captureFormat.width == widthBack && captureFormat.height == heightBack){
-                positionBack = mFrontCameraFormats.indexOf(captureFormat);
-            }
-        }*/
 
         String frontQuality = sharedPreferences.getString(getString(R.string.frontCameraQuality), "");
         String backQuality = sharedPreferences.getString(getString(R.string.backCameraQuality), "");
@@ -91,10 +67,10 @@ public class SettingsActivity extends AppCompatActivity {
         adapterFrontSpinner.add("Medium quality");
         adapterFrontSpinner.add("Low quality");
 
-        ArrayAdapter arrayFrontAdapter = new ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, adapterFrontSpinner);
+        ArrayAdapter arrayFrontAdapter = new ArrayAdapter(this, R.layout.item_spinner, adapterFrontSpinner);
         arrayFrontAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
-        ArrayAdapter arrayBackAdapter = new ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, adapterBackSpinner);
+        ArrayAdapter arrayBackAdapter = new ArrayAdapter(this, R.layout.item_spinner, adapterBackSpinner);
         arrayBackAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         mBinding.backResolutions.setAdapter(arrayBackAdapter);
@@ -145,10 +121,6 @@ public class SettingsActivity extends AppCompatActivity {
         mBinding.frontResolutions.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                /*CameraEnumerationAndroid.CaptureFormat captureFormat = mFrontCameraFormats.get(position);
-                sharedPref.putString(getString(R.string.frontCameraHeight), String.valueOf(captureFormat.height));
-                sharedPref.putString(getString(R.string.frontCameraWidth), String.valueOf(captureFormat.width));*/
-
                 sharedPref.putString(getString(R.string.frontCameraQuality), adapterFrontSpinner.get(position));
                 sharedPref.commit();
             }
@@ -162,10 +134,6 @@ public class SettingsActivity extends AppCompatActivity {
         mBinding.backResolutions.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                /*CameraEnumerationAndroid.CaptureFormat captureFormat = mBackCameraFormats.get(position);
-                sharedPref.putString(getString(R.string.backCameraHeight), String.valueOf(captureFormat.height));
-                sharedPref.putString(getString(R.string.backCameraWidth), String.valueOf(captureFormat.width));*/
-
                 sharedPref.putString(getString(R.string.backCameraQuality), adapterBackSpinner.get(position));
                 sharedPref.commit();
             }

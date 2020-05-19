@@ -93,20 +93,22 @@
                             app:layout_constraintGuide_percent="0.5" />
 
                         <TextView
+                            android:id="@+id/textView"
                             style="@style/textView_adminBoard"
+                            android:layout_marginTop="8dp"
                             android:text="Active users"
-                            app:layout_constraintBottom_toTopOf="@+id/guideline4"
                             app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent" />
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="@+id/guideline4" />
 
                         <androidx.appcompat.widget.AppCompatImageView
                             android:layout_width="35dp"
                             android:layout_height="35dp"
-                            android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp"
                             android:src="@drawable/ic_guardian"
+                            app:layout_constraintBottom_toTopOf="@+id/guideline4"
                             app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="@+id/guideline4" />
+                            app:layout_constraintStart_toStartOf="parent" />
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
                 </androidx.cardview.widget.CardView>
@@ -133,20 +135,23 @@
                             app:layout_constraintGuide_percent="0.5" />
 
                         <TextView
+                            android:id="@+id/textView3"
                             style="@style/textView_adminBoard"
+                            android:layout_marginTop="8dp"
                             android:text="All users"
-                            app:layout_constraintBottom_toTopOf="@+id/guideline5"
                             app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent" />
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="@+id/guideline5" />
 
                         <ImageView
                             android:layout_width="35dp"
                             android:layout_height="35dp"
-                            android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp"
                             android:src="@drawable/ic_user"
+                            app:layout_constraintBottom_toTopOf="@+id/guideline5"
                             app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="@+id/guideline5" />
+                            app:layout_constraintHorizontal_bias="0.503"
+                            app:layout_constraintStart_toStartOf="parent" />
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
                 </androidx.cardview.widget.CardView>
@@ -173,20 +178,24 @@
                             app:layout_constraintGuide_percent="0.5" />
 
                         <TextView
+                            android:id="@+id/textView4"
                             style="@style/textView_adminBoard"
-                            android:text="Recorded videos"
-                            app:layout_constraintBottom_toTopOf="@+id/guideline6"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent" />
-
-                        <ImageView
-                            android:layout_width="35dp"
-                            android:layout_height="35dp"
                             android:layout_marginTop="8dp"
-                            android:src="@drawable/ic_ondemand_video_black_24dp"
+                            android:text="Recorded videos"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="@+id/guideline6" />
+
+                        <ImageView
+                            android:id="@+id/imageView3"
+                            android:layout_width="0dp"
+                            android:layout_height="35dp"
+                            android:layout_marginBottom="8dp"
+                            android:src="@drawable/ic_ondemand_video_black_24dp"
+                            app:layout_constraintBottom_toTopOf="@+id/guideline6"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintHorizontal_bias="0.503"
+                            app:layout_constraintStart_toStartOf="parent" />
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
                 </androidx.cardview.widget.CardView>
@@ -213,20 +222,22 @@
                             app:layout_constraintGuide_percent="0.5" />
 
                         <TextView
+                            android:id="@+id/textView5"
                             style="@style/textView_adminBoard"
+                            android:layout_marginTop="8dp"
                             android:text="Create account"
-                            app:layout_constraintBottom_toTopOf="@+id/guideline7"
                             app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent" />
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="@+id/guideline7" />
 
                         <ImageView
                             android:layout_width="35dp"
                             android:layout_height="35dp"
-                            android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp"
                             android:src="@drawable/ic_add_user"
+                            app:layout_constraintBottom_toTopOf="@+id/guideline7"
                             app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent"
-                            app:layout_constraintTop_toTopOf="@+id/guideline7" />
+                            app:layout_constraintStart_toStartOf="parent" />
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
                 </androidx.cardview.widget.CardView>
@@ -253,19 +264,21 @@
 
                         <TextView
                             style="@style/textView_adminBoard"
-                            android:text="Live video"
-                            app:layout_constraintBottom_toTopOf="@+id/guideline9"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent" />
-
-                        <ImageView
-                            android:layout_width="35dp"
-                            android:layout_height="35dp"
                             android:layout_marginTop="8dp"
-                            android:src="@drawable/ic_live"
+                            android:text="Live video"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="@+id/guideline9" />
+
+                        <ImageView
+                            android:id="@+id/imageView4"
+                            android:layout_width="35dp"
+                            android:layout_height="35dp"
+                            android:layout_marginBottom="8dp"
+                            android:src="@drawable/ic_live"
+                            app:layout_constraintBottom_toTopOf="@+id/guideline9"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent" />
                     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
@@ -293,19 +306,21 @@
 
                         <TextView
                             style="@style/textView_adminBoard"
-                            android:text="Locations"
-                            app:layout_constraintBottom_toTopOf="@+id/guideline10"
-                            app:layout_constraintEnd_toEndOf="parent"
-                            app:layout_constraintStart_toStartOf="parent" />
-
-                        <ImageView
-                            android:layout_width="35dp"
-                            android:layout_height="35dp"
                             android:layout_marginTop="8dp"
-                            android:src="@drawable/ic_map"
+                            android:text="Locations"
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toTopOf="@+id/guideline10" />
+
+                        <ImageView
+                            android:id="@+id/imageView5"
+                            android:layout_width="35dp"
+                            android:layout_height="35dp"
+                            android:layout_marginBottom="8dp"
+                            android:src="@drawable/ic_map"
+                            app:layout_constraintBottom_toTopOf="@+id/guideline10"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent" />
                     </androidx.constraintlayout.widget.ConstraintLayout>
 
 

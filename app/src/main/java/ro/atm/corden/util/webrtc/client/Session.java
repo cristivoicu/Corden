@@ -114,6 +114,14 @@ public class Session {
         return ((LiveVideoClient) client).getVideoCapturer();
     }
 
+    public void leaveLiveWatchSession(){
+        ((LiveWatcherClient) client).dispose();
+        if(peerConnectionFactory != null){
+            peerConnectionFactory.dispose();
+            peerConnectionFactory = null;
+        }
+    }
+
     public void leaveLiveSession() {
         ((LiveVideoClient) client).dispose();
         if (peerConnectionFactory != null) {
