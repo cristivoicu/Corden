@@ -71,11 +71,44 @@ public class LiveVideoClient extends Client {
                 videoCapturer = CameraSelector.getBackCamera(new Camera2Enumerator(context));
                 width = Integer.parseInt(sharedPreferences.getString(context.getString(R.string.backCameraWidth), "640"));
                 height = Integer.parseInt(sharedPreferences.getString(context.getString(R.string.backCameraHeight), "480"));
+                String quality = sharedPreferences.getString(context.getString(R.string.backCameraQuality), "Medium quality");
+                switch (quality) {
+                    case "High quality":
+                        width = 1920;
+                        height = 1080;
+                        break;
+                    case "Medium quality":
+                        width = 1280;
+                        height = 720;
+                        break;
+                    case "Low quality":
+                        width = 640;
+                        height = 480;
+                        ;
+                        break;
+
+                }
                 break;
             case FRONT:
                 videoCapturer = CameraSelector.getFrontCamera(new Camera2Enumerator(context));
                 width = Integer.parseInt(sharedPreferences.getString(context.getString(R.string.frontCameraWidth), "640"));
                 height = Integer.parseInt(sharedPreferences.getString(context.getString(R.string.frontCameraHeight), "480"));
+
+                quality = sharedPreferences.getString(context.getString(R.string.frontCameraQuality), "Medium quality");
+                switch (quality) {
+                    case "High quality":
+                        width = 1920;
+                        height = 1080;
+                        break;
+                    case "Medium quality":
+                        width = 1280;
+                        height = 720;
+                        break;
+                    case "Low quality":
+                        width = 640;
+                        height = 480;
+                        break;
+                }
                 break;
             case EXTERNAL:
                 videoCapturer = CameraSelector.getExternalCamera(context);

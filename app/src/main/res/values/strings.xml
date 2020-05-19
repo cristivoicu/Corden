@@ -46,4 +46,7 @@
     <string name="frontCameraHeight">frontCameraHeight</string>
     <string name="backCameraWidth">backCameraWidth</string>
     <string name="backCameraHeight">backCameraHeight</string>
+
+    <string name="frontCameraQuality">frontCameraQuality</string>
+    <string name="backCameraQuality">frontCameraQuality</string>
 </resources>

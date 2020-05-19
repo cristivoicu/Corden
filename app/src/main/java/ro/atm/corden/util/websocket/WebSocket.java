@@ -478,6 +478,9 @@ final class WebSocket extends WebSocketClient {
     @Override
     public void onClose(int code, String reason, boolean remote) {
         Log.e(TAG, String.format("onClose, reason %s, remote: %s, code: %d", reason, remote, code));
+        if (code == 1000){ // user logout
+            return;
+        }
         if (code == 1002) {
             Log.d(TAG, "onClose");
             loginListener.onLoginError();
