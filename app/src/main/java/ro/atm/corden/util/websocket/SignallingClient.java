@@ -27,6 +27,8 @@ import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 
+import de.adorsys.android.securestoragelibrary.SecurePreferences;
+import de.adorsys.android.securestoragelibrary.SecureStorageException;
 import ro.atm.corden.R;
 import ro.atm.corden.model.user.LoginUser;
 import ro.atm.corden.model.user.Role;
@@ -78,26 +80,24 @@ public class SignallingClient {
 
     public void initWebSociet(Context context) {
         try {
-            // uri = new URI("wss://192.168.8.100:8443/websocket"); // atunci cand e conectat prin stick
-            // URI uri = new URI("wss://100.113.143.54:8443/websocket"); // wifi acasa
             URI uri = new URI("wss://corden.go.ro:8443/websocket"); // wifi acasa
-            // URI uri = new URI("wss://192.168.43.228:8443/websocket"); // hotspot telefon
 
             try {
-                String keyStoreType = KeyStore.getDefaultType();
-                keyStoreType = "PKCS12";
-                KeyStore trustStore = KeyStore.getInstance(keyStoreType);
-                InputStream serverCert = context.getResources().openRawResource(R.raw.applicationserver);
-                InputStream caCert = context.getResources().openRawResource(R.raw.corden_ca);
-                // trustStore.load(serverCert, "parola".toCharArray());
-                trustStore.load(caCert, "parola".toCharArray());
+                /*SecurePreferences.setValue(context, "trustStorePass", "parola");
+                SecurePreferences.setValue(context, "keyStorePass", "parola");*/
 
-                /*TrustManagerFactory trustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-                trustManagerFactory.init(trustStore);*/
+                String trustPass = SecurePreferences.getStringValue(context, "trustStorePass", "");
+                String keyPass = SecurePreferences.getStringValue(context, "keyStorePass", "");
+
+                String keyStoreType = "PKCS12";
+                KeyStore trustStore = KeyStore.getInstance(keyStoreType);
+                //InputStream serverCert = context.getResources().openRawResource(R.raw.applicationserver);
+                InputStream caCert = context.getResources().openRawResource(R.raw.corden_ca);
+                trustStore.load(caCert, trustPass.toCharArray());
 
                 InputStream clientCert = context.getResources().openRawResource(R.raw.androidclient);
                 KeyStore keyStore = KeyStore.getInstance(keyStoreType);
-                keyStore.load(clientCert, "parola".toCharArray());
+                keyStore.load(clientCert,  keyPass.toCharArray());
 
                 // initialize key manager factory with the read client certificate
                 KeyManagerFactory keyManagerFactory = null;
@@ -120,7 +120,9 @@ public class SignallingClient {
 
             } catch (NoSuchAlgorithmException | UnrecoverableKeyException | IOException | CertificateException | KeyStoreException | KeyManagementException e) {
                 e.printStackTrace();
-            }
+            } /*catch (SecureStorageException e) {
+                e.printStackTrace();
+            }*/
 
         } catch (URISyntaxException e) {
             e.printStackTrace();

@@ -9,14 +9,12 @@ import org.webrtc.SurfaceTextureHelper;
 import org.webrtc.SurfaceViewRenderer;
 import org.webrtc.VideoCapturer;
 
-import ro.atm.corden.util.webrtc.usb_camera.UsbCapturer;
 
 /**
  * Static class for getting cameras
  */
 public class CameraSelector {
     private static final String TAG = "CameraControl";
-    private static UsbCapturer mUsbCapturer;
 
     public enum CameraType {
         BACK,
@@ -77,10 +75,5 @@ public class CameraSelector {
             }
         }
         return null;
-    }
-
-    static VideoCapturer getExternalCamera(Context context){
-        mUsbCapturer = new UsbCapturer(context);
-        return mUsbCapturer;
     }
 }

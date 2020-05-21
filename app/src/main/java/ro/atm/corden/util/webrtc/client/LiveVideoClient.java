@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import com.serenegiant.usb.UVCCamera;
 
 import org.webrtc.AudioSource;
 import org.webrtc.AudioTrack;
@@ -27,7 +26,6 @@ import ro.atm.corden.model.user.LoginUser;
 import ro.atm.corden.util.constant.JsonConstants;
 import ro.atm.corden.util.webrtc.interfaces.MediaActivity;
 import ro.atm.corden.util.webrtc.observer.SimpleSdpObserver;
-import ro.atm.corden.util.webrtc.usb_camera.UsbCapturer;
 import ro.atm.corden.util.websocket.SignallingClient;
 
 /**
@@ -69,8 +67,8 @@ public class LiveVideoClient extends Client {
         switch (cameraType) {
             case BACK:
                 videoCapturer = CameraSelector.getBackCamera(new Camera2Enumerator(context));
-                width = Integer.parseInt(sharedPreferences.getString(context.getString(R.string.backCameraWidth), "640"));
-                height = Integer.parseInt(sharedPreferences.getString(context.getString(R.string.backCameraHeight), "480"));
+               /* width = Integer.parseInt(sharedPreferences.getString(context.getString(R.string.backCameraWidth), "640"));
+                height = Integer.parseInt(sharedPreferences.getString(context.getString(R.string.backCameraHeight), "480"));*/
                 String quality = sharedPreferences.getString(context.getString(R.string.backCameraQuality), "Medium quality");
                 switch (quality) {
                     case "High quality":
@@ -91,8 +89,8 @@ public class LiveVideoClient extends Client {
                 break;
             case FRONT:
                 videoCapturer = CameraSelector.getFrontCamera(new Camera2Enumerator(context));
-                width = Integer.parseInt(sharedPreferences.getString(context.getString(R.string.frontCameraWidth), "640"));
-                height = Integer.parseInt(sharedPreferences.getString(context.getString(R.string.frontCameraHeight), "480"));
+               /* width = Integer.parseInt(sharedPreferences.getString(context.getString(R.string.frontCameraWidth), "640"));
+                height = Integer.parseInt(sharedPreferences.getString(context.getString(R.string.frontCameraHeight), "480"));*/
 
                 quality = sharedPreferences.getString(context.getString(R.string.frontCameraQuality), "Medium quality");
                 switch (quality) {
@@ -111,10 +109,10 @@ public class LiveVideoClient extends Client {
                 }
                 break;
             case EXTERNAL:
-                videoCapturer = CameraSelector.getExternalCamera(context);
+                //videoCapturer = CameraSelector.getExternalCamera(context);
                 break;
             default:
-                videoCapturer = CameraSelector.createCameraCapturer(new Camera1Enumerator(false));
+                videoCapturer = CameraSelector.createCameraCapturer(new Camera2Enumerator(context));
                 Log.e(TAG, "UNKNOWN CAMERA TYPE!");
         }
 

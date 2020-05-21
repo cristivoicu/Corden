@@ -77,7 +77,9 @@ dependencies {
     implementation 'androidx.biometric:biometric:1.0.1'
 
     // usb camera library
-    implementation 'com.github.jiangdongguo:AndroidUSBCamera:2.3.4'
+    //implementation 'com.github.jiangdongguo:AndroidUSBCamera:2.3.4'
+
+    implementation "de.adorsys.android:securestoragelibrary:1.2.4"
 
     implementation 'com.google.android.gms:play-services-location:17.0.0'
     implementation "androidx.localbroadcastmanager:localbroadcastmanager:1.0.0"

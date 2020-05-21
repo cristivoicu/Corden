@@ -49,7 +49,7 @@
             android:layout_height="wrap_content"
             android:text="voicu.cristian"
             android:textSize="18sp"
-            android:textColor="@color/BLACK"
+            android:textColor="@color/colorBlack"
             app:layout_constraintEnd_toStartOf="@+id/imageView2"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/duration"
