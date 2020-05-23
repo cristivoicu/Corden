@@ -1,6 +1,8 @@
 package ro.atm.corden.view.fragment;
 
 import android.app.AlertDialog;
+import android.content.Context;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -53,6 +55,10 @@ public class LiveWatchFragment extends Fragment
                 container,
                 false);
 
+        AudioManager audioManager = (AudioManager) this.getActivity().getSystemService(Context.AUDIO_SERVICE);
+        audioManager.setMode(AudioManager.MODE_NORMAL);
+        audioManager.setSpeakerphoneOn(true);
+
         start();
         mWatchSession.createWatchOffer(username);
         return mBinding.getRoot();
@@ -93,7 +99,7 @@ public class LiveWatchFragment extends Fragment
                 AudioTrack audioTrack = mediaStream.audioTracks.get(0);
                 videoTrack.addSink(mBinding.localView);
                 audioTrack.setEnabled(true);
-                audioTrack.setVolume(1000);
+                //audioTrack.setVolume(100);
             } catch (Exception e) {
                 e.printStackTrace();
             }

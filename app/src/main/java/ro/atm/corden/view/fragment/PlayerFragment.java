@@ -69,10 +69,6 @@ public class PlayerFragment extends Fragment implements MediaListener.PlaybackLi
         // Inflate the layout for this fragment
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_player, container, false);
 
-        AudioManager audioManager = (AudioManager) this.getActivity().getSystemService(Context.AUDIO_SERVICE);
-        audioManager.setSpeakerphoneOn(true);
-        audioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-
         seekBar = binding.seekBar;
         binding.play.setOnClickListener(this::onPlayButtonClicked);
         binding.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -103,6 +99,9 @@ public class PlayerFragment extends Fragment implements MediaListener.PlaybackLi
         SignallingClient.getInstance().isInitiator = true;
 
         start();
+        AudioManager audioManager = (AudioManager) this.getActivity().getSystemService(Context.AUDIO_SERVICE);
+        audioManager.setMode(AudioManager.MODE_NORMAL);
+        audioManager.setSpeakerphoneOn(true);
         return binding.getRoot();
     }
 
@@ -145,7 +144,7 @@ public class PlayerFragment extends Fragment implements MediaListener.PlaybackLi
         final VideoTrack videoTrack = stream.videoTracks.get(0);
         final AudioTrack audioTrack = stream.audioTracks.get(0);
         audioTrack.setEnabled(true);
-        audioTrack.setVolume(100);
+        //audioTrack.setVolume(100);
         getActivity().runOnUiThread(() -> {
             try {
                 binding.remoteView.setVisibility(View.VISIBLE);

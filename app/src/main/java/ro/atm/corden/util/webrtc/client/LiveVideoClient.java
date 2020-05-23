@@ -134,7 +134,7 @@ public class LiveVideoClient extends Client {
         audioSource = peerConnectionFactory.createAudioSource(audioConstraints);
         audioTrack = peerConnectionFactory.createAudioTrack("ARDa0", audioSource);
         audioTrack.setEnabled(true);
-        audioTrack.setVolume(1000);
+        //audioTrack.setVolume(100);
 
         if (videoCapturer != null) {
             // videoCapturer.startCapture(1280, 720, 30);
