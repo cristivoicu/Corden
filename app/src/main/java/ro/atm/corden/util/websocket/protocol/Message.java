@@ -16,6 +16,7 @@ import ro.atm.corden.model.map.Mark;
 import ro.atm.corden.model.map.Path;
 import ro.atm.corden.model.map.Zone;
 import ro.atm.corden.model.user.User;
+import ro.atm.corden.util.websocket.AuthenticatedUser;
 import ro.atm.corden.util.websocket.protocol.events.MediaEventType;
 
 public class Message {
@@ -40,6 +41,7 @@ public class Message {
         public RequestMessageBuilder(){
             message = new JsonObject();
             message.addProperty(METHOD, METHOD_REQUEST);
+            message.addProperty("token", AuthenticatedUser.getInstance().getToken());
         }
 
         public RequestMessageBuilder addEvent(String event){
@@ -71,6 +73,7 @@ public class Message {
         public UpdateMessageBuilder(){
             message = new JsonObject();
             message.addProperty(METHOD, METHOD_UPDATE);
+            message.addProperty("token", AuthenticatedUser.getInstance().getToken());
         }
 
         public UpdateMessageBuilder addEvent(String event){
@@ -119,22 +122,6 @@ public class Message {
                     paths.add(json);
                 }
             }
-
-            /*for (MapItem mapItem : mapItems){
-                String json = "";
-                if(mapItem instanceof Mark){
-                    json = mapItem.toJson();
-                    marks.add(json);
-                }
-                if(mapItem instanceof Zone){
-                    json = mapItem.toJson();
-                    paths.add(json);
-                }
-                if(mapItem instanceof Path){
-                    json = mapItem.toJson();
-                    zones.add(json);
-                }
-            }*/
             message.add("marks", marks);
             message.add("paths", paths);
             message.add("zones", zones);
@@ -153,6 +140,7 @@ public class Message {
         public MediaMessageBuilder(){
             message = new JsonObject();
             message.addProperty(METHOD, METHOD_MEDIA);
+            message.addProperty("token", AuthenticatedUser.getInstance().getToken());
         }
 
         public MediaMessageBuilder addEvent(String event){
@@ -209,6 +197,7 @@ public class Message {
         public SubscribeMessageBuilder(){
             message = new JsonObject();
             message.addProperty(METHOD, "subscribe");
+            message.addProperty("token", AuthenticatedUser.getInstance().getToken());
         }
 
         public SubscribeMessageBuilder addEvent(String event){
@@ -229,6 +218,7 @@ public class Message {
         public UnsubscribeMessageBuilder(){
             message = new JsonObject();
             message.addProperty(METHOD, "unsubscribe");
+            message.addProperty("token", AuthenticatedUser.getInstance().getToken());
         }
 
         public UnsubscribeMessageBuilder addEvent(String event){
@@ -249,6 +239,7 @@ public class Message {
         public ActivityMessageBuilder(){
             message = new JsonObject();
             message.addProperty(METHOD, METHOD_ACTIVITY);
+            message.addProperty("token", AuthenticatedUser.getInstance().getToken());
         }
 
         public ActivityMessageBuilder addEvent(String event){

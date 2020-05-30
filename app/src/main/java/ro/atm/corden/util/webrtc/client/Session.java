@@ -71,7 +71,6 @@ public class Session {
                 .setVideoEncoderFactory(defaultVideoEncoderFactory)
                 .setVideoDecoderFactory(defaultVideoDecoderFactory)
                 .createPeerConnectionFactory();
-
     }
 
     public void createPlaybackOffer(String videoPath) {

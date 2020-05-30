@@ -83,8 +83,8 @@ public class SignallingClient {
             URI uri = new URI("wss://corden.go.ro:8443/websocket"); // wifi acasa
 
             try {
-                /*SecurePreferences.setValue(context, "trustStorePass", "parola");
-                SecurePreferences.setValue(context, "keyStorePass", "parola");*/
+                SecurePreferences.setValue(context, "trustStorePass", "parola");
+                SecurePreferences.setValue(context, "keyStorePass", "parola");
 
                 String trustPass = SecurePreferences.getStringValue(context, "trustStorePass", "");
                 String keyPass = SecurePreferences.getStringValue(context, "keyStorePass", "");
@@ -120,9 +120,9 @@ public class SignallingClient {
 
             } catch (NoSuchAlgorithmException | UnrecoverableKeyException | IOException | CertificateException | KeyStoreException | KeyManagementException e) {
                 e.printStackTrace();
-            } /*catch (SecureStorageException e) {
+            } catch (SecureStorageException e) {
                 e.printStackTrace();
-            }*/
+            }
 
         } catch (URISyntaxException e) {
             e.printStackTrace();

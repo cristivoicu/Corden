@@ -450,6 +450,10 @@ final class WebSocket extends WebSocketClient {
             Log.i(TAG, "Rec brut: " + message);
             JsonObject receivedMessage = gson.fromJson(message, JsonObject.class);
             switch (receivedMessage.get("method").getAsString()) {
+                case "token":
+                    String token = receivedMessage.get("token").getAsString();
+                    AuthenticatedUser.getInstance().setToken(token);
+                    break;
                 case "update":
                     handleUpdateMethodMessage(receivedMessage);
                     break;
