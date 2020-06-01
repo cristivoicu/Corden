@@ -11,4 +11,5 @@ public class MediaEventType {
     public static final String START_LIVE_STREAM = "startVideoStreamRequest";
     public static final String STOP_LIVE_STREAM = "stopVideoStreamRequest";
     public static final String START_VIDEO_WATCH = "startLiveVideoWatch";
+    public static final String STOP_VIDEO_WATCH = "stopLiveVideoWatch";
 }

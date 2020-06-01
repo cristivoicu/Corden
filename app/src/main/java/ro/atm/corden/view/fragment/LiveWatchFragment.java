@@ -79,8 +79,8 @@ public class LiveWatchFragment extends Fragment
 
     @Override
     public void onStop() {
-        super.onStop();
         mWatchSession.leaveLiveWatchSession();
+        super.onStop();
     }
 
     private void initVideos() {
@@ -108,9 +108,9 @@ public class LiveWatchFragment extends Fragment
 
     @Override
     public void showToast(String message) {
-        this.getActivity().runOnUiThread(() -> {
-            Toast.makeText(this.getActivity(), message, Toast.LENGTH_SHORT).show();
-        });
+/*        this.getActivity().runOnUiThread(() -> {
+            //Toast.makeText(this.getActivity(), message, Toast.LENGTH_SHORT).show();
+        });*/
     }
 
     @Override

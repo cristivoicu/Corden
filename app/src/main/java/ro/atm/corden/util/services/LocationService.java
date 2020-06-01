@@ -2,6 +2,7 @@ package ro.atm.corden.util.services;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.IntentService;
 import android.app.Notification;
 import android.app.Service;
 import android.content.Context;
@@ -15,6 +16,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.location.LocationManagerCompat;
@@ -31,7 +33,7 @@ import ro.atm.corden.util.websocket.SignallingClient;
 import ro.atm.corden.util.websocket.protocol.Message;
 import ro.atm.corden.util.websocket.protocol.events.UpdateEventType;
 
-public class LocationService extends Service {
+public class LocationService extends IntentService {
     private static final String TAG = "LocationService";
     public static final long UPDATE_INTERVAL = 4000; // 4 seconds
 
@@ -39,12 +41,18 @@ public class LocationService extends Service {
     private LocationListener mLocationListener;
 
     public LocationService() {
+        super("LocationService");
     }
 
     @Override
     public IBinder onBind(Intent intent) {
         // TODO: Return the communication channel to the service.
         throw new UnsupportedOperationException("Not yet implemented");
+    }
+
+    @Override
+    protected void onHandleIntent(@Nullable Intent intent) {
+        while(true){}
     }
 
     @SuppressLint("MissingPermission")
@@ -107,24 +115,6 @@ public class LocationService extends Service {
             }
         }
         return bestLocation;
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(TAG, "onStartCommand");
-        getLocation();
-        return START_NOT_STICKY;
-    }
-
-    private void getLocation() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
-                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            stopSelf();
-            return;
-        }
-       // mLocationManager.requestLocationUpdates(Context.LOCATION_SERVICE, 0, 0, mLocationListener);
-       //Location lastLocation = mLocationManager.getLastKnownLocation(LOCATION_SERVICE);
-        //saveUserLocation(lastLocation);
     }
 
     private void saveUserLocation(Location location){

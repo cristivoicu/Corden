@@ -70,21 +70,9 @@ public class StreamingIntentService extends IntentService implements MediaListen
 
     EglBase rootEglBase;
 
-    private SurfaceViewRenderer mSurfaceView = null;
-
     public StreamingIntentService() {
         super("StreamingIntentService");
         //setIntentRedelivery(true);
-    }
-
-    public StreamingIntentService(SurfaceViewRenderer surfaceViewRenderer){
-        super("StreamingIntentService");
-        mSurfaceView = surfaceViewRenderer;
-        mSurfaceView.init(rootEglBase.getEglBaseContext(), null);
-        mSurfaceView.setZOrderMediaOverlay(true);
-        mSurfaceView.setMirror(true);
-        mSurfaceView.setScalingType(SCALE_ASPECT_FIT);
-        isInited = true;
     }
 
     @Nullable
@@ -226,12 +214,12 @@ public class StreamingIntentService extends IntentService implements MediaListen
     }
 
     public void showToast(final String message) {
-        new Handler(Looper.getMainLooper()).post(new Runnable() {
+/*        new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
                 Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
             }
-        });
+        });*/
     }
 
     public class LocalBinder extends Binder {

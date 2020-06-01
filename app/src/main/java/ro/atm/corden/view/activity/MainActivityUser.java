@@ -87,7 +87,6 @@ public class MainActivityUser extends AppCompatActivity implements EasyPermissio
                 if (!binding.frontCamera.isSelected()) {
                     binding.frontCamera.setSelected(true);
                     binding.backCamera.setSelected(false);
-                    binding.externalCamera.setSelected(false);
                     if (StreamingIntentService.isRunning()) {
                         mService.switchCamera(binding.localView, true);
                     }
@@ -101,21 +100,9 @@ public class MainActivityUser extends AppCompatActivity implements EasyPermissio
                 if (!binding.backCamera.isSelected()) {
                     binding.frontCamera.setSelected(false);
                     binding.backCamera.setSelected(true);
-                    binding.externalCamera.setSelected(false);
                     if (StreamingIntentService.isRunning()) {
                         mService.switchCamera(binding.localView, false);
                     }
-                }
-                return true;
-            }
-            return false;
-        });
-        binding.externalCamera.setOnTouchListener((v, event) -> {
-            if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                if (!binding.externalCamera.isSelected()) {
-                    binding.frontCamera.setSelected(false);
-                    binding.backCamera.setSelected(false);
-                    binding.externalCamera.setSelected(true);
                 }
                 return true;
             }
@@ -185,7 +172,6 @@ public class MainActivityUser extends AppCompatActivity implements EasyPermissio
     /***/
     private CameraSelector.CameraType determineCamera(){
         if(binding.frontCamera.isSelected() || binding.backCamera.isSelected()){
-            binding.externalCamera.setEnabled(false);
             if(binding.frontCamera.isSelected()){
                 return CameraSelector.CameraType.FRONT;
             }
@@ -193,11 +179,6 @@ public class MainActivityUser extends AppCompatActivity implements EasyPermissio
                 return CameraSelector.CameraType.BACK;
             }
 
-        }
-        if(binding.externalCamera.isSelected()){
-            binding.frontCamera.setEnabled(false);
-            binding.backCamera.setEnabled(false);
-            return CameraSelector.CameraType.EXTERNAL;
         }
         return null;
     }
@@ -227,7 +208,6 @@ public class MainActivityUser extends AppCompatActivity implements EasyPermissio
                     binding.streamStatus.setText("Start streaming service");
                     binding.frontCamera.setEnabled(true);
                     binding.backCamera.setEnabled(true);
-                    binding.externalCamera.setEnabled(true);
                 });
                 if (mBound) {
                     mBound = false;

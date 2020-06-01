@@ -159,7 +159,7 @@ public class PlayerFragment extends Fragment implements MediaListener.PlaybackLi
 
     @Override
     public void showToast(final String msg) {
-        getActivity().runOnUiThread(() -> Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show());
+        //getActivity().runOnUiThread(() -> Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show());
     }
 
     private void onPlayButtonClicked(View view) {

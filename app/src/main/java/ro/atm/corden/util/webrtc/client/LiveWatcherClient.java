@@ -14,11 +14,13 @@ import ro.atm.corden.util.webrtc.observer.SimpleSdpObserver;
 import ro.atm.corden.util.websocket.SignallingClient;
 
 public class LiveWatcherClient extends Client {
+    private String mUsername = null;
     protected LiveWatcherClient(MediaActivity mediaActivity, PeerConnectionFactory peerConnectionFactory) {
         super(mediaActivity, peerConnectionFactory, JsonConstants.ICE_FOR_LIVE);
     }
 
     void createWatchOffer(String username){
+        mUsername = username;
         MediaConstraints sdpConstraints = new MediaConstraints();
         sdpConstraints.mandatory.add(
                 new MediaConstraints.KeyValuePair("OfferToReceiveAudio", "true"));
@@ -46,5 +48,7 @@ public class LiveWatcherClient extends Client {
     @Override
     public void dispose() {
         super.dispose();
+        if(mUsername != null)
+            SignallingClient.getInstance().sendStopWatchVideoRequest(mUsername);
     }
 }

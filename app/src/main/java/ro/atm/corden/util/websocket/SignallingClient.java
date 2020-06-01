@@ -186,6 +186,27 @@ public class SignallingClient {
     }
 
     /**
+     * Used by admin to stop intercepting user recording session
+     *
+     * @param username is the username that is sending live video to the media server for recording
+     */
+    public void sendStopWatchVideoRequest(@NonNull String username) {
+        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
+            Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
+            throw new NetworkOnMainThreadException();
+        }
+
+        Log.i(TAG, "Sending live request to server");
+
+        Message message = new Message.MediaMessageBuilder()
+                .addEvent(MediaEventType.STOP_VIDEO_WATCH)
+                .addUser(username)
+                .build();
+
+        webSocket.send(message.toString());
+    }
+
+    /**
      * Used by admin to send a video playback request to the application server
      * This method should not be used on the main thread
      *
