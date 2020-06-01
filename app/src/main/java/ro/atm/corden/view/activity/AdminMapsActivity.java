@@ -28,6 +28,8 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -63,6 +65,7 @@ public class AdminMapsActivity extends AppCompatActivity
         EditMapItemDialog.EditMapDialogListener,
         GoogleMap.OnPolygonClickListener,
         GoogleMap.OnPolylineClickListener,
+        GoogleMap.OnMarkerClickListener,
         MapItemsListener {
     private ActivityUserJobsMapsBinding binding;
 
@@ -183,6 +186,7 @@ public class AdminMapsActivity extends AppCompatActivity
         mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
         mMap.setOnPolygonClickListener(this);
         mMap.setOnPolylineClickListener(this);
+        mMap.setOnMarkerClickListener(this);
 
         // UI settings
         mUiSettings = mMap.getUiSettings();
@@ -291,8 +295,7 @@ public class AdminMapsActivity extends AppCompatActivity
                 case "MARKER":
                     MarkerOptions markerOptions = new MarkerOptions();
                     markerOptions.position(new LatLng(mapItem.getCoordinates().get(0).latitude, mapItem.getCoordinates().get(0).longitude));
-                    markerOptions.title(mapItem.getName());
-                    markerOptions.snippet(mapItem.getDescription());
+                    markerOptions.icon(ColorHelper.getMarkerIcon(mapItem.getColor()));
                     Marker marker = mMap.addMarker(markerOptions);
                     mapItemHashMap.put(marker.getId(), new Mark(marker, marker.getTitle(), marker.getSnippet(), mapItem.getColor(), marker.getPosition()));
                     break;
@@ -403,6 +406,19 @@ public class AdminMapsActivity extends AppCompatActivity
     }
 
     @Override
+    public boolean onMarkerClick(Marker marker) {
+        try {
+            MapItem current = mapItemHashMap.get(marker.getId());
+            EditMapItemDialog editMapItemDialog = new EditMapItemDialog(current, current.getId());
+            editMapItemDialog.show(getSupportFragmentManager(), "Edit map dialog");
+
+        }catch (NullPointerException e){
+            // maybe clicked on user location
+        }
+        return false;
+    }
+
+    @Override
     public void onBackPressed() {
         if(!isModified)
             super.onBackPressed();
@@ -447,7 +463,8 @@ public class AdminMapsActivity extends AppCompatActivity
                 userMarker = mMap.addMarker(new MarkerOptions()
                         .title(username)
                         .draggable(false)
-                        .position(new LatLng(lat, lng)));
+                        .position(new LatLng(lat, lng))
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
                 liveLocations.put(username, userMarker);
             }
         });
@@ -506,11 +523,11 @@ public class AdminMapsActivity extends AppCompatActivity
             } else {
                 if (isLocation) {
                     isLocation = !isLocation;
-                    markerOptions.title(name)
-                            .snippet(description)
+                    markerOptions.icon(ColorHelper.getMarkerIcon(color))
                             .alpha(0.6f);
                     currentMarker.remove();
                     currentMarker = mMap.addMarker(markerOptions);
+                    currentMarker.setTag(name);
 
                     //mapItems.add(new Mark(name, description, color, currentMarker.getPosition()));
                     mapItemHashMap.put(currentMarker.getId(), new Mark(currentMarker, name, description, color, currentMarker.getPosition()));
