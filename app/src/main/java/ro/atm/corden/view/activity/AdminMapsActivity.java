@@ -295,6 +295,8 @@ public class AdminMapsActivity extends AppCompatActivity
                 case "MARKER":
                     MarkerOptions markerOptions = new MarkerOptions();
                     markerOptions.position(new LatLng(mapItem.getCoordinates().get(0).latitude, mapItem.getCoordinates().get(0).longitude));
+                    markerOptions.title(mapItem.getName());
+                    markerOptions.snippet(mapItem.getDescription());
                     markerOptions.icon(ColorHelper.getMarkerIcon(mapItem.getColor()));
                     Marker marker = mMap.addMarker(markerOptions);
                     mapItemHashMap.put(marker.getId(), new Mark(marker, marker.getTitle(), marker.getSnippet(), mapItem.getColor(), marker.getPosition()));
@@ -482,6 +484,11 @@ public class AdminMapsActivity extends AppCompatActivity
         if (mapItem instanceof Path) {
             ((Path) mapItem).getPolyline().setColor(mapItem.getColor());
         }
+        if(mapItem instanceof Mark){
+            ((Mark) mapItem).getMarker().setIcon(ColorHelper.getMarkerIcon(mapItem.getColor()));
+            ((Mark) mapItem).getMarker().setTitle(mapItem.getName());
+            ((Mark) mapItem).getMarker().setSnippet(mapItem.getDescription());
+        }
     }
 
     @Override
@@ -523,8 +530,9 @@ public class AdminMapsActivity extends AppCompatActivity
             } else {
                 if (isLocation) {
                     isLocation = !isLocation;
-                    markerOptions.icon(ColorHelper.getMarkerIcon(color))
-                            .alpha(0.6f);
+                    markerOptions.title(name)
+                            .snippet(description)
+                            .icon(ColorHelper.getMarkerIcon(color));
                     currentMarker.remove();
                     currentMarker = mMap.addMarker(markerOptions);
                     currentMarker.setTag(name);
