@@ -24,29 +24,20 @@ import ro.atm.corden.model.map.MapItem;
 public class EditMapItemDialog extends AppCompatDialogFragment {
     public static final String TAG = "EditMapItemDialog";
 
-    private String mName;
-    private String mDesc;
     private int mColor;
     private String mID;
-    private String itemType;
 
     private MapItem mMapItem;
-
 
     private TextInputLayout mInputTextLayoutName;
     private TextInputLayout mInputTextLayoutDescription;
     private Button mColorPickerButton;
     private EditMapDialogListener listener;
 
-    public EditMapItemDialog(String itemId, String type, String name, String description, int color) {
-        mName = name;
-        mDesc = description;
-        mColor = color;
-    }
-
-    public EditMapItemDialog(MapItem mMapItem, String id) {
-        this.mMapItem = mMapItem;
+    public EditMapItemDialog(MapItem mapItem, String id) {
+        this.mMapItem = mapItem;
         this.mID = id;
+        mColor = mapItem.getColor();
     }
 
     @NonNull
@@ -57,7 +48,7 @@ public class EditMapItemDialog extends AppCompatDialogFragment {
         View view = inflater.inflate(R.layout.dialog_save_map_item, null);
 
         builder.setView(view)
-                .setTitle("Save map detail")
+                .setTitle("Edit map item")
                 .setNegativeButton("Delete", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {

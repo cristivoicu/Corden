@@ -111,12 +111,6 @@ public class UserDetailActivity extends AppCompatActivity {
     }
 
     public void onStartCameraButtonClicked(View view) {
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... voids) {
-                SignallingClient.getInstance().sendStreamRequest(viewModel.getUsername());
-                return null;
-            }
-        }.execute();
+        SignallingClient.getInstance().sendStreamRequest(viewModel.getUsername());
     }
 }

@@ -94,14 +94,7 @@ public class UsersActivity extends AppCompatActivity
             isOnlineUsers = true;
             viewModel.setOnlineUsers();
         }
-
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... voids) {
-                SignallingClient.getInstance().sendMessageToSubscribeToUserList();
-                return null;
-            }
-        }.execute();
+        SignallingClient.getInstance().sendMessageToUnsubscribeFromUserList();
     }
 
     @Override
@@ -110,13 +103,7 @@ public class UsersActivity extends AppCompatActivity
 
         SignallingClient.getInstance().unsubscribeUserListListener();
 
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... voids) {
-                SignallingClient.getInstance().sendMessageToUnsubscribeFromUserList();
-                return null;
-            }
-        }.execute();
+        SignallingClient.getInstance().sendMessageToUnsubscribeFromUserList();
     }
 
     @Override
@@ -125,13 +112,7 @@ public class UsersActivity extends AppCompatActivity
 
         SignallingClient.getInstance().unsubscribeUserListListener();
 
-        new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... voids) {
-                SignallingClient.getInstance().sendMessageToUnsubscribeFromUserList();
-                return null;
-            }
-        }.execute();
+        SignallingClient.getInstance().sendMessageToUnsubscribeFromUserList();
     }
 
     @Override
@@ -178,13 +159,7 @@ public class UsersActivity extends AppCompatActivity
                 startActivityForResult(intent, AppConstants.USER_DETAIL_ACTIVITY);
                 break;
             case R.id.ctx_notifyStream:
-                new AsyncTask<Void, Void, Void>() {
-                    @Override
-                    protected Void doInBackground(Void... voids) {
-                        SignallingClient.getInstance().sendStreamRequest(user.getUsername());
-                        return null;
-                    }
-                }.execute();
+                SignallingClient.getInstance().sendStreamRequest(user.getUsername());
                 break;
         }
         return super.onContextItemSelected(item);
@@ -220,4 +195,6 @@ public class UsersActivity extends AppCompatActivity
             }
         }, 2000);
     }
+
+
 }

@@ -360,15 +360,7 @@ public class SignallingClient {
 
     /***/
     public void sendStreamRequest(@NonNull String username) {
-        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
-            Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
-            throw new NetworkOnMainThreadException();
-        }
-        Message message = new Message.RequestMessageBuilder()
-                .addEvent(RequestEventTypes.REQUEST_START_STREAMING)
-                .addUser(username)
-                .build();
-        webSocket.send(message.toString());
+        new AsyncMessageToStreamRequest().execute(username);
     }
 
     /***/
@@ -510,16 +502,7 @@ public class SignallingClient {
      * <p>This method must not be used from UI thread</p>
      */
     public void sendMessageToUnsubscribeFromUserList() {
-        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
-            Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
-            throw new NetworkOnMainThreadException();
-        }
-
-        Message message = new Message.UnsubscribeMessageBuilder()
-                .addEvent(UnsubscribeEventType.UNSUBSCRIBE_USER_UPDATED)
-                .build();
-
-        webSocket.send(message.toString());
+        new AsyncMessageToUnsubscribe().execute();
     }
 
     /**
@@ -617,5 +600,29 @@ public class SignallingClient {
             return null;
         }
     }
+
+    private static class AsyncMessageToUnsubscribe extends AsyncTask<Void, Void, Void>{
+        @Override
+        protected Void doInBackground(Void... voids) {
+            Message message = new Message.UnsubscribeMessageBuilder()
+                    .addEvent(UnsubscribeEventType.UNSUBSCRIBE_USER_UPDATED)
+                    .build();
+
+            SignallingClient.getInstance().webSocket.send(message.toString());
+            return null;
+        }
+    }
+    private static class AsyncMessageToStreamRequest extends AsyncTask<String, Void, Void>{
+        @Override
+        protected Void doInBackground(String... strings) {
+            Message message = new Message.RequestMessageBuilder()
+                    .addEvent(RequestEventTypes.REQUEST_START_STREAMING)
+                    .addUser(strings[0])
+                    .build();
+            SignallingClient.getInstance().webSocket.send(message.toString());
+            return null;
+        }
+    }
+
     //endregion
 }

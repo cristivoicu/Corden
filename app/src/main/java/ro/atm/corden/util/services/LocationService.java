@@ -50,8 +50,16 @@ public class LocationService extends IntentService {
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
+
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
+
+
+
+
+        Location location = getLastKnownLocation();
+        if(location != null)
+            saveUserLocation(location);
         while(true){}
     }
 
@@ -59,12 +67,11 @@ public class LocationService extends IntentService {
     @Override
     public void onCreate() {
         super.onCreate();
-
         mLocationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-
         mLocationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
+                Log.d("LocationListener", String.format("Location changed %s", location.toString()));
                 saveUserLocation(location);
             }
 
@@ -83,12 +90,7 @@ public class LocationService extends IntentService {
                 Log.d("LocationListener", "onProviderDisabled");
             }
         };
-
         mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 1, mLocationListener);
-        Location location = getLastKnownLocation();
-        if(location != null)
-            saveUserLocation(location);
-
         Notification notification = new NotificationCompat.Builder(this, App.LOCATION_CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_location)
                 .setContentTitle("Sending live location")
