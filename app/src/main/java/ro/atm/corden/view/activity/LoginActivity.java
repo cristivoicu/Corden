@@ -148,6 +148,12 @@ public class LoginActivity extends AppCompatActivity implements LoginListener,
         super.onStart();
     }
 
+    @Override
+    protected void onDestroy() {
+        SignallingClient.getInstance().disconnect();
+        super.onDestroy();
+    }
+
     @AfterPermissionGranted(AppConstants.LOCATION_REQUEST_CODE)
     private void requestPermissions() {
         if (!EasyPermissions.hasPermissions(this, AppConstants.locationPermissions)) {

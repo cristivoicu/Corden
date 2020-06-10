@@ -128,6 +128,10 @@ public class SignallingClient {
         }
     }
 
+    public void disconnect(){
+        webSocket.close();
+    }
+
     public static SignallingClient getInstance() {
         return INSTANCE;
     }

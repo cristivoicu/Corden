@@ -180,7 +180,7 @@ public class Repository {
             signallingClient.webSocket.send(message.toString());
 
             signallingClient.webSocket.usersConditionVariable = new ConditionVariable(false);
-            signallingClient.webSocket.usersConditionVariable.block();
+            signallingClient.webSocket.usersConditionVariable.block(5000);
 
             if (signallingClient.webSocket.users != null) {
                 return signallingClient.webSocket.users;
@@ -200,7 +200,7 @@ public class Repository {
             signallingClient.webSocket.send(message.toString());
 
             signallingClient.webSocket.usersConditionVariable = new ConditionVariable(false);
-            signallingClient.webSocket.usersConditionVariable.block();
+            signallingClient.webSocket.usersConditionVariable.block(5000);
 
             if (signallingClient.webSocket.users != null) {
                 return signallingClient.webSocket.users;
@@ -221,7 +221,7 @@ public class Repository {
             signallingClient.webSocket.send(message.toString());
 
             signallingClient.webSocket.userDataConditionVariable = new ConditionVariable(false);
-            signallingClient.webSocket.userDataConditionVariable.block();
+            signallingClient.webSocket.userDataConditionVariable.block(5000);
             return signallingClient.webSocket.users.get(0);
         }
     }
@@ -236,7 +236,7 @@ public class Repository {
             signallingClient.webSocket.send(message.toString());
 
             signallingClient.webSocket.userDataConditionVariable = new ConditionVariable(false);
-            signallingClient.webSocket.userDataConditionVariable.block();
+            signallingClient.webSocket.userDataConditionVariable.block(5000);
             return signallingClient.webSocket.liveStreamers;
         }
     }
@@ -257,7 +257,7 @@ public class Repository {
                 signallingClient.webSocket.send(message.build().toString());
 
                 signallingClient.webSocket.videosConditionVariable = new ConditionVariable(false);
-                signallingClient.webSocket.videosConditionVariable.block();
+                signallingClient.webSocket.videosConditionVariable.block(5000);
                 if (signallingClient.webSocket.videos != null) {
                     return signallingClient.webSocket.videos;
                 }
@@ -287,7 +287,7 @@ public class Repository {
             signallingClient.webSocket.send(message.toString());
 
             signallingClient.webSocket.timelineConditionVariable = new ConditionVariable(false);
-            signallingClient.webSocket.timelineConditionVariable.block();
+            signallingClient.webSocket.timelineConditionVariable.block(5000);
             if (signallingClient.webSocket.actions != null) {
                 return signallingClient.webSocket.actions;
             }
@@ -305,7 +305,7 @@ public class Repository {
             signallingClient.webSocket.send(message.toString());
 
             signallingClient.webSocket.timelineConditionVariable = new ConditionVariable(false);
-            signallingClient.webSocket.timelineConditionVariable.block();
+            signallingClient.webSocket.timelineConditionVariable.block(5000);
             if (signallingClient.webSocket.actions != null) {
                 return signallingClient.webSocket.actions;
             }
@@ -357,7 +357,7 @@ public class Repository {
             signallingClient.webSocket.send(message.toString());
 
             signallingClient.webSocket.conditionVariable = new ConditionVariable(false);
-            signallingClient.webSocket.conditionVariable.block();
+            signallingClient.webSocket.conditionVariable.block(5000);
 
             if (signallingClient.webSocket.mapItems != null) {
                 return signallingClient.webSocket.mapItems;
@@ -425,7 +425,7 @@ public class Repository {
             signallingClient.webSocket.send(message.toString());
 
             signallingClient.webSocket.conditionVariable = new ConditionVariable(false);
-            signallingClient.webSocket.conditionVariable.block();
+            signallingClient.webSocket.conditionVariable.block(5000);
 
 
             return signallingClient.webSocket.latLng;
