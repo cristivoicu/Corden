@@ -22,19 +22,17 @@ import java.util.List;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;
-import ro.atm.corden.MotionListener;
 import ro.atm.corden.R;
 import ro.atm.corden.databinding.ActivityMainUserBinding;
 import ro.atm.corden.model.user.LoginUser;
 import ro.atm.corden.util.constant.AppConstants;
-import ro.atm.corden.util.services.ActivityDetectorIntentService;
 import ro.atm.corden.util.services.DetectedActivitiesIntentService;
 import ro.atm.corden.util.services.LocationService;
 import ro.atm.corden.util.services.StreamingIntentService;
 import ro.atm.corden.util.webrtc.client.CameraSelector;
 import ro.atm.corden.util.websocket.SignallingClient;
 
-public class MainActivityUser extends AppCompatActivity implements EasyPermissions.PermissionCallbacks, MotionListener {
+public class MainActivityUser extends AppCompatActivity implements EasyPermissions.PermissionCallbacks {
     private ActivityMainUserBinding binding;
     private static final String ACTION_STREAM = "ActionStream";
     private StreamingIntentService mService;
@@ -120,12 +118,6 @@ public class MainActivityUser extends AppCompatActivity implements EasyPermissio
         Intent intent = new Intent(this, DetectedActivitiesIntentService.class);
 
         startService(intent);
-    }
-
-    @Override
-    protected void onStart() {
-        ActivityDetectorIntentService.motionListener = this;
-        super.onStart();
     }
 
     @Override
@@ -251,11 +243,6 @@ public class MainActivityUser extends AppCompatActivity implements EasyPermissio
         if( EasyPermissions.somePermissionPermanentlyDenied(this, Arrays.asList(AppConstants.webRtcPermissions))){
             new AppSettingsDialog.Builder(this).build().show();
         }
-    }
-
-    @Override
-    public void onMotion() {
-        startService(new View(this));
     }
 
     @Override

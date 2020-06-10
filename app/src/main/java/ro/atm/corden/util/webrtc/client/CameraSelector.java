@@ -3,6 +3,7 @@ package ro.atm.corden.util.webrtc.client;
 import android.content.Context;
 import android.util.Log;
 
+import org.webrtc.Camera2Enumerator;
 import org.webrtc.CameraEnumerator;
 import org.webrtc.Logging;
 import org.webrtc.SurfaceTextureHelper;
@@ -22,7 +23,7 @@ public class CameraSelector {
         EXTERNAL
     }
 
-    static VideoCapturer createCameraCapturer(CameraEnumerator enumerator) {
+    static VideoCapturer createCameraCapturer(Camera2Enumerator enumerator) {
         final String[] deviceNames = enumerator.getDeviceNames();
 
         // First, try to find front facing camera
@@ -53,7 +54,7 @@ public class CameraSelector {
         return null;
     }
 
-    static VideoCapturer getFrontCamera(CameraEnumerator enumerator){
+    static VideoCapturer getFrontCamera(Camera2Enumerator enumerator){
         final String[] deviceNames = enumerator.getDeviceNames();
         for(String deviceName : deviceNames){
             if(enumerator.isFrontFacing(deviceName)){
@@ -65,7 +66,7 @@ public class CameraSelector {
         return null;
     }
 
-    static VideoCapturer getBackCamera(CameraEnumerator enumerator){
+    static VideoCapturer getBackCamera(Camera2Enumerator enumerator){
         final String[] deviceNames = enumerator.getDeviceNames();
         for(String deviceName : deviceNames){
             if(enumerator.isBackFacing(deviceName)){

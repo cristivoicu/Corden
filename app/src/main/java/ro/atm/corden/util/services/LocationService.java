@@ -35,7 +35,7 @@ import ro.atm.corden.util.websocket.protocol.events.UpdateEventType;
 
 public class LocationService extends IntentService {
     private static final String TAG = "LocationService";
-    public static final long UPDATE_INTERVAL = 4000; // 4 seconds
+    public static final long UPDATE_INTERVAL = 2000; // 2 seconds
 
     private LocationManager mLocationManager;
     private LocationListener mLocationListener;
@@ -53,9 +53,6 @@ public class LocationService extends IntentService {
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
-
-
-
 
         Location location = getLastKnownLocation();
         if(location != null)
@@ -90,7 +87,7 @@ public class LocationService extends IntentService {
                 Log.d("LocationListener", "onProviderDisabled");
             }
         };
-        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 2000, 1, mLocationListener);
+        mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, UPDATE_INTERVAL, 1, mLocationListener);
         Notification notification = new NotificationCompat.Builder(this, App.LOCATION_CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_location)
                 .setContentTitle("Sending live location")

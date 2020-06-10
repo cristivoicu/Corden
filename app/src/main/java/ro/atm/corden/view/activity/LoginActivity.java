@@ -2,7 +2,6 @@ package ro.atm.corden.view.activity;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.biometric.BiometricManager;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -16,10 +15,15 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
+import java.io.IOException;
+import java.security.cert.CertificateException;
 import java.util.Arrays;
 import java.util.List;
 
+import de.adorsys.android.securestoragelibrary.SecurePreferences;
+import de.adorsys.android.securestoragelibrary.SecureStorageException;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;
@@ -28,10 +32,12 @@ import ro.atm.corden.databinding.ActivityLoginBinding;
 import ro.atm.corden.model.user.LoginUser;
 import ro.atm.corden.model.user.Role;
 import ro.atm.corden.util.constant.AppConstants;
+import ro.atm.corden.util.exception.login.CertNoPassException;
 import ro.atm.corden.util.exception.login.EmptyTextException;
 import ro.atm.corden.util.exception.login.LoginListenerNotInitialisedException;
 import ro.atm.corden.util.websocket.callback.LoginListener;
 import ro.atm.corden.util.websocket.SignallingClient;
+import ro.atm.corden.view.dialog.CertificatePasswordDialog;
 import ro.atm.corden.viewmodel.LoginViewModel;
 
 import static ro.atm.corden.util.constant.ExceptionCodes.EMPTY_FIELD_CODE;
@@ -39,10 +45,9 @@ import static ro.atm.corden.util.constant.ExceptionCodes.LOGIN_LISTENER_NOT_INIT
 import static ro.atm.corden.util.constant.ExceptionCodes.OK_CODE;
 
 public class LoginActivity extends AppCompatActivity implements LoginListener,
-        EasyPermissions.PermissionCallbacks{
+        EasyPermissions.PermissionCallbacks, CertificatePasswordDialog.CertificatePasswordDialogListener {
     private LoginViewModel viewModel;
     private static ActivityLoginBinding binding;
-    private static Context context;
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -65,18 +70,30 @@ public class LoginActivity extends AppCompatActivity implements LoginListener,
         }
     }
 
+    private void initWebSocket(){
+        try {
+            SignallingClient.getInstance().initWebSocket(this);
+            binding.loginButton.setEnabled(true);
+            SignallingClient.getInstance().subscribeLoginListener(this);
+        } catch (IOException | CertNoPassException e) {
+            CertificatePasswordDialog certificatePasswordDialog = new CertificatePasswordDialog();
+            certificatePasswordDialog.show(getSupportFragmentManager(), "CertPassDialog");
+            binding.loginButton.setEnabled(false);
+            Toast.makeText(this, "Password is not correct!", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d("Log", "onCreate");
-        context = this;
-        SignallingClient.getInstance().initWebSociet(context);
+
         binding = DataBindingUtil.setContentView(this, R.layout.activity_login);
+
+        initWebSocket();
 
         viewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(this.getApplication())
                 .create(LoginViewModel.class);
-
-        SignallingClient.getInstance().subscribeLoginListener(this);
 
         binding.setLifecycleOwner(this);
         binding.setViewmodel(viewModel);
@@ -85,6 +102,7 @@ public class LoginActivity extends AppCompatActivity implements LoginListener,
         viewModel.getUser().observe(this, (LoginUser loginUser) -> {
             Log.d("Log", "on observe clicked.");
             LoginAsyncTask loginAsyncTask = new LoginAsyncTask();
+            loginAsyncTask.context = this;
             loginAsyncTask.execute(loginUser);
         });
 
@@ -171,9 +189,21 @@ public class LoginActivity extends AppCompatActivity implements LoginListener,
             viewModel.onClick(view);
     }
 
+    @Override
+    public void onPassword(String password) {
+        try {
+            SecurePreferences.setValue(this, "trustStorePass", password);
+            SecurePreferences.setValue(this, "keyStorePass", password);
+            initWebSocket();
+        } catch (SecureStorageException e) {
+            e.printStackTrace();
+        }
+    }
+
     private static class LoginAsyncTask extends AsyncTask<LoginUser, Void, Integer> {
 
         ProgressDialog progressDialog;
+        Context context;
 
         @Override
         protected Integer doInBackground(LoginUser... loginUsers) {

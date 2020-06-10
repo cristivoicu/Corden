@@ -32,6 +32,7 @@ import de.adorsys.android.securestoragelibrary.SecureStorageException;
 import ro.atm.corden.R;
 import ro.atm.corden.model.user.LoginUser;
 import ro.atm.corden.model.user.Role;
+import ro.atm.corden.util.exception.login.CertNoPassException;
 import ro.atm.corden.util.exception.login.LoginListenerNotInitialisedException;
 import ro.atm.corden.util.exception.websocket.UserNotLoggedInException;
 import ro.atm.corden.util.websocket.callback.EnrollListener;
@@ -78,16 +79,17 @@ public class SignallingClient {
 
     }
 
-    public void initWebSociet(Context context) {
+    public void initWebSocket(Context context) throws CertNoPassException, IOException {
         try {
             URI uri = new URI("wss://corden.go.ro:8443/websocket"); // wifi acasa
 
             try {
-                SecurePreferences.setValue(context, "trustStorePass", "parola");
-                SecurePreferences.setValue(context, "keyStorePass", "parola");
-
                 String trustPass = SecurePreferences.getStringValue(context, "trustStorePass", "");
                 String keyPass = SecurePreferences.getStringValue(context, "keyStorePass", "");
+
+                if(trustPass.isEmpty() || keyPass.isEmpty()){
+                    throw new CertNoPassException();
+                }
 
                 String keyStoreType = "PKCS12";
                 KeyStore trustStore = KeyStore.getInstance(keyStoreType);
@@ -102,7 +104,7 @@ public class SignallingClient {
                 // initialize key manager factory with the read client certificate
                 KeyManagerFactory keyManagerFactory = null;
                 keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-                keyManagerFactory.init(keyStore, "parola".toCharArray());
+                keyManagerFactory.init(keyStore, keyPass.toCharArray());
 
                 // Create a TrustManager that trusts the CAs in our KeyStore
                 String tmfAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
@@ -112,15 +114,12 @@ public class SignallingClient {
                 SSLContext sslContext = SSLContext.getInstance("TLS");
                 sslContext.init(keyManagerFactory.getKeyManagers(), tmf.getTrustManagers(), null);
 
-
                 webSocket = new WebSocket(uri, context.getApplicationContext());
                 webSocket.setConnectionLostTimeout(0);
 
                 webSocket.setSocketFactory(sslContext.getSocketFactory());
 
-            } catch (NoSuchAlgorithmException | UnrecoverableKeyException | IOException | CertificateException | KeyStoreException | KeyManagementException e) {
-                e.printStackTrace();
-            } catch (SecureStorageException e) {
+            } catch (NoSuchAlgorithmException | UnrecoverableKeyException | CertificateException | KeyStoreException | KeyManagementException e) {
                 e.printStackTrace();
             }
 
