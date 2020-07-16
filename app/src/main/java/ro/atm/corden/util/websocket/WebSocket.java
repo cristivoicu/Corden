@@ -424,6 +424,8 @@ final class WebSocket extends WebSocketClient {
                     liveStreamerSubscriber.onNewSubscriber(LiveStreamer.fromJson(dataJson));
                 }
                 if (status.equals("stopped")) {
+                    if(liveStreamingListener != null)
+                        liveStreamingListener.onLiveStreamingError("User has stop streaming ...");
                     liveStreamerSubscriber.onSubscribeStop(LiveStreamer.fromJson(dataJson));
                 }
                 break;

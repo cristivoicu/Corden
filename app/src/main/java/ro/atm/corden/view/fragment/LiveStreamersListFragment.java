@@ -62,7 +62,7 @@ implements LiveStreamerSubscriber {
         mViewModel = ViewModelProvider.AndroidViewModelFactory
                 .getInstance(getActivity().getApplication())
                 .create(LiveStreamersViewModel.class);
-
+        mBinding.setViewModel(mViewModel);
         mBinding.liveStreamers.setLayoutManager(new LinearLayoutManager(getContext()));
         mBinding.liveStreamers.setHasFixedSize(true);
 
@@ -104,6 +104,11 @@ implements LiveStreamerSubscriber {
             @Override
             public void run() {
                 mAdpater.addStreamer(liveStreamer);
+                if(mViewModel.isListEmpty()){
+                    mBinding.noOneStreams.setVisibility(View.VISIBLE);
+                }else {
+                    mBinding.noOneStreams.setVisibility(View.GONE);
+                }
             }
         });
     }
@@ -115,6 +120,11 @@ implements LiveStreamerSubscriber {
             @Override
             public void run() {
                 mAdpater.removeStreamer(liveStreamer);
+                if(mViewModel.isListEmpty()){
+                    mBinding.noOneStreams.setVisibility(View.VISIBLE);
+                }else {
+                    mBinding.noOneStreams.setVisibility(View.GONE);
+                }
             }
         });
     }

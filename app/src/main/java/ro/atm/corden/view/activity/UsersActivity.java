@@ -94,7 +94,8 @@ public class UsersActivity extends AppCompatActivity
             isOnlineUsers = true;
             viewModel.setOnlineUsers();
         }
-        SignallingClient.getInstance().sendMessageToUnsubscribeFromUserList();
+
+        SignallingClient.getInstance().sendMessageToSubscribeToUserList();
     }
 
     @Override

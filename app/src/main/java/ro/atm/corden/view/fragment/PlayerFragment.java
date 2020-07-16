@@ -122,8 +122,9 @@ public class PlayerFragment extends Fragment implements MediaListener.PlaybackLi
 
     @Override
     public void onStop() {
-        super.onStop();
         playbackSession.leavePlaybackSession();
+        SignallingClient.getInstance().unsubscribePlaybackVideoListener();
+        super.onStop();
     }
 
     private void initVideos() {

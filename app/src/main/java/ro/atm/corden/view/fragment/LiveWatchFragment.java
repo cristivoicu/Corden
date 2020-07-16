@@ -64,8 +64,6 @@ public class LiveWatchFragment extends Fragment
         return mBinding.getRoot();
     }
 
-
-
     private void start() {
         try {
             SignallingClient.getInstance().subscribeLiveVideoListener(this);
@@ -80,6 +78,7 @@ public class LiveWatchFragment extends Fragment
     @Override
     public void onStop() {
         mWatchSession.leaveLiveWatchSession();
+        SignallingClient.getInstance().unsubscribeLiveVideoListener();
         super.onStop();
     }
 
@@ -130,9 +129,10 @@ public class LiveWatchFragment extends Fragment
     }
 
     @Override
-    public void onLiveStreamingError() {
-        AlertDialog alertDialog = new AlertDialog.Builder(this.getActivity().getBaseContext())
-                .setMessage("Live watching can't be accomplished")
+    public void onLiveStreamingError(String message) {
+        //mWatchSession.leaveLiveWatchSession();
+        AlertDialog alertDialog = new AlertDialog.Builder(this.getContext())
+                .setMessage(String.format("Message: %s", message))
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .create();
         alertDialog.show();

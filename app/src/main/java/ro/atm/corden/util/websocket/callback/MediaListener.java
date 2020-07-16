@@ -83,7 +83,7 @@ public interface MediaListener {
          */
         void onIceCandidate(JsonObject data);
 
-        void onLiveStreamingError();
+        void onLiveStreamingError(String message);
     }
 
 }

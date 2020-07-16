@@ -193,11 +193,15 @@ public class StreamingIntentService extends IntentService implements MediaListen
 
     public void showVideo(SurfaceViewRenderer localVideoView) {
         if (!isInited) {
-            localVideoView.init(rootEglBase.getEglBaseContext(), null);
-            localVideoView.setZOrderMediaOverlay(true);
-            localVideoView.setMirror(true);
-            localVideoView.setScalingType(SCALE_ASPECT_FIT);
-            isInited = true;
+            try {
+                localVideoView.init(rootEglBase.getEglBaseContext(), null);
+                localVideoView.setZOrderMediaOverlay(true);
+                localVideoView.setMirror(true);
+                localVideoView.setScalingType(SCALE_ASPECT_FIT);
+                isInited = true;
+            }catch (IllegalStateException e){
+                isInited = true;
+            }
         }
 
         liveSession.getVideoTrack().addSink(localVideoView);

@@ -70,14 +70,14 @@ public class LiveStreamerAdapter extends RecyclerView.Adapter<LiveStreamerAdapte
     }
 
     public void removeStreamer(LiveStreamer liveStreamer){
-        for (LiveStreamer streamer : streamers){
-            if(streamer.getName().equals(liveStreamer.getName()) &&
-            streamer.getUsername().equals(liveStreamer.getUsername())){
+        for (LiveStreamer streamer : streamers) {
+            if (streamer.getName().equals(liveStreamer.getName()) &&
+                    streamer.getUsername().equals(liveStreamer.getUsername())) {
                 this.streamers.remove(streamer);
+                notifyDataSetChanged();
                 break;
             }
         }
-        notifyDataSetChanged();
     }
 
     public interface OnItemClickListener{

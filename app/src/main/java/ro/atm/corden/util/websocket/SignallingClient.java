@@ -81,7 +81,9 @@ public class SignallingClient {
 
     public void initWebSocket(Context context) throws CertNoPassException, IOException {
         try {
-            URI uri = new URI("wss://corden.go.ro:8443/websocket"); // wifi acasa
+            //URI uri = new URI("wss://corden.go.ro:8443/websocket"); // wifi acasa
+            URI uri = new URI("wss://192.168.8.100:8443/websocket"); // wifi acasa
+            //URI uri = new URI("wss://192.168.43.228:8443/websocket"); // wifi acasa
 
             try {
                 String trustPass = SecurePreferences.getStringValue(context, "trustStorePass", "");
@@ -194,19 +196,7 @@ public class SignallingClient {
      * @param username is the username that is sending live video to the media server for recording
      */
     public void sendStopWatchVideoRequest(@NonNull String username) {
-        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
-            Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
-            throw new NetworkOnMainThreadException();
-        }
-
-        Log.i(TAG, "Sending live request to server");
-
-        Message message = new Message.MediaMessageBuilder()
-                .addEvent(MediaEventType.STOP_VIDEO_WATCH)
-                .addUser(username)
-                .build();
-
-        webSocket.send(message.toString());
+        new AsyncMessageToStopVideoWatch().execute(username);
     }
 
     /**
@@ -487,16 +477,7 @@ public class SignallingClient {
      * This method must not be used from UI thread.
      */
     public void sendMessageToSubscribeToUserList() {
-        if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
-            Log.e(TAG, "Main thread is used! in SignallingClient.logIn");
-            throw new NetworkOnMainThreadException();
-        }
-
-        Message message = new Message.SubscribeMessageBuilder()
-                .addEvent(SubscribeEventType.USER_UPDATED)
-                .build();
-
-        webSocket.send(message.toString());
+        new AsyncMessageToSubscribeToUserList().execute();
     }
 
     /**
@@ -604,6 +585,19 @@ public class SignallingClient {
         }
     }
 
+    private static class AsyncMessageToSubscribeToUserList extends AsyncTask<Void, Void, Void>{
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            Message message = new Message.SubscribeMessageBuilder()
+                    .addEvent(SubscribeEventType.USER_UPDATED)
+                    .build();
+
+            SignallingClient.getInstance().webSocket.send(message.toString());
+            return null;
+        }
+    }
+
     private static class AsyncMessageToUnsubscribe extends AsyncTask<Void, Void, Void>{
         @Override
         protected Void doInBackground(Void... voids) {
@@ -622,6 +616,22 @@ public class SignallingClient {
                     .addEvent(RequestEventTypes.REQUEST_START_STREAMING)
                     .addUser(strings[0])
                     .build();
+            SignallingClient.getInstance().webSocket.send(message.toString());
+            return null;
+        }
+    }
+
+    public static class AsyncMessageToStopVideoWatch extends AsyncTask<String, Void, Void>{
+
+        @Override
+        protected Void doInBackground(String... strings) {
+            Log.i(TAG, "Sending live request to server");
+
+            Message message = new Message.MediaMessageBuilder()
+                    .addEvent(MediaEventType.STOP_VIDEO_WATCH)
+                    .addUser(strings[0])
+                    .build();
+
             SignallingClient.getInstance().webSocket.send(message.toString());
             return null;
         }

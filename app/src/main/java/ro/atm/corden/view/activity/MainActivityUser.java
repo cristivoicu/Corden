@@ -200,6 +200,12 @@ public class MainActivityUser extends AppCompatActivity implements EasyPermissio
                     binding.streamStatus.setText("Start streaming service");
                     binding.frontCamera.setEnabled(true);
                     binding.backCamera.setEnabled(true);
+                    if(isShowVideoPressed){
+                        mService.hideVideo(binding.localView);
+                        isShowVideoPressed = !isShowVideoPressed;
+                        binding.localView.setVisibility(View.INVISIBLE);
+                        binding.showStream.setSelected(isShowVideoPressed);
+                    }
                 });
                 if (mBound) {
                     mBound = false;

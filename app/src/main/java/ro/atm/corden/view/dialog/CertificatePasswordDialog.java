@@ -26,6 +26,7 @@ public class CertificatePasswordDialog extends AppCompatDialogFragment {
         mPassword = view.findViewById(R.id.password);
         builder.setView(view)
                 .setTitle("Enter certificate password!")
+                .setCancelable(false)
                 .setPositiveButton("Ok", (dialog, which) -> {
                     mListener.onPassword(mPassword.getText().toString());
                 });

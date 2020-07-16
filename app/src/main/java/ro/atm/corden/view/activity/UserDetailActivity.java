@@ -59,11 +59,6 @@ public class UserDetailActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void onAssignJobClicked(View view) {
-        Intent intent = new Intent(this, AdminMapsActivity.class);
-        startActivity(intent);
-    }
-
     public void onTimelineButtonClicked(View view) {
         Intent intent = new Intent(this, UserTimelineActivity.class);
         intent.putExtra(AppConstants.GET_USERNAME, user.getUsername());

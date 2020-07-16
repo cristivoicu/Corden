@@ -94,7 +94,7 @@ public class ActivityDetectorIntentService extends IntentService {
                     ContextCompat.startForegroundService(this.getApplicationContext(), streamService);
                 }
                 if(label.equals(ActivityEventType.STILL)){
-                    if(lastKnownActivity.equals(ActivityEventType.RUNNING) || lastKnownActivity.equals(ActivityEventType.WALKING)){
+                    if(lastKnownActivity.equals(ActivityEventType.RUNNING) || lastKnownActivity.equals(ActivityEventType.WALKING) || label.equals(ActivityEventType.ON_FOOT)){
                         SignallingClient.getInstance().sendDetectedActivity(label, confidence);
                         SignallingClient.getInstance().stopVideoStreaming(LoginUser.username);
                         Intent streamService = new Intent(this.getApplicationContext(), StreamingIntentService.class);
