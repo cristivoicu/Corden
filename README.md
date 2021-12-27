@@ -1,11 +1,13 @@
 # Corden
-Android client application.
-Aplicatie android, folosita de personalul care asigura paza perimetrala al unui punct de interes.
+Android client application, which is used in an environment with [application server](https://github.com/Crisvo/appserver) and [Kurento Media Server](https://doc-kurento.readthedocs.io/en/latest/).
+This application is meant to be used by security personnel.
 
 # About app
 
-# Application features
+## Application features
 
+- secured communication
+- uese WebRTC for video communication
 - transmitting real time data (user location, events, etc.)
 - video recording on a media server (Kurento), watching realtime video streaming, playback recorded videos from server.
 - detecting user activity
@@ -14,7 +16,7 @@ Aplicatie android, folosita de personalul care asigura paza perimetrala al unui 
 - user roles (admin and user)
 - user notifications
 
-# Application UI
+## Application UI
 
 
 <img src = "https://user-images.githubusercontent.com/26572825/130316322-cd352d52-8835-462e-beb4-8d5da747194e.jpg" width="250px" height="500px"></img>
